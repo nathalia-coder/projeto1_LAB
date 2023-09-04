@@ -40,7 +40,7 @@ df4 <- read_xlsx("dados.xlsx", sheet = "Imunoturbidimetria")
 df5 <- read_xlsx("dados.xlsx", sheet = "Doenças Crônicas")
 ```
 
-* Aba: Dados Atuais
+* DF1: Dados Atuais
 
 ```{r}
 #df1 %>% colnames()
@@ -148,3 +148,46 @@ df1 <- df1 %>%
 df1 %>% summary()
 ```
 
+* DF2: Dados Gestacionais
+
+```{r}
+#df2 %>% colnames()
+colunas_interesse <- c(
+  "GRUPO      MN:0      MP:1",
+  "Há quantos anos",
+  "PESO BEBÊ (kg)",
+  "PARTO                                     0:normal   1:cesariana   2:fórceps  3: induzido",
+  "PARTO PREMATURO 0:não      1:sim"
+  )
+
+renomear_colunas <- c(
+  "grupo",
+  "quantos_anos_evento",
+  "peso_bebe",
+  "tipo_parto",
+  "prematuro"
+  )
+
+
+df2 <- df2 %>% select(all_of(colunas_interesse))
+colnames(df2) <- renomear_colunas
+```
+
+
+```{r}
+grupos_nulos <- df2 %>% select(grupo) %>% is.na()
+df2 <- df2 %>% 
+  filter(! grupos_nulos) %>% 
+  mutate(
+    grupo = as.factor(grupo),
+    quantos_anos_evento = quantos_anos_evento %>% as.numeric(),
+    peso_bebe = coluna_na_numerica(peso_bebe),
+    tipo_parto = as.factor(coluna_na_numerica(tipo_parto)),
+    prematuro = as.factor(prematuro)
+    )
+```
+
+
+```{r}
+df2 %>% summary()
+```
