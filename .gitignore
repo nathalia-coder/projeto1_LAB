@@ -1,0 +1,17 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# ignorar dados
+*.xlsx
+
+# ignorar lixos da geracao do markdown
+projeto1_files/*
+
+# ignorar anotacoes word
+*.docx
+
+# ignorar imagens
+*.jpg
+*.png

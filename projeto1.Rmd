@@ -1,0 +1,150 @@
+---
+title: "Projeto I"
+author: 
+  - "Bárbara"
+  - "Nathalia Gabriella Ferreira dos Santos"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Pacotes
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readxl)
+```
+
+
+# Análises
+
+## Saneamento de dados
+
+### **Extraindo dados**
+
+Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas* 
+
+
+```{r}
+rm(list = ls()) # limpa enviroment
+
+df1 <- read_xlsx("dados.xlsx", sheet = "Dados Atuais")
+df2 <- read_xlsx("dados.xlsx", sheet = "Dados Gestacionais")
+df3 <- read_xlsx("dados.xlsx", sheet = "ELISAs")
+df4 <- read_xlsx("dados.xlsx", sheet = "Imunoturbidimetria")
+df5 <- read_xlsx("dados.xlsx", sheet = "Doenças Crônicas")
+```
+
+* Aba: Dados Atuais
+
+```{r}
+#df1 %>% colnames()
+colunas_interesse <- c(
+  "GRUPO      MN:0      MP:1", 
+  "IDADE    anos",
+  "ESCOLARIDADE COMPLETA  0: 4ª série completa   1:fundamental completo 2:médio completo 3:ensino técnico completo 4:superior completo 5:pós-graduação completa",
+  "NÚMERO GESTAÇÕES",
+  "Peso (kg)",
+  "IMC",
+  "GORDURA (%)",
+  "PRESSÃO SISTÓLICA (mmHg)",
+  "PRESSÃO DIASTÓLICA (mmHg)",
+  "PRESSÃO ARTERIAL MÉDIA",
+  "CINTURA (cm)",
+  "ABDÔMEN (cm)",
+  "QUADRIL (cm)",
+  "RELAÇÃO CINTURA/QUADRIL",
+  "NEU (10³/µL)",
+  "LYM (10³/µL)",
+  "NLR",
+  "Colesterol total (mg/dL)",
+  "HDL (mg/dL)",
+  "LDL (mg/dL) DOSADO",
+  "VLDL (mg/dL)",
+  "Não-HDL (mg/dL)",
+  "Triglicérides (mg/dL)",
+  "HbA1c (%)",
+  "Creatinina (mg/dL)",
+  "Ritmo de filtrção glomerular calculado",
+  "TGP/ALT",
+  "TGO/AST",
+  "Ácido Úrico",
+  "CK",
+  "Gama GT"
+  )
+
+renomear_colunas <- c(
+  "grupo", 
+  "idade",
+  "escolaridade",
+  "num_gestacoes",
+  "peso",
+  "imc",
+  "gordura",  
+  "pressao_sis",
+  "pressao_dias",
+  "pressao_media", 
+  "cintura",
+  "abdomen",
+  "quadril",
+  "cintura_quadril",
+  "neu",
+  "lym",
+  "nlr",
+  "colesterol_total",
+  "hdl",
+  "ldl_dosado",
+  "vldl",
+  "nao_hdl",
+  "triglicerides",
+  "hba1c",
+  "creatinina",
+  "filtr_glomerular",
+  "tgp_alt",
+  "tgo_ast",
+  "acido_urico",
+  "ck",
+  "gama_gt"
+  )
+
+
+df1 <- df1 %>% select(all_of(colunas_interesse))
+colnames(df1) <- renomear_colunas
+```
+
+
+```{r}
+coluna_na_numerica <- function(lista){
+  lista %>% 
+    str_replace(. , pattern = ",", replacement = ".") %>%
+    str_replace_na(. , replacement = "") %>% 
+    ifelse(. == ".", "", .) %>% as.numeric()
+}
+```
+
+```{r}
+grupos_nulos <- df1 %>% select(grupo) %>% is.na()
+df1 <- df1 %>% 
+  filter(! grupos_nulos) %>% 
+  mutate(
+    grupo = as.factor(grupo),
+    escolaridade = as.factor(escolaridade),
+    gordura = coluna_na_numerica(gordura),
+    ldl_dosado = coluna_na_numerica(ldl_dosado),
+    hba1c = coluna_na_numerica(hba1c),
+    creatinina = coluna_na_numerica(creatinina),
+    filtr_glomerular = coluna_na_numerica(filtr_glomerular),
+    ck = coluna_na_numerica(ck)
+    )
+```
+
+
+```{r}
+df1 %>% summary()
+```
+
