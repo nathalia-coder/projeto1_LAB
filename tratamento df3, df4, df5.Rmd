@@ -1,0 +1,187 @@
+---
+title: "Projeto I"
+author: 
+  - "Bárbara"
+  - "Nathalia Gabriella Ferreira dos Santos"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Pacotes
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readxl)
+```
+
+
+# Análises
+
+## Saneamento de dados
+
+### **Extraindo dados**
+
+Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas* 
+
+
+```{r}
+rm(list = ls()) # limpa enviroment
+df1 <- read_xlsx("dados.xlsx", sheet = "Dados Atuais")
+df2 <- read_xlsx("dados.xlsx", sheet = "Dados Gestacionais")
+df3 <- read_xlsx("dados.xlsx", sheet = "ELISAs")
+df4 <- read_xlsx("dados.xlsx", sheet = "Imunoturbidimetria")
+df5 <- read_xlsx("dados.xlsx", sheet = "Doenças Crônicas")
+```
+
+* Aba: ELISAs
+
+```{r}
+colunas_interesse <- c(
+ "GRUPO      MN:0      MP:1", 
+ "PAI-1 (ng/mL)",
+ "Log PAI-1 (ng/mL)",
+ "TROMBOMODULINA (ng/mL)",
+ "ADMA (ng/mL)",
+ "sFlt1 (pg/mL)",
+ "Absorbâncias sFlt1",
+ "sFlt1 (pg/mL) Ajuste linear (Luiza)",
+ "AA-AT1 (ng/mL)"
+)
+renomear_colunas <- c(
+ "grupo", 
+ "pai1",
+ "logpai1",
+ "trombomodulina",
+ "adma",
+ "sflt1",
+ "absor_sflt1",
+ "sflt1_ajuste",  
+ "aaat1"
+)
+df3 <- df3 %>% select(all_of(colunas_interesse))
+colnames(df3) <- renomear_colunas
+
+df3 <- df3 %>% mutate_all(~ifelse(is.na(.), "", .)) %>% mutate_all(~ifelse(. != "< curva", as.numeric(.), .))
+```
+
+* Aba: Imunoturbidimetria
+
+```{r}
+colunas_interesse <- c(
+ "GRUPO      MN:0      MP:1", 
+ "DÍMERO-D (ng/mL)",
+ "LOG DÍMERO-D"
+)
+renomear_colunas <- c(
+ "grupo", 
+ "dimero",
+ "logdimero"
+)
+df4 <- df4 %>% select(all_of(colunas_interesse))
+colnames(df4) <- renomear_colunas
+
+df4 <- df4 %>% mutate_all(~ifelse(is.na(.), "", .)) %>% mutate_all(as.numeric)
+```
+
+* Aba: Doenças Crônicas
+
+```{r}
+colunas_interesse <- c(
+ "GRUPO      MN:0      MP:1", 
+ "HIPERTENSÃO 0:não   1:sim",
+ "DIABETES 0:não   1:sim",
+ "HIPERCOLESTEROLEMIA 0:não   1:sim",
+ "FIBROMIALGIA 0:não   1:sim",
+ "GLAUCOMA 0:não   1:sim",
+ "ENXAQUECA 0:não   1:sim",
+ "HIPOTIREOIDISMO 0:não   1:sim",
+ "ASMA 0:não   1:sim",
+ "ESTEATOSE HEPÁTICA 0:não   1:sim",
+ "SÍNDROME DO INTESTINO IRRITÁVEL 0:não   1:sim",
+ "HEMANGIOMA  0:não   1:sim",
+ "TROMBOFILIA  0:não   1:sim",
+ "BRONQUITE  0:não   1:sim",
+ "RINITE  0:não   1:sim",
+ "OVÁRIOS POLICÍSTICOS 0:não   1:sim",
+  "Transtorno de ansiedade generalizada (TAG)  0:não   1:sim",
+ "SINUSITE 0:não 1:sim",
+ "DEPRESSÃO 0:não   1:sim",
+ "ARTROSE 0:não   1:sim",
+ "LEUCOCITOSE 0:não   1:sim",
+ "ANEMIA 0:não   1:sim",
+ "SÍNDROME DO PÂNICO 0:não   1:sim",
+ "GASTRITE 0:não   1:sim",
+ "HEPATITE 0:não   1:sim",
+ "CRISE ALÉRGICA 0:não   1:sim",
+ "CISTITE 0:não   1:sim",
+ "ANEMIA FALCIFORME 0: não 1:sim",
+ "MIOMA UTERINO 0: não 1: sim",
+ "CÁLCULO RENAL 0: não 1: sim",
+ "CALCIFICAÇÃO MAMÁRIA 0: não 1: sim",
+ "HIPOGLICEMIA 0: não 1: sim",
+ "DERRAME DE VISTA 0: não 1: sim",
+ "HIDRADENITE 0: não 1: sim",
+ "GLOMERULOESCLEREOSE  0: não 1: sim",
+ "PRÉ-DIABETES 0: não 1: sim",
+  "BIPOLAR 0: não 1: sim",
+  "TDAH 0: não 1: sim",
+  "TEA 0: não 1: sim",
+  "DOENÇA DE STILL 0: não 1: sim"
+)
+
+renomear_colunas <- c(
+ "grupo", 
+ "hipertensao",
+ "diabetes",
+ "hipercolesterolemia",
+ "fibromialgia",
+ "glaucoma",
+ "enxaqueca",
+ "hipotireoidismo",
+ "asma",
+ "esteatose_hepatica",
+ "sindrome_intestino_irritavel",
+ "hemangioma",
+ "trombofilia",
+ "bronquite",
+ "rinite",
+ "ovario_policistico",
+ "TAG",
+ "sinusite",
+ "depressao",
+ "artrose",
+ "leucocitose",
+ "anemia",
+ "sindrome_panico",
+ "gastrite",
+ "hepatite",
+ "crise_alergica",
+ "cistite",
+ "anemia_falciforme",
+ "mioma_uterino",
+ "calculo_renal",
+ "calcificacao_mamaria",
+ "hipoglicemia",
+ "derrame de vista",
+ "hidradenite",
+ "glomeruloesclerose",
+ "pre_diabetes",
+ "bipolaridade",
+ "TDAH",
+ "TEA",
+ "Doenca_Still"
+)
+
+df5 <- df5 %>% select(all_of(colunas_interesse))
+colnames(df5) <- renomear_colunas
+
+df5 <- df5 %>% mutate_all(~ifelse(is.na(.), "", .)) %>% mutate_all(as.numeric)
+
+View(df5)
+```
