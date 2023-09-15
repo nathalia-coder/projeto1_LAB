@@ -197,22 +197,51 @@ df2 %>% summary()
 
 ```{r}
 rm(list = ls()) # limpa enviroment
+```
 
-df <- read_xlsx("teste.xlsx")
+* Curva com base nos dados
+
+```{r}
+df <- read_xlsx("dados_amostrais.xlsx")
 
 df <- df %>% select(x,y)
 
+plot(df$y, log(df$x))
+
 df$y %>% log() %>% hist()
 
-fit <- lm(log(x) ~ y, data = df)
-fit %>% summary()
+fit1 <- lm(log(x) ~ y, data = df)
+fit1 %>% summary()
 
-reglin::ggresiduals(fit)
+reglin::ggresiduals(fit1)
 
-plot(fit)
+plot(fit1)
 
-newdata <- data.frame(y = c(0.166, 0.048, 0.210, .207))
+newdata <- data.frame(y = c(0.166, 0.048, .152, 0.210, .207))
 
-predict(fit, newdata) %>% exp()
+newdata$amostra <- predict(fit1, newdata) %>% exp()
+```
+
+* Curva com base teórica
+
+```{r}
+df <- read_xlsx("dados_teoricos.xlsx")
+
+plot(df$y, df$x)
+
+fit2 <- lm(x ~ y, data = df)
+fit2 %>% summary()
+
+reglin::ggresiduals(fit2)
+
+plot(fit2)
+
+newdata$teorico <- predict(fit2, newdata)
+```
+
+## Resultado curvas
+
+```{r}
+newdata
 ```
 
