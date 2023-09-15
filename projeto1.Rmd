@@ -191,3 +191,28 @@ df2 <- df2 %>%
 ```{r}
 df2 %>% summary()
 ```
+
+
+# Testes da curva
+
+```{r}
+rm(list = ls()) # limpa enviroment
+
+df <- read_xlsx("teste.xlsx")
+
+df <- df %>% select(x,y)
+
+df$y %>% log() %>% hist()
+
+fit <- lm(log(x) ~ y, data = df)
+fit %>% summary()
+
+reglin::ggresiduals(fit)
+
+plot(fit)
+
+newdata <- data.frame(y = c(0.166, 0.048, 0.210, .207))
+
+predict(fit, newdata) %>% exp()
+```
+
