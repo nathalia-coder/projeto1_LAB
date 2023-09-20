@@ -20,15 +20,13 @@ library(tidyverse)
 library(readxl)
 ```
 
-
 # Análises
 
 ## Saneamento de dados
 
 ### **Extraindo dados**
 
-Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas* 
-
+Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas*
 
 ```{r}
 rm(list = ls()) # limpa enviroment
@@ -40,7 +38,7 @@ df4 <- read_xlsx("dados.xlsx", sheet = "Imunoturbidimetria")
 df5 <- read_xlsx("dados.xlsx", sheet = "Doenças Crônicas")
 ```
 
-* DF1: Dados Atuais
+-   DF1: Dados Atuais
 
 ```{r}
 #df1 %>% colnames()
@@ -117,7 +115,6 @@ df1 <- df1 %>% select(all_of(colunas_interesse))
 colnames(df1) <- renomear_colunas
 ```
 
-
 ```{r}
 coluna_na_numerica <- function(lista){
   lista %>% 
@@ -143,12 +140,11 @@ df1 <- df1 %>%
     )
 ```
 
-
 ```{r}
 df1 %>% summary()
 ```
 
-* DF2: Dados Gestacionais
+-   DF2: Dados Gestacionais
 
 ```{r}
 #df2 %>% colnames()
@@ -173,7 +169,6 @@ df2 <- df2 %>% select(all_of(colunas_interesse))
 colnames(df2) <- renomear_colunas
 ```
 
-
 ```{r}
 grupos_nulos <- df2 %>% select(grupo) %>% is.na()
 df2 <- df2 %>% 
@@ -187,11 +182,9 @@ df2 <- df2 %>%
     )
 ```
 
-
 ```{r}
 df2 %>% summary()
 ```
-
 
 # Testes da curva
 
@@ -199,18 +192,18 @@ df2 %>% summary()
 rm(list = ls()) # limpa enviroment
 ```
 
-* Curva com base nos dados
+-   Curva com base nos dados
 
 ```{r}
-df <- read_xlsx("dados_amostrais.xlsx")
+df1 <- read_xlsx("dados_amostrais.xlsx")
 
-df <- df %>% select(x,y)
+df1 <- df1 %>% select(x,y)
 
-plot(df$y, log(df$x))
+plot(df1$y, log(df1$x))
 
-df$y %>% log() %>% hist()
+df1$y %>% log() %>% hist()
 
-fit1 <- lm(log(x) ~ y, data = df)
+fit1 <- lm(log(x) ~ y, data = df1)
 fit1 %>% summary()
 
 reglin::ggresiduals(fit1)
@@ -222,14 +215,14 @@ newdata <- data.frame(y = c(0.166, 0.048, .152, 0.210, .207))
 newdata$amostra <- predict(fit1, newdata) %>% exp()
 ```
 
-* Curva com base teórica
+-   Curva com base teórica
 
 ```{r}
-df <- read_xlsx("dados_teoricos.xlsx")
+df2 <- read_xlsx("dados_teoricos.xlsx")
 
-plot(df$y, df$x)
+plot(df2$y, df2$x)
 
-fit2 <- lm(x ~ y, data = df)
+fit2 <- lm(x ~ y, data = df2)
 fit2 %>% summary()
 
 reglin::ggresiduals(fit2)
@@ -243,5 +236,53 @@ newdata$teorico <- predict(fit2, newdata)
 
 ```{r}
 newdata
+```
+
+** Curva teorica vs amostral
+
+```{r}
+eq1 <- function(x){
+  y = 0.1532 + ( (0.8722 - 0.1532) / (1 + (x/606.3139)^(-1.3109) ) )
+  return(y)
+}
+
+eq2 <- function(x){
+  y = 0.1173 + ( (0.202658 - 0.1173) / (1 + (x/10746.6371)^(-1.2605) ) )
+  return(y)
+}
+
+
+teste = tibble(x = seq(0.1,1500,0.5),
+               y = eq1(x)
+)
+
+teste2 = tibble(x = seq(0.1,1500,0.5),
+               y = eq2(x)
+)
+
+bind_rows(teste %>% mutate(tipo = 'amostral'),
+          teste2 %>% mutate(tipo = 'teorico')) %>% 
+  ggplot(aes(x = x, y = y, color = tipo)) +
+  geom_line(aes(group = tipo))
+
+
+g1 <- ggplot(data = teste, aes(x = x, y = y)) +
+  geom_line(group = 1) + 
+  geom_point() +
+  theme_minimal() + 
+  labs(title = "Amostral")
+
+g2 <- ggplot(data = teste2, aes(x = x, y = y)) +
+  geom_line(group = 1) + 
+  geom_point() +
+  theme_minimal() + 
+  labs(title = "Teórico")
+
+gridExtra::grid.arrange(g1, g2, ncol = 2)
+
+# fazer a inversa das eq e dps buscar os x em y
+eq1(0.048)
+eq2(0.048)
+
 ```
 
