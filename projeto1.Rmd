@@ -116,11 +116,16 @@ colnames(df1) <- renomear_colunas
 ```
 
 ```{r}
-coluna_na_numerica <- function(lista){
+coluna_na_numerica <- function(lista, caracter = ".", substituto = ""){
   lista %>% 
     str_replace(. , pattern = ",", replacement = ".") %>%
     str_replace_na(. , replacement = "") %>% 
-    ifelse(. == ".", "", .) %>% as.numeric()
+    ifelse(. == caracter, substituto, .) %>% as.numeric()
+}
+
+coluna_numerica <- function(lista){
+  lista %>% 
+    ifelse(. == 99999, NA, .) %>% as.numeric()
 }
 ```
 
@@ -131,12 +136,23 @@ df1 <- df1 %>%
   mutate(
     grupo = as.factor(grupo),
     escolaridade = as.factor(escolaridade),
-    gordura = coluna_na_numerica(gordura),
-    ldl_dosado = coluna_na_numerica(ldl_dosado),
-    hba1c = coluna_na_numerica(hba1c),
-    creatinina = coluna_na_numerica(creatinina),
-    filtr_glomerular = coluna_na_numerica(filtr_glomerular),
-    ck = coluna_na_numerica(ck)
+    peso = coluna_numerica(idade),
+    imc = coluna_na_numerica(imc, "#DIV/0!", NA) %>% coluna_numerica(),
+    gordura = coluna_numerica(gordura),
+    pressao_sis = coluna_numerica(pressao_sis),
+    pressao_dias = coluna_numerica(pressao_dias),
+    pressao_media = coluna_numerica(pressao_media),
+    cintura = coluna_numerica(cintura),
+    abdomen = coluna_numerica(abdomen),
+    quadril = coluna_numerica(quadril),
+    cintura_quadril = coluna_na_numerica(cintura_quadril, "#DIV/0!", NA) %>% coluna_numerica(),
+    nlr = coluna_na_numerica(nlr, "#DIV/0!", NA) %>% coluna_numerica(),
+    ldl_dosado = coluna_na_numerica(ldl_dosado, "#DIV/0!", NA) %>% coluna_numerica(),
+    vldl = coluna_na_numerica(vldl, "#DIV/0!", NA) %>% coluna_numerica(),
+    hba1c = coluna_numerica(hba1c),
+    creatinina = coluna_numerica(creatinina),
+    filtr_glomerular = coluna_na_numerica(filtr_glomerular, "#DIV/0!", NA) %>% coluna_numerica(),
+    ck = coluna_numerica(ck)
     )
 ```
 
@@ -176,8 +192,8 @@ df2 <- df2 %>%
   mutate(
     grupo = as.factor(grupo),
     quantos_anos_evento = quantos_anos_evento %>% as.numeric(),
-    peso_bebe = coluna_na_numerica(peso_bebe),
-    tipo_parto = as.factor(coluna_na_numerica(tipo_parto)),
+    peso_bebe = coluna_numerica(peso_bebe),
+    tipo_parto = as.factor(coluna_numerica(tipo_parto)),
     prematuro = as.factor(prematuro)
     )
 ```
@@ -189,21 +205,21 @@ df2 %>% summary()
 # Testes da curva
 
 ```{r}
-rm(list = ls()) # limpa enviroment
+#rm(list = ls()) # limpa enviroment
 ```
 
 -   Curva com base nos dados
 
 ```{r}
-df1 <- read_xlsx("dados_amostrais.xlsx")
+df_1 <- read_xlsx("dados_amostrais.xlsx")
 
-df1 <- df1 %>% select(x,y)
+df_1 <- df_1 %>% select(x,y)
 
-plot(df1$y, log(df1$x))
+plot(df_1$y, log(df_1$x))
 
-df1$y %>% log() %>% hist()
+df_1$y %>% log() %>% hist()
 
-fit1 <- lm(log(x) ~ y, data = df1)
+fit1 <- lm(log(x) ~ y, data = df_1)
 fit1 %>% summary()
 
 reglin::ggresiduals(fit1)
@@ -218,11 +234,11 @@ newdata$amostra <- predict(fit1, newdata) %>% exp()
 -   Curva com base teórica
 
 ```{r}
-df2 <- read_xlsx("dados_teoricos.xlsx")
+df_2 <- read_xlsx("dados_teoricos.xlsx")
 
-plot(df2$y, df2$x)
+plot(df_2$y, df_2$x)
 
-fit2 <- lm(x ~ y, data = df2)
+fit2 <- lm(x ~ y, data = df_2)
 fit2 %>% summary()
 
 reglin::ggresiduals(fit2)
@@ -257,7 +273,7 @@ teste = tibble(x = seq(0.1,1500,0.5),
 )
 
 teste2 = tibble(x = seq(0.1,1500,0.5),
-               y = eq2(x)
+                y = eq2(x)
 )
 
 bind_rows(teste %>% mutate(tipo = 'amostral'),
@@ -285,4 +301,3 @@ eq1(0.048)
 eq2(0.048)
 
 ```
-
