@@ -143,7 +143,7 @@ df1 <- df1 %>%
     escolaridade = as.factor(escolaridade),
     peso = coluna_numerica(idade),
     imc = coluna_na_numerica(imc, "#DIV/0!", NA) %>% coluna_numerica(),
-    gordura = coluna_numerica(df1$gordura), # ta dando erro aqui
+    gordura = coluna_na_numerica(gordura) %>% coluna_numerica(),
     pressao_sis = coluna_numerica(pressao_sis),
     pressao_dias = coluna_numerica(pressao_dias),
     pressao_media = coluna_numerica(pressao_media),
