@@ -209,6 +209,8 @@ df2 %>% summary()
 
 # Descritivas e Testes de Médias
 
+## Funções que serão aplicadas:
+
 ```{r}
 cor_verde = c("#4fb6a7")
 cor_roxa = c("#652177")
@@ -264,10 +266,9 @@ graficos <- function(dados, grupo, variavel, texto = "variável"){
       (g2)
   )
   }
-
-graficos(df1, "grupo", "imc")
 ```
 
+* Função para gráficos categóricos
 
 ```{r}
 graficos_categoricos <- function(lista1, lista2, variavel){
@@ -292,10 +293,404 @@ graficos_categoricos <- function(lista1, lista2, variavel){
   
   return(g1)
 }
-
-graficos_categoricos(df1$grupo, df1$num_gestacoes, "número de gestações")
 ```
 
+* Teste de Hipóteses
+
+```{r}
+realizar_teste <- function(dataframe, variavel) {
+  
+  dataframefiltrado <- dataframe %>%
+    mutate(grupo = ifelse(grupo == "0", "MN", "MP"))
+
+  grupo_MN<- dataframefiltrado %>%
+    filter(grupo == "MN") %>%
+    pull(variavel)
+  
+  grupo_MP<- dataframefiltrado %>%
+    filter(grupo == "MP") %>%
+    pull(variavel)
+
+  shapiro1 <- shapiro.test(grupo_MN)
+  shapiro2 <- shapiro.test(grupo_MP)
+
+  if (shapiro1$p.value <= 0.05 || shapiro2$p.value <= 0.05) {
+    resultado_teste <- wilcox.test(grupo_MP, grupo_MN, alternative = "greater")
+    return(resultado_teste)
+  } else {
+    resultado_teste <- t.test(grupo_MN, grupo_MP, alternative = "greater") 
+    return(resultado_teste)
+  }
+}
+#realizar_teste(df3,"logpai1")
+```
+
+## Análise por variável:
+
+### Idade:
+
+Não rejeita-se a hipótese nula de que as médias sejam iguais.
+
+```{r}
+graficos(df1, "grupo", "idade")
+realizar_teste(df1, "idade")
+```
+
+### Escolaridade: ** Falta aplicar teste para frequência dos categporicos
+
+```{r}
+graficos_categoricos(df1$grupo, df1$escolaridade, "escolaridade")
+```
+
+### Número de Gestações:
+
+```{r}
+graficos_categoricos(df1$grupo, df1$num_gestacoes, "Número de Gestações")
+```
+
+### Peso:
+
+Não rejeita-se a hipótese nula de que as médias sejam iguais.
+
+```{r}
+graficos(df1, "grupo", "peso")
+realizar_teste(df1, "peso")
+```
+
+### IMC:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "imc")
+realizar_teste(df1, "imc")
+```
+
+### Gordura:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "gordura")
+realizar_teste(df1, "gordura")
+```
+
+### Pressão Sistólica:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "pressao_sis")
+realizar_teste(df1, "pressao_sis")
+```
+
+
+### Pressão Diastólica:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "pressao_dias")
+realizar_teste(df1, "pressao_dias")
+```
+
+### Pressão Média:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "pressao_media")
+realizar_teste(df1, "pressao_media")
+```
+
+### Cintura:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "cintura")
+realizar_teste(df1, "cintura")
+```
+
+### Abdomen:
+
+Não rejeita-se a hipótese nula que não haja diferença nas médias dos grupos.
+
+```{r}
+graficos(df1, "grupo", "abdomen")
+realizar_teste(df1, "abdomen")
+```
+
+### Quadril:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "quadril")
+realizar_teste(df1, "quadril")
+```
+
+### Relação cintura vs quadril:
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "cintura_quadril")
+realizar_teste(df1, "cintura_quadril")
+```
+
+### neu:
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "neu")
+realizar_teste(df1, "neu")
+```
+
+### lym:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "lym")
+realizar_teste(df1, "lym")
+```
+
+### nlr:
+
+Foi encontrado uma observação outlier, ela será retirada. 
+
+* Relação antes da retirada:
+```{r}
+df1$nlr %>% summary()
+df1$nlr[df1$nlr > 6]
+```
+
+* Após retirada:
+
+```{r}
+df_nlr <- df1 %>% 
+  filter(nlr < 6)
+
+df_nlr$nlr %>% summary()
+```
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df_nlr, "grupo", "nlr")
+realizar_teste(df_nlr, "nlr")
+```
+
+### colesterol Total:
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "colesterol_total")
+realizar_teste(df1, "colesterol_total")
+```
+
+### hdl:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "hdl")
+realizar_teste(df1, "hdl")
+```
+
+### ldl_dosado:
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "ldl_dosado")
+realizar_teste(df1, "ldl_dosado")
+```
+
+### vldl:
+
+Foi encontrado observação outlier, elas serão retiradas. 
+
+* Relação antes da retirada:
+```{r}
+df1$vldl %>% summary()
+df1$vldl[df1$vldl > 45]
+```
+
+* Após retirada:
+
+```{r}
+df_vldl <- df1 %>% 
+  filter(vldl < 45)
+
+df_vldl$vldl %>% summary()
+```
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df_vldl, "grupo", "vldl")
+realizar_teste(df_vldl, "vldl")
+```
+
+### nao_hdl:
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "nao_hdl")
+realizar_teste(df1, "nao_hdl")
+```
+
+### triglicerides:
+
+Foi encontrado observação outlier, elas serão retiradas. 
+
+* Relação antes da retirada:
+```{r}
+df1$triglicerides %>% summary()
+df1$triglicerides[df1$triglicerides > 300]
+```
+
+* Após retirada:
+
+```{r}
+df_triglicerides <- df1 %>% 
+  filter(triglicerides < 300)
+
+df_triglicerides$triglicerides %>% summary()
+```
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df_triglicerides, "grupo", "triglicerides")
+realizar_teste(df_triglicerides, "triglicerides")
+```
+
+### hba1c: **Aqui também encontramos influentes mas não tiramos
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "hba1c")
+realizar_teste(df1, "hba1c")
+```
+
+### creatinina:
+
+Foi encontrado observação outlier, elas serão retiradas. 
+
+* Relação antes da retirada:
+```{r}
+df1$creatinina %>% summary()
+df1$creatinina[df1$creatinina > 4]
+```
+
+* Após retirada:
+
+```{r}
+df_creatinina <- df1 %>% 
+  filter(creatinina < 4)
+
+df_creatinina$creatinina %>% summary()
+```
+
+Rejeita-se a hipótese nula.
+
+```{r}
+graficos(df_creatinina, "grupo", "creatinina")
+realizar_teste(df_creatinina, "creatinina")
+```
+
+### filtr_glomerular:
+
+Foi encontrado observação outlier, elas serão retiradas. 
+
+* Relação antes da retirada:
+```{r}
+df1$filtr_glomerular %>% summary()
+df1$filtr_glomerular[df1$filtr_glomerular > 3200]
+```
+
+* Após retirada:
+
+```{r}
+df_filtr_glomerular <- df1 %>% 
+  filter(filtr_glomerular < 3200)
+
+df_filtr_glomerular$filtr_glomerular %>% summary()
+```
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df_filtr_glomerular, "grupo", "filtr_glomerular")
+realizar_teste(df_filtr_glomerular, "filtr_glomerular")
+```
+
+### tgp_alt:
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "tgp_alt")
+realizar_teste(df1, "tgp_alt")
+```
+
+### tgo_ast:
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "tgo_ast")
+realizar_teste(df1, "tgo_ast")
+```
+
+### acido_urico:
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "acido_urico")
+realizar_teste(df1, "acido_urico")
+```
+
+### ck: ** Erro no teste
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "ck")
+
+df_filtro <- df1 %>% 
+  drop_na(ck)
+
+#realizar_teste(df_filtro, "ck")
+```
+
+### gama_gt: ** Erro no teste
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos(df1, "grupo", "gama_gt")
+realizar_teste(df1, "gama_gt")
+```
+
+
+
+```{r}
+## testes
+graficos(df1, "grupo", "imc")
+graficos_categoricos(df1$grupo, df1$num_gestacoes, "número de gestações")
+realizar_teste(df1, "idade")
+```
+
+## Resumo Descritivas
 
 # Testes da curva
 
@@ -319,7 +714,7 @@ fit1 %>% summary()
 
 reglin::ggresiduals(fit1)
 
-plot(fit1)
+#plot(fit1)
 
 newdata <- data.frame(y = c(0.166, 0.048, .152, 0.210, .207))
 
@@ -338,7 +733,7 @@ fit2 %>% summary()
 
 reglin::ggresiduals(fit2)
 
-plot(fit2)
+#plot(fit2)
 
 newdata$teorico <- predict(fit2, newdata)
 ```
