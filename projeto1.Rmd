@@ -10,7 +10,11 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message=FALSE, 
+  warning=FALSE
+  )
 ```
 
 # Pacotes
@@ -18,6 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(readxl)
+library(patchwork) # para parcionar os graficos
 ```
 
 # Análises
@@ -138,7 +143,7 @@ df1 <- df1 %>%
     escolaridade = as.factor(escolaridade),
     peso = coluna_numerica(idade),
     imc = coluna_na_numerica(imc, "#DIV/0!", NA) %>% coluna_numerica(),
-    gordura = coluna_numerica(gordura),
+    gordura = coluna_numerica(df1$gordura), # ta dando erro aqui
     pressao_sis = coluna_numerica(pressao_sis),
     pressao_dias = coluna_numerica(pressao_dias),
     pressao_media = coluna_numerica(pressao_media),
@@ -201,6 +206,96 @@ df2 <- df2 %>%
 ```{r}
 df2 %>% summary()
 ```
+
+# Descritivas e Testes de Médias
+
+```{r}
+cor_verde = c("#4fb6a7")
+cor_roxa = c("#652177")
+
+cores = colorRampPalette(c("#4fb6a7","#652177"))
+tema = theme_minimal() + 
+       theme(axis.title.y = element_text(angle = 90, margin = unit(c(0.3, 0.5, 0.3, 0), "cm")),
+             axis.title.x = element_text(margin = unit(c(0.3, 0, 0, 0), "cm")),
+             axis.line.x = element_line(linewidth = 0.6, linetype=1),
+             axis.line.y = element_line(linewidth = 0.6, linetype=1),
+             axis.ticks.y = element_line(linewidth = 0.6, linetype = 1),
+             axis.text = element_text(size=10),
+             legend.position = "right",
+             plot.margin = unit(c(0.3, 0.4, 0.3, 0.4), "cm"),
+             plot.subtitle = element_text(hjust = 0.5, vjust= 4))
+theme_set(tema)
+```
+
+* Funções de gráficos numéricos e categóricos
+
+```{r message=FALSE, warning=FALSE}
+graficos <- function(dados, grupo, variavel, texto = "variável"){
+  
+  dados <- dados %>% 
+    mutate(grupo = ifelse(grupo == "0", "Controle", "Tratamento"))
+  
+  tabela <- dados %>%
+    dplyr::summarise(
+    `Média` = mean( !!sym(variavel) , na.rm = TRUE) %>% round(2),
+    `Desvio Padrão`= sd( !!sym(variavel) , na.rm = TRUE) %>% round(2),
+    `Valores nulos` = is.na( !!sym(variavel) ) %>% sum() %>% round(2),
+    `Tamanho da amostra` = n() %>% round()
+    ) %>%
+    tidyr::pivot_longer(dplyr::everything(), names_to = "Variável", values_to = "Valores")
+  
+  dados <- dados %>% filter(! is.na(variavel) )
+  
+  g1 <- dados %>%
+    ggplot(aes(x = !!sym(grupo), y = !!sym(variavel), fill = !!sym(grupo))) + 
+    geom_boxplot() + 
+    labs(title = "Descritivas\n", x = "Grupos", y = str_to_upper(variavel), fill = "Grupos") + 
+    tema +
+    scale_fill_manual(values=c(cor_verde, cor_roxa))
+
+
+  g2 <- dados %>% 
+    ggplot(aes(x = !!sym(variavel))) +
+    geom_histogram(fill = cor_verde) + 
+    labs(y = "Frequência", x = str_to_upper(variavel))
+  
+  return(
+    (g1 + gridExtra::tableGrob(tabela, rows = c("", "","", "")))/ 
+      (g2)
+  )
+  }
+
+graficos(df1, "grupo", "imc")
+```
+
+
+```{r}
+graficos_categoricos <- function(lista1, lista2, variavel){
+  
+  tabela <- prop.table(
+    table(lista1, lista2), 
+    margin = 2) #freq da escolaridade dentro dos grupos, ex: freq do grupo 2 no grupo 1
+  
+  perc <- data.frame(tabela) %>% 
+    mutate(lista1 = ifelse(lista1 == "0", "Controle", "Tratamento")) %>% 
+    rename(`Frequência` = Freq)
+  
+  g1 <- perc %>% 
+    ggplot(aes(x = lista2, y = `Frequência` , fill = lista1)) +
+    geom_bar(stat='identity') + 
+    tema +
+    scale_fill_manual(values=c(cor_verde, cor_roxa)) +
+    labs(
+      x = str_to_title(variavel), 
+      title = paste("Frequência de", variavel," por grupo"),
+      fill = "Grupo") 
+  
+  return(g1)
+}
+
+graficos_categoricos(df1$grupo, df1$num_gestacoes, "número de gestações")
+```
+
 
 # Testes da curva
 
