@@ -20,15 +20,13 @@ library(tidyverse)
 library(readxl)
 ```
 
-
 # Análises
 
 ## Saneamento de dados
 
 ### **Extraindo dados**
 
-Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas* 
-
+Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas*
 
 ```{r}
 rm(list = ls()) # limpa enviroment
@@ -40,7 +38,7 @@ df4 <- read_xlsx("dados.xlsx", sheet = "Imunoturbidimetria")
 df5 <- read_xlsx("dados.xlsx", sheet = "Doenças Crônicas")
 ```
 
-* DF1: Dados Atuais
+-   DF1: Dados Atuais
 
 ```{r}
 #df1 %>% colnames()
@@ -117,13 +115,17 @@ df1 <- df1 %>% select(all_of(colunas_interesse))
 colnames(df1) <- renomear_colunas
 ```
 
-
 ```{r}
-coluna_na_numerica <- function(lista){
+coluna_na_numerica <- function(lista, caracter = ".", substituto = ""){
   lista %>% 
     str_replace(. , pattern = ",", replacement = ".") %>%
     str_replace_na(. , replacement = "") %>% 
-    ifelse(. == ".", "", .) %>% as.numeric()
+    ifelse(. == caracter, substituto, .) %>% as.numeric()
+}
+
+coluna_numerica <- function(lista){
+  lista %>% 
+    ifelse(. == 99999, NA, .) %>% as.numeric()
 }
 ```
 
@@ -134,21 +136,31 @@ df1 <- df1 %>%
   mutate(
     grupo = as.factor(grupo),
     escolaridade = as.factor(escolaridade),
-    gordura = coluna_na_numerica(gordura),
-    ldl_dosado = coluna_na_numerica(ldl_dosado),
-    hba1c = coluna_na_numerica(hba1c),
-    creatinina = coluna_na_numerica(creatinina),
-    filtr_glomerular = coluna_na_numerica(filtr_glomerular),
-    ck = coluna_na_numerica(ck)
+    peso = coluna_numerica(idade),
+    imc = coluna_na_numerica(imc, "#DIV/0!", NA) %>% coluna_numerica(),
+    gordura = coluna_numerica(gordura),
+    pressao_sis = coluna_numerica(pressao_sis),
+    pressao_dias = coluna_numerica(pressao_dias),
+    pressao_media = coluna_numerica(pressao_media),
+    cintura = coluna_numerica(cintura),
+    abdomen = coluna_numerica(abdomen),
+    quadril = coluna_numerica(quadril),
+    cintura_quadril = coluna_na_numerica(cintura_quadril, "#DIV/0!", NA) %>% coluna_numerica(),
+    nlr = coluna_na_numerica(nlr, "#DIV/0!", NA) %>% coluna_numerica(),
+    ldl_dosado = coluna_na_numerica(ldl_dosado, "#DIV/0!", NA) %>% coluna_numerica(),
+    vldl = coluna_na_numerica(vldl, "#DIV/0!", NA) %>% coluna_numerica(),
+    hba1c = coluna_numerica(hba1c),
+    creatinina = coluna_numerica(creatinina),
+    filtr_glomerular = coluna_na_numerica(filtr_glomerular, "#DIV/0!", NA) %>% coluna_numerica(),
+    ck = coluna_numerica(ck)
     )
 ```
-
 
 ```{r}
 df1 %>% summary()
 ```
 
-* DF2: Dados Gestacionais
+-   DF2: Dados Gestacionais
 
 ```{r}
 #df2 %>% colnames()
@@ -173,7 +185,6 @@ df2 <- df2 %>% select(all_of(colunas_interesse))
 colnames(df2) <- renomear_colunas
 ```
 
-
 ```{r}
 grupos_nulos <- df2 %>% select(grupo) %>% is.na()
 df2 <- df2 %>% 
@@ -181,36 +192,34 @@ df2 <- df2 %>%
   mutate(
     grupo = as.factor(grupo),
     quantos_anos_evento = quantos_anos_evento %>% as.numeric(),
-    peso_bebe = coluna_na_numerica(peso_bebe),
-    tipo_parto = as.factor(coluna_na_numerica(tipo_parto)),
+    peso_bebe = coluna_numerica(peso_bebe),
+    tipo_parto = as.factor(coluna_numerica(tipo_parto)),
     prematuro = as.factor(prematuro)
     )
 ```
-
 
 ```{r}
 df2 %>% summary()
 ```
 
-
 # Testes da curva
 
 ```{r}
-rm(list = ls()) # limpa enviroment
+#rm(list = ls()) # limpa enviroment
 ```
 
-* Curva com base nos dados
+-   Curva com base nos dados
 
 ```{r}
-df <- read_xlsx("dados_amostrais.xlsx")
+df_1 <- read_xlsx("dados_amostrais.xlsx")
 
-df <- df %>% select(x,y)
+df_1 <- df_1 %>% select(x,y)
 
-plot(df$y, log(df$x))
+plot(df_1$y, log(df_1$x))
 
-df$y %>% log() %>% hist()
+df_1$y %>% log() %>% hist()
 
-fit1 <- lm(log(x) ~ y, data = df)
+fit1 <- lm(log(x) ~ y, data = df_1)
 fit1 %>% summary()
 
 reglin::ggresiduals(fit1)
@@ -222,14 +231,14 @@ newdata <- data.frame(y = c(0.166, 0.048, .152, 0.210, .207))
 newdata$amostra <- predict(fit1, newdata) %>% exp()
 ```
 
-* Curva com base teórica
+-   Curva com base teórica
 
 ```{r}
-df <- read_xlsx("dados_teoricos.xlsx")
+df_2 <- read_xlsx("dados_teoricos.xlsx")
 
-plot(df$y, df$x)
+plot(df_2$y, df_2$x)
 
-fit2 <- lm(x ~ y, data = df)
+fit2 <- lm(x ~ y, data = df_2)
 fit2 %>% summary()
 
 reglin::ggresiduals(fit2)
@@ -245,3 +254,50 @@ newdata$teorico <- predict(fit2, newdata)
 newdata
 ```
 
+** Curva teorica vs amostral
+
+```{r}
+eq1 <- function(x){
+  y = 0.1532 + ( (0.8722 - 0.1532) / (1 + (x/606.3139)^(-1.3109) ) )
+  return(y)
+}
+
+eq2 <- function(x){
+  y = 0.1173 + ( (0.202658 - 0.1173) / (1 + (x/10746.6371)^(-1.2605) ) )
+  return(y)
+}
+
+
+teste = tibble(x = seq(0.1,1500,0.5),
+               y = eq1(x)
+)
+
+teste2 = tibble(x = seq(0.1,1500,0.5),
+                y = eq2(x)
+)
+
+bind_rows(teste %>% mutate(tipo = 'amostral'),
+          teste2 %>% mutate(tipo = 'teorico')) %>% 
+  ggplot(aes(x = x, y = y, color = tipo)) +
+  geom_line(aes(group = tipo))
+
+
+g1 <- ggplot(data = teste, aes(x = x, y = y)) +
+  geom_line(group = 1) + 
+  geom_point() +
+  theme_minimal() + 
+  labs(title = "Amostral")
+
+g2 <- ggplot(data = teste2, aes(x = x, y = y)) +
+  geom_line(group = 1) + 
+  geom_point() +
+  theme_minimal() + 
+  labs(title = "Teórico")
+
+gridExtra::grid.arrange(g1, g2, ncol = 2)
+
+# fazer a inversa das eq e dps buscar os x em y
+eq1(0.048)
+eq2(0.048)
+
+```
