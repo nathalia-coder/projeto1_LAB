@@ -1,0 +1,44 @@
+---
+title: "função testes"
+author: "Bárbara Oliveira Ribeiro"
+date: "2023-09-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+realizar_teste <- function(dataframe, variavel) {
+  
+  dataframefiltrado<- dataframe %>%
+    filter(grupo %in% c("MP", "MN")) %>%
+    drop_na(variavel)
+  
+  grupo_MN<- dataframefiltrado %>%
+    filter(grupo == "MN") %>%
+    pull(variavel)
+  
+  grupo_MP<- dataframefiltrado %>%
+    filter(grupo == "MP") %>%
+    pull(variavel)
+
+  shapiro1 <- shapiro.test(grupo_MN)
+  shapiro2 <- shapiro.test(grupo_MP)
+
+  if (shapiro1$p.value <= 0.05 || shapiro2$p.value <= 0.05) {
+    resultado_teste <- wilcox.test(grupo_MP, grupo_MN, alternative = "greater")
+    return(resultado_teste)
+  } else {
+    resultado_teste <- t.test(grupo_MN, grupo_MP, alternative = "greater") 
+    return(resultado_teste)
+  }
+}
+```
+
+### exemplo
+```{r}
+realizar_teste(df3,"logpai1")
+```
+```
