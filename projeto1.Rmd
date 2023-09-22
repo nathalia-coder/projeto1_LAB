@@ -681,6 +681,49 @@ graficos(df1, "grupo", "gama_gt")
 realizar_teste(df1, "gama_gt")
 ```
 
+### quantos_anos_evento ** não sei se podemos aplicar esse teste
+
+Não rejeita-se a hipótese nula.
+
+```{r}
+graficos_categoricos(df2$grupo, 
+                     df2$quantos_anos_evento, 
+                     "quantos anos se passou do evento")
+realizar_teste(df2, "quantos_anos_evento")
+```
+
+### peso_bebe
+
+Rejeita-se a hipótese nula.
+
+```{r}
+df2 %>% 
+  drop_na(peso_bebe) %>% 
+  graficos(., "grupo", "peso_bebe") 
+realizar_teste(df2, "peso_bebe")
+```
+
+### peso_bebe ** Teste 
+
+Rejeita-se a hipótese nula.
+
+```{r}
+df2_filtro <- df2 %>% 
+  filter(tipo_parto != "<NA>")
+
+graficos_categoricos(df2_filtro$grupo, df2_filtro$tipo_parto, "tipo de parto") 
+```
+
+### prematuro ** Testar isso
+
+Rejeita-se a hipótese nula.
+
+```{r}
+df2_filtro <- df2 %>% 
+  filter(prematuro != "<NA>")
+
+graficos_categoricos(df2_filtro$grupo, df2_filtro$prematuro, "prematuro") 
+```
 
 
 ```{r}
