@@ -834,3 +834,29 @@ eq1(0.048)
 eq2(0.048)
 
 ```
+
+# Tamanho Amostral
+
+Foi repassado:
+
+As variâncias para a pressão sistólica são:
+
+Grupo MN: 196,90
+Grupo MP: 514,95
+
+Será considerado um $\alpha = 5%$ e $\beta = 10%$
+
+```{r}
+var1 <- 196.9
+var2 <- 514.95
+alpha <- 0.05
+beta <- 0.1
+gama <- 1
+
+z2 <- qnorm(1 - alpha/2)
+zbeta <- qnorm(1 - beta)
+
+n = ((var1 + var2) * (z2 + zbeta)^2) / (gama^2) # falta o denominador
+n %>% round()
+```
+
