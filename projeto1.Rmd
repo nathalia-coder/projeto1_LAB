@@ -741,99 +741,115 @@ realizar_teste(df1, "idade")
 #rm(list = ls()) # limpa enviroment
 ```
 
--   Curva com base nos dados
+**Variável resposta: Concentração**
+
+**Variável explicativa: Absorbância**
 
 ```{r}
-df_1 <- read_xlsx("dados_amostrais.xlsx")
+newdata <- read_xlsx("curva.xlsx", sheet = "prev")
+newdata %>% head()
 
-df_1 <- df_1 %>% select(x,y)
+ajuste <- read_xlsx("curva.xlsx", sheet = "ajust")
 
-plot(df_1$y, log(df_1$x))
-
-df_1$y %>% log() %>% hist()
-
-fit1 <- lm(log(x) ~ y, data = df_1)
-fit1 %>% summary()
-
-reglin::ggresiduals(fit1)
-
-#plot(fit1)
-
-newdata <- data.frame(y = c(0.166, 0.048, .152, 0.210, .207))
-
-newdata$amostra <- predict(fit1, newdata) %>% exp()
+resultado <- newdata
+resultado$ajust <- ajuste
+resultado %>% head()
 ```
 
--   Curva com base teórica
+## Curva com base nos dados amostrais
+
+* Modelo Logístico de 4 parâmetros
+
+b = the Hill coefficient;
+c = min_value;
+d = max_value;
+e = EC50.
+
+b = the Hill coefficient;a = min_value;d = max_value;c = EC50.
+
+- Ideia foi achar coeficientes e depois aplicar inversa
+
+- problema: função não está definida abaixo do valor mínimo
+
+- Predict aqui prevê absorbância e não concentração
 
 ```{r}
-df_2 <- read_xlsx("dados_teoricos.xlsx")
+library(drc)
 
-plot(df_2$y, df_2$x)
+data.m1 <- drm(abs ~ conc, data = data, 
+                   fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50")))
 
-fit2 <- lm(x ~ y, data = df_2)
-fit2 %>% summary()
+summary(data.m1)
+confint(data.m1, level = 0.90) # tds sao sig
 
-reglin::ggresiduals(fit2)
+par(mfrow = c(1,1))
+plot(data.m1, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
+     cex=1.2, cex.axis=1.2, cex.lab=1.2)
 
-#plot(fit2)
+# Extraindo coefs
+coefs.data <- setNames(
+  data.m1$coefficients,
+  c("b", "a", "d", "c")
+)
+coefs.data
 
-newdata$teorico <- predict(fit2, newdata)
+a = coefs.data[2]
+b = coefs.data[1]
+c = coefs.data[4]
+d = coefs.data[3]
+
+prev.x <- function(y){
+  x <- c * ( (((a-d)/(y-d))-1)^(1/b) )
+  return(x)
+}
+
+prev.x(.166)
+prev.x(a+0.01)
+```
+
+
+## Curva com base teórica
+
+```{r}
+data2 <- read_xlsx("dados_teoricos.xlsx")
+
+data.m2 <- drm(abs ~ conc, data = data2, 
+               fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50")))
+
+summary(data.m2)
+confint(data.m2, level = 0.90)
+
+plot(data.m2, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
+     cex=1.2, cex.axis=1.2, cex.lab=1.2)
+
+# Extraindo coefs
+coefs.data2 <- setNames(
+  data.m2$coefficients,
+  c("b", "a", "d", "c")
+)
+coefs.data2
+
+a = coefs.data2[2]
+b = coefs.data2[1]
+c = coefs.data2[4]
+d = coefs.data2[3]
+
+prev.x <- function(y){
+  x <- c * ( (((a-d)/(y-d))-1)^(1/b) )
+  return(x)
+}
+
+prev.x(.166)
+prev.x(a+0.01)
+prev.x(0.048)
 ```
 
 ## Resultado curvas
 
 ```{r}
-newdata
-```
-
-** Curva teorica vs amostral
-
-```{r}
-eq1 <- function(x){
-  y = 0.1532 + ( (0.8722 - 0.1532) / (1 + (x/606.3139)^(-1.3109) ) )
-  return(y)
-}
-
-eq2 <- function(x){
-  y = 0.1173 + ( (0.202658 - 0.1173) / (1 + (x/10746.6371)^(-1.2605) ) )
-  return(y)
-}
-
-
-teste = tibble(x = seq(0.1,1500,0.5),
-               y = eq1(x)
-)
-
-teste2 = tibble(x = seq(0.1,1500,0.5),
-                y = eq2(x)
-)
-
-bind_rows(teste %>% mutate(tipo = 'amostral'),
-          teste2 %>% mutate(tipo = 'teorico')) %>% 
-  ggplot(aes(x = x, y = y, color = tipo)) +
-  geom_line(aes(group = tipo))
-
-
-g1 <- ggplot(data = teste, aes(x = x, y = y)) +
-  geom_line(group = 1) + 
-  geom_point() +
-  theme_minimal() + 
-  labs(title = "Amostral")
-
-g2 <- ggplot(data = teste2, aes(x = x, y = y)) +
-  geom_line(group = 1) + 
-  geom_point() +
-  theme_minimal() + 
-  labs(title = "Teórico")
-
-gridExtra::grid.arrange(g1, g2, ncol = 2)
-
-# fazer a inversa das eq e dps buscar os x em y
-eq1(0.048)
-eq2(0.048)
 
 ```
+
 
 # Tamanho Amostral
 
