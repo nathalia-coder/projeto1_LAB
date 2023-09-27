@@ -298,6 +298,35 @@ graficos_categoricos <- function(lista1, lista2, variavel){
 * Teste de Hipóteses
 
 ```{r}
+permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
+  difobs <- mean(grupo_MN, na.rm = T) - mean(grupo_MP, na.rm = T)
+  dif <-numeric(n)
+  todos <- c(grupo_MN, grupo_MP)
+  todos <- todos[! is.na(todos)]
+  set.seed(2023)
+  N <- length(todos)
+
+  for (i in 1:n) {
+    # permutar dados
+    sorteio <- sample(todos, replace = F)
+  
+    g1_perm <- sorteio[1:(N/2)]
+    g2_perm <- sorteio[((N/2)+1):N]
+    dif[i] <- mean(g1_perm)-mean(g2_perm)
+  }
+  valorp<-length(dif[dif<difobs])/n
+  alpha <- 0.05
+  
+  cat(paste("Teste permutação\n",
+            "Hipotese Nula: Medias iguais para os grupos\n",
+            paste0("Nivel de significancia de ", alpha),
+            "pvalor =", valorp), 
+      "\n", if_else(valorp >= alpha/2, "Não rejeita-se H0", "Rejeita-se H0"))
+  } 
+```
+
+
+```{r}
 realizar_teste <- function(dataframe, variavel) {
   
   dataframefiltrado <- dataframe %>%
@@ -315,8 +344,7 @@ realizar_teste <- function(dataframe, variavel) {
   shapiro2 <- shapiro.test(grupo_MP)
 
   if (shapiro1$p.value <= 0.05 || shapiro2$p.value <= 0.05) {
-    resultado_teste <- wilcox.test(grupo_MP, grupo_MN, alternative = "greater")
-    return(resultado_teste)
+    permutacoes(grupo_MN, grupo_MP)
   } else {
     resultado_teste <- t.test(grupo_MN, grupo_MP, alternative = "greater") 
     return(resultado_teste)
@@ -364,6 +392,8 @@ Rejeita-se a hipótese nula.
 ```{r}
 graficos(df1, "grupo", "imc")
 realizar_teste(df1, "imc")
+
+
 ```
 
 ### Gordura:
@@ -883,16 +913,16 @@ plot(teste)
 
 teste$parameters
 
-ajuste <- dr4pl(formula = abs~conc,
+teste2 <- dr4pl(formula = abs~conc,
              data = data,
              method.init = "Mead",
              method.robust = "Tukey" )
-plot(ajuste)
+plot(teste2)
 
-ajuste$parameters
+teste2$parameters
 ```
 
-Modelo "teste" ficou melhor que o de ajuste
+Modelo "teste" ficou melhor que o de teste2
 
 ```{r}
 a = teste$parameters[4] # minimo
@@ -907,6 +937,97 @@ prev.x <- function(y){
 
 prev.x(a+0.01)
 prev.x(0.166)
+```
+
+## Nova estimação
+
+Referência: https://janalin.github.io/analyse-ELISA/results.html
+
+```{r}
+library(minpack.lm)
+
+data <- data %>% dplyr::mutate(log2concentration = log2(conc))
+levm.fit <- nlsLM(
+  abs ~
+  Amin + ((Amax - Amin) / (1 + exp(n * (log2concentration - log2EC50)))),
+  data = data,
+  start = list(Amin = 0, Amax = 1, log2EC50 = 0.5, n = -1), # chutes iniciais
+  control = list(maxiter = 500)
+)
+# Show summary of the fit
+summary(levm.fit)
+```
+
+> Depois tentar pegar o mínimo ao invés da mediana
+
+```{r}
+# Set Amin to blank values
+Amin <- min(newdata$abs) # mediana dos valores a serem previsto
+# Re-fit with only three free parameters
+levm.fit <- nlsLM(
+  abs ~
+  Amin + ((Amax - Amin) / (1 + exp(n * (log2concentration - log2EC50)))),
+  data = data,
+  start = list(Amax = 2, log2EC50 = 0.5, n = -1),
+  control = list(maxiter = 500)
+)
+# Check new fit results
+summary(levm.fit)
+```
+
+```{r}
+drc.fit <- drm(abs ~ conc,
+  data = data,
+  fct = LL2.4(names = c("n", "Amin", "Amax", "EC50"))
+)
+summary(drc.fit)
+
+plot(drc.fit)
+
+# os residuos ficaram ruins
+ggplot(as_tibble(drc.fit$predres)) +
+  geom_point(aes(`Predicted values`, Residuals),
+    pch = 1, size = 3, color = "cornflowerblue") +
+  geom_hline(yintercept = 0, lwd = 0.2)
+```
+
+* Predizendo concentracao
+
+```{r}
+
+prev.conc = newdata$abs
+
+n.est <- coef(drc.fit)[1]
+#Amin <- coef(drc.fit)[2]
+Amax.est <- coef(drc.fit)[3]
+log2EC50.est <- log2(coef(drc.fit)[4])
+
+log2concentration.est <- sapply(prev.conc, function(A){(1/n.est) * (log( ((Amax.est - A)/(A - Amin))) + log2EC50.est*n.est)})
+
+# Get confidence intervals
+n = nrow(data)
+
+fgh <- deriv(
+  log2concentration ~ (1/n) * (log( ((Amax - A)/(A - Amin))) + log2EC50*n),
+  c("Amax", "log2EC50", "n"), function(Amax, log2EC50, n, A) {}
+)
+f.new <- fgh(Amax.est, log2EC50.est, n.est, data$abs)
+g.new <- attr(f.new, "gradient")
+
+drc.fit$predres
+
+#gs <- rowSums((g.new %*% cov.fit) * g.new)
+alpha <- 0.05
+#delta.f <- sqrt(gs) * qt(1 - alpha/2, 15)
+#results <- data %>% 
+#  dplyr::mutate(concentration.est = 2^log2concentration.est) %>%
+#  dplyr::mutate(log2concentration.est = log2concentration.est) %>%
+#  dplyr::mutate(log2conf = delta.f) 
+
+results <- newdata %>% 
+  dplyr::mutate(concentration.est = 2^log2concentration.est)
+
+results
 ```
 
 
