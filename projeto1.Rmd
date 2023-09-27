@@ -116,7 +116,7 @@ renomear_colunas <- c(
   )
 
 
-df1 <- df1 %>% select(all_of(colunas_interesse))
+df1 <- df1 %>% dplyr::select(all_of(colunas_interesse))
 colnames(df1) <- renomear_colunas
 ```
 
@@ -760,11 +760,6 @@ resultado %>% head()
 
 * Modelo Logístico de 4 parâmetros
 
-b = the Hill coefficient;
-c = min_value;
-d = max_value;
-e = EC50.
-
 b = the Hill coefficient;a = min_value;d = max_value;c = EC50.
 
 - Ideia foi achar coeficientes e depois aplicar inversa
@@ -775,6 +770,9 @@ b = the Hill coefficient;a = min_value;d = max_value;c = EC50.
 
 ```{r}
 library(drc)
+
+data <- read_xlsx("curva.xlsx", sheet = "certo")
+data %>% head()
 
 data.m1 <- drm(abs ~ conc, data = data, 
                    fct = LL.4(names = c("Slope", "Lower Limit", "Upper Limit", "ED50")))
@@ -844,10 +842,71 @@ prev.x(a+0.01)
 prev.x(0.048)
 ```
 
-## Resultado curvas
+## Segundo pacote curva
 
 ```{r}
+library(dr4pl)
 
+## Exemplo pacote
+
+# dados originais
+a <- dr4pl(dose = sample_data_1$Dose,
+             response = sample_data_1$Response,
+             method.init = "logistic")
+plot(a)
+
+# dados ajuste
+b <- dr4pl(formula = Response~Dose,
+             data = sample_data_4,
+             method.init = "Mead",
+             method.robust = "Tukey" )
+plot(b)
+
+c <- dr4pl(data = sample_data_10,
+             dose = Dose,
+             response = Response)
+plot(c)
+
+c <- dr4pl(Response~Dose,
+             data = drc_error_2,
+             method.optim = "CG",
+             trend = "decreasing" )
+d <- plot(c, x.breaks = c(.00135, .0135, .135, 1.35, 13.5))
+d + theme_grey()
+
+## Como os dados se comportam
+
+teste <- dr4pl(dose = data$conc,
+             response = data$abs,
+             method.init = "logistic")
+plot(teste)
+
+teste$parameters
+
+ajuste <- dr4pl(formula = abs~conc,
+             data = data,
+             method.init = "Mead",
+             method.robust = "Tukey" )
+plot(ajuste)
+
+ajuste$parameters
+```
+
+Modelo "teste" ficou melhor que o de ajuste
+
+```{r}
+a = teste$parameters[4] # minimo
+b = teste$parameters[3] # 
+c = teste$parameters[2] # inflexao/mediana
+d = teste$parameters[1] # maximo
+
+prev.x <- function(y){
+  x <- c * ( (((a-d)/(y-d))-1)^(1/b) )
+  return(x)
+}
+
+prev.x(a+0.01)
+prev.x(0.166)
 ```
 
 
