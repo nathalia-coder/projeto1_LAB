@@ -1133,7 +1133,7 @@ df_adma$adma %>% summary()
 
 ```{r}
 variavel = "adma"
-graficos(df_adma, "grupo", variave)
+graficos(df_adma, "grupo", variavel)
 teste <- realizar_teste(df_adma, variavel)
 
 resultado <- resumo_testes(teste, variavel)
