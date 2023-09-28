@@ -237,6 +237,9 @@ df3 <- df3 %>% mutate(
   sflt1_ajuste = coluna_numerica(sflt1_ajuste),
   aaat1 = coluna_numerica(aaat1)
 )
+
+# corrigindo outro erro de adma
+df3$adma <- df3$adma %>% ifelse(. == 999999, NA, .) %>% as.numeric()
 ```
 
 #### DF4: Imunoturbidimetria
@@ -928,14 +931,73 @@ realizar_teste(df2, "peso_bebe")
 ### pai1
 
 ```{r}
-df3$pai1
+graficos(df3, "grupo", "pai1") 
+realizar_teste(df3, "pai1")
 ```
 
+### trombomodulina
 
 ```{r}
-""           "logpai1"        "trombomodulina" "adma"           "sflt1"         
-[7] "absor_sflt1"    "sflt1_ajuste"   "aaat1"
+graficos(df3, "grupo", "trombomodulina") 
+realizar_teste(df3, "trombomodulina")
 ```
+
+### adma
+
+Foi encontrado observação outlier, elas serão retiradas. 
+
+* Relação antes da retirada:
+```{r}
+df3$adma %>% summary()
+#df3$adma[df3$adma > 250]
+```
+
+* Após retirada:
+
+```{r}
+df_adma <- df3 %>% 
+  filter(adma < 250)
+
+df_adma$adma %>% summary()
+```
+
+```{r}
+graficos(df_adma, "grupo", "adma")
+realizar_teste(df_adma, "adma")
+```
+
+### aaat1
+
+```{r}
+graficos(df3, "grupo", "aaat1")
+realizar_teste(df3, "aaat1")
+```
+
+### sflt1 ** Obter dados faltantes primeiro
+
+Foi encontrado observação outlier, elas serão retiradas. 
+
+* Relação antes da retirada:
+```{r}
+df3$sflt1 %>% summary()
+#df3$sflt1[df3$sflt1 > 1000]
+```
+
+* Após retirada:
+
+```{r}
+df_filtro <- df3 %>% 
+  filter(sflt1 < 200)
+
+df_filtro$sflt1 %>% summary()
+```
+
+```{r}
+graficos(df_filtro, "grupo", "sflt1")
+realizar_teste(df_filtro, "sflt1")
+```
+
+
 
 
 ## Resumo Descritivas
