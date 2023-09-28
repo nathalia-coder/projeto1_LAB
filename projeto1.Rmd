@@ -1152,33 +1152,6 @@ new %>% head() # ver se precisamos elevar os dados ao quadrado
 ```{r}
 library(dr4pl)
 
-## Exemplo pacote
-
-# dados originais
-a <- dr4pl(dose = sample_data_1$Dose,
-             response = sample_data_1$Response,
-             method.init = "logistic")
-plot(a)
-
-# dados ajuste
-b <- dr4pl(formula = Response~Dose,
-             data = sample_data_4,
-             method.init = "Mead",
-             method.robust = "Tukey" )
-plot(b)
-
-c <- dr4pl(data = sample_data_10,
-             dose = Dose,
-             response = Response)
-plot(c)
-
-c <- dr4pl(Response~Dose,
-             data = drc_error_2,
-             method.optim = "CG",
-             trend = "decreasing" )
-d <- plot(c, x.breaks = c(.00135, .0135, .135, 1.35, 13.5))
-d + theme_grey()
-
 ## Como os dados se comportam
 
 teste <- dr4pl(dose = data$conc,
