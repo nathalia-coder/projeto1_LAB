@@ -1,7 +1,7 @@
 ---
 title: "Projeto I"
 author: 
-  - "Bárbara"
+  - "Bárbara Oliveira Ribeiro"
   - "Nathalia Gabriella Ferreira dos Santos"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -141,7 +141,7 @@ df1 <- df1 %>%
   mutate(
     grupo = as.factor(grupo),
     escolaridade = as.factor(escolaridade),
-    peso = coluna_numerica(idade),
+    peso = coluna_numerica(peso),
     imc = coluna_na_numerica(imc, "#DIV/0!", NA) %>% coluna_numerica(),
     gordura = coluna_na_numerica(gordura) %>% coluna_numerica(),
     pressao_sis = coluna_numerica(pressao_sis),
@@ -237,14 +237,29 @@ graficos <- function(dados, grupo, variavel, texto = "variável"){
   dados <- dados %>% 
     mutate(grupo = ifelse(grupo == "0", "Controle", "Tratamento"))
   
-  tabela <- dados %>%
-    dplyr::summarise(
-    `Média` = mean( !!sym(variavel) , na.rm = TRUE) %>% round(2),
-    `Desvio Padrão`= sd( !!sym(variavel) , na.rm = TRUE) %>% round(2),
-    `Valores nulos` = is.na( !!sym(variavel) ) %>% sum() %>% round(2),
-    `Tamanho da amostra` = n() %>% round()
-    ) %>%
-    tidyr::pivot_longer(dplyr::everything(), names_to = "Variável", values_to = "Valores")
+  tab <- dados %>% 
+    group_by(grupo) %>% 
+    summarise(
+      `Média` = mean( !!sym(variavel) , na.rm = TRUE) %>% round(2),
+      `Desvio Padrão`= sd( !!sym(variavel) , na.rm = TRUE) %>% round(2),
+      `Valores nulos` = is.na( !!sym(variavel) ) %>% sum() %>% round(2),
+      `Tamanho da amostra` = n() %>% round()) %>% 
+    t()
+  
+  tabela <- data.frame(
+    "Métrica" = row.names(tab)[2:5], 
+    "Controle" = as.numeric(tab[c(-1),1]),
+    "Tratamento" = as.numeric(tab[c(-1),2])) %>% 
+    as_tibble()
+  
+  #tabela <- dados %>%
+  #  dplyr::summarise(
+  #  `Média` = mean( !!sym(variavel) , na.rm = TRUE) %>% round(2),
+  #  `Desvio Padrão`= sd( !!sym(variavel) , na.rm = TRUE) %>% round(2),
+  #  `Valores nulos` = is.na( !!sym(variavel) ) %>% sum() %>% round(2),
+  #  `Tamanho da amostra` = n() %>% round()
+  #  ) %>%
+  #  tidyr::pivot_longer(dplyr::everything(), names_to = "Variável", values_to = "Valores")
   
   dados <- dados %>% filter(! is.na(variavel) )
   
@@ -314,7 +329,7 @@ permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
     g2_perm <- sorteio[((N/2)+1):N]
     dif[i] <- mean(g1_perm)-mean(g2_perm)
   }
-  valorp<-length(dif[dif<difobs])/n
+  valorp<- 2 * length(dif[dif<difobs])/n
   alpha <- 0.05
   
   cat(paste("Teste permutação\n",
@@ -330,7 +345,7 @@ permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
 realizar_teste <- function(dataframe, variavel) {
   
   dataframefiltrado <- dataframe %>%
-    mutate(grupo = ifelse(grupo == "0", "MN", "MP"))
+    mutate(grupo = ifelse(grupo == "0", "MN", "MP")) 
 
   grupo_MN<- dataframefiltrado %>%
     filter(grupo == "MN") %>%
@@ -755,6 +770,18 @@ df2_filtro <- df2 %>%
 graficos_categoricos(df2_filtro$grupo, df2_filtro$prematuro, "prematuro") 
 ```
 
+### peso_bebe
+
+Rejeita-se a hipótese nula.
+
+```{r}
+df2 %>% 
+  drop_na(peso_bebe) %>% 
+  graficos(., "grupo", "peso_bebe") 
+realizar_teste(df2, "peso_bebe")
+```
+
+
 
 ```{r}
 ## testes
@@ -871,6 +898,18 @@ prev.x(.166)
 prev.x(a+0.01)
 prev.x(0.048)
 ```
+
+```{r}
+new <- data.frame(
+  conc = seq(0,50, 0.01)
+)
+
+abs_predita <- predict(object = data.m2, new)
+new$abs_prev <- abs_predita
+new %>% head() # ver se precisamos elevar os dados ao quadrado
+```
+
+
 
 ## Segundo pacote curva
 
@@ -1054,5 +1093,13 @@ zbeta <- qnorm(1 - beta)
 
 n = ((var1 + var2) * (z2 + zbeta)^2) / (gama^2) # falta o denominador
 n %>% round()
+```
+
+
+```{r}
+teste <- function(df, col) {
+  df %>% select(col)
+  
+}
 ```
 
