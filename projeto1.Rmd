@@ -481,11 +481,15 @@ permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
   valorp<- 2 * length(dif[dif > abs(difobs) ])/n # cauda superior
   alpha <- 0.05
   
+  tipo_teste <- "Teste permutação"
+  
   cat(paste("Teste permutação\n",
             "Hipotese Alternativa: Medias diferentes para os grupos\n",
             paste0("Nivel de significancia de ", alpha),
             "pvalor =", valorp), 
       "\n", if_else(valorp >= alpha/2, "Não rejeita-se H0", "Rejeita-se H0"))
+  
+  return(list(method = tipo_teste, p.value = valorp))
   } 
 ```
 
@@ -516,34 +520,84 @@ realizar_teste <- function(dataframe, variavel) {
 }
 ```
 
+* Teste de hipóteses para dados categóricos
+
+```{r}
+hipo_categorica <- function(dados, grupo, variavel){
+  data_grupo <- dados %>% dplyr::select( !!sym(grupo) ) %>% pull( !!sym(grupo) )
+  data_variavel <- dados %>% dplyr::select( !!sym(variavel) ) %>% pull( !!sym(variavel) )
+  tab = xtabs(~ data_grupo + data_variavel) # tabela de frequencia
+  return(fisher.test(tab))
+}
+```
+
+
 * Função Resumo hipóteses
 
 ```{r}
-
+resumo_testes <- function(teste, variavel){
+    pvalor <- teste$p.value
+    metodo <- teste$method  
+    alpha <- 0.05
+    conclusao <- if_else(pvalor >= alpha/2, "Não rejeita-se H0", "Rejeita-se H0")
+    
+    lista <- list(
+      Nome = variavel,
+      `Método` = metodo,
+      Pvalor = pvalor,
+      `Conclusão` = conclusao)
+    
+    return(lista %>% as_tibble() )
+}
 ```
 
 
 ## Análise por variável:
 
+
 ### Idade:
 
-Não rejeita-se a hipótese nula de que as médias sejam iguais.
-
 ```{r}
-graficos(df1, "grupo", "idade")
-realizar_teste(df1, "idade")
+variavel <- "idade"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- resultado
+resultado
 ```
 
-### Escolaridade: ** Falta aplicar teste para frequência dos categóricos
+### Escolaridade:
 
 ```{r}
-graficos_categoricos(df1$grupo, df1$escolaridade, "escolaridade")
+variavel <- "escolaridade"
+graficos_categoricos(df1$grupo, df1$escolaridade, variavel)
+teste <- hipo_categorica(df1, "grupo", variavel)
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
+```
+
+Suposição do quiquadrado é freq > 5
+
+```{r}
+M = xtabs(~ grupo + escolaridade, data=df1)
+
+xtabs(grupo, escolaridade, subset = df1)
+M <- as.table(rbind(c(762, 327, 468), c(484,239,477)))
+dimnames(M) <- list(Sexo=c("Controle","Tratamento"),
+Partido=c("Democrat","Independent", "Republican"))
+chisq.test(M)
+
+fisher.test(M) # aqui da sem erro
+
 ```
 
 ### Número de Gestações:
 
 ```{r}
 graficos_categoricos(df1$grupo, df1$num_gestacoes, "Número de Gestações")
+hipo_categorica(df1, "grupo", "num_gestacoes")
 ```
 
 ### Peso:
@@ -887,6 +941,9 @@ Não rejeita-se a hipótese nula.
 graficos_categoricos(df2$grupo, 
                      df2$quantos_anos_evento, 
                      "quantos anos se passou do evento")
+
+#hipo_categorica(df2, "grupo", "quantos_anos_evento")
+
 realizar_teste(df2, "quantos_anos_evento")
 ```
 
@@ -910,6 +967,7 @@ df2_filtro <- df2 %>%
   filter(tipo_parto != "<NA>")
 
 graficos_categoricos(df2_filtro$grupo, df2_filtro$tipo_parto, "tipo de parto") 
+hipo_categorica(df2, "grupo", "tipo_parto")
 ```
 
 ### prematuro ** Testar isso
@@ -921,7 +979,15 @@ df2_filtro <- df2 %>%
   filter(prematuro != "<NA>")
 
 graficos_categoricos(df2_filtro$grupo, df2_filtro$prematuro, "prematuro") 
+hipo_categorica(df2, "grupo", "prematuro")
 ```
+
+```{r}
+# pode usar quiquadrado
+tab <- xtabs(~ grupo + prematuro, df2_filtro)
+chisq.test(tab)
+```
+
 
 ### peso_bebe
 
@@ -1097,7 +1163,6 @@ prev.x <- function(y){
 prev.x(.166)
 prev.x(a+0.01)
 ```
-
 
 ## Curva com base teórica
 
@@ -1305,10 +1370,8 @@ n %>% round()
 ```
 
 
-```{r}
-teste <- function(df, col) {
-  df %>% select(col)
-  
-}
-```
+# Referências
 
+https://dl.acm.org/doi/pdf/10.1145/503506.503509
+
+https://est.ufba.br/sites/est.ufba.br/files/kim/matd49-aula04-fisher.pdf
