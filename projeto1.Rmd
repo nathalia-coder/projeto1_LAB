@@ -261,6 +261,12 @@ colnames(df4) <- renomear_colunas
 df4 <- df4 %>% 
   mutate_all(~ifelse(is.na(.), "", .)) %>% 
   mutate_all(as.numeric)
+
+# alterando df4
+df4 <- df4 %>% mutate(
+    dimero = coluna_numerica(dimero)
+)
+
 ```
 
 #### DF5: Doenças Crônicas
@@ -997,8 +1003,28 @@ graficos(df_filtro, "grupo", "sflt1")
 realizar_teste(df_filtro, "sflt1")
 ```
 
+### dimero
 
+Foi encontrado observação outlier, elas serão retiradas. 
 
+* Relação antes da retirada:
+```{r}
+df4$dimero %>% summary()
+```
+
+* Após retirada:
+
+```{r}
+df_filtro <- df4 %>% 
+  filter(dimero < 1000)
+
+df_filtro$dimero %>% summary()
+```
+
+```{r}
+graficos(df_filtro, "grupo", "dimero")
+realizar_teste(df_filtro, "dimero")
+```
 
 ## Resumo Descritivas
 
