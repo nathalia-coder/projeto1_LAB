@@ -539,7 +539,7 @@ resumo_testes <- function(teste, variavel){
     pvalor <- teste$p.value
     metodo <- teste$method  
     alpha <- 0.05
-    conclusao <- if_else(pvalor >= alpha/2, "Não rejeita-se H0", "Rejeita-se H0")
+    conclusao <- if_else(pvalor >= alpha, "Não rejeita-se H0", "Rejeita-se H0")
     
     lista <- list(
       Nome = variavel,
