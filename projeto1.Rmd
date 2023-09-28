@@ -578,44 +578,39 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 resultado
 ```
 
-Suposição do quiquadrado é freq > 5
-
-```{r}
-M = xtabs(~ grupo + escolaridade, data=df1)
-
-xtabs(grupo, escolaridade, subset = df1)
-M <- as.table(rbind(c(762, 327, 468), c(484,239,477)))
-dimnames(M) <- list(Sexo=c("Controle","Tratamento"),
-Partido=c("Democrat","Independent", "Republican"))
-chisq.test(M)
-
-fisher.test(M) # aqui da sem erro
-
-```
-
 ### Número de Gestações:
 
 ```{r}
+variavel = "num_gestacoes"
 graficos_categoricos(df1$grupo, df1$num_gestacoes, "Número de Gestações")
-hipo_categorica(df1, "grupo", "num_gestacoes")
+teste <- hipo_categorica(df1, "grupo", variavel)
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Peso:
 
-Não rejeita-se a hipótese nula de que as médias sejam iguais.
-
 ```{r}
-graficos(df1, "grupo", "peso")
-realizar_teste(df1, "peso")
+variavel = "peso"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### IMC:
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "imc")
-realizar_teste(df1, "imc")
+variavel = "imc"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Gordura:
@@ -623,27 +618,37 @@ realizar_teste(df1, "imc")
 Rejeita-se a hipótese nula.
 
 ```{r}
-graficos(df1, "grupo", "gordura")
-realizar_teste(df1, "gordura")
+variavel = "gordura"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Pressão Sistólica:
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "pressao_sis")
-realizar_teste(df1, "pressao_sis")
-```
+variavel = "pressao_sis"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
 
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
+```
 
 ### Pressão Diastólica:
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "pressao_dias")
-realizar_teste(df1, "pressao_dias")
+variavel = "pressao_dias"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Pressão Média:
@@ -651,26 +656,37 @@ realizar_teste(df1, "pressao_dias")
 Rejeita-se a hipótese nula.
 
 ```{r}
-graficos(df1, "grupo", "pressao_media")
-realizar_teste(df1, "pressao_media")
+variavel = "pressao_media"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Cintura:
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "cintura")
-realizar_teste(df1, "cintura")
+variavel = "cintura"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Abdomen:
 
-Não rejeita-se a hipótese nula que não haja diferença nas médias dos grupos.
-
 ```{r}
-graficos(df1, "grupo", "abdomen")
-realizar_teste(df1, "abdomen")
+variavel = "abdomen"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Quadril:
@@ -678,35 +694,49 @@ realizar_teste(df1, "abdomen")
 Rejeita-se a hipótese nula.
 
 ```{r}
-graficos(df1, "grupo", "quadril")
-realizar_teste(df1, "quadril")
+variavel = "quadril"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### Relação cintura vs quadril:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "cintura_quadril")
-realizar_teste(df1, "cintura_quadril")
+variavel = "cintura_quadril"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### neu:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "neu")
-realizar_teste(df1, "neu")
+variavel = "neu"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### lym:
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "lym")
-realizar_teste(df1, "lym")
+variavel = "lym"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### nlr:
@@ -728,38 +758,50 @@ df_nlr <- df1 %>%
 df_nlr$nlr %>% summary()
 ```
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df_nlr, "grupo", "nlr")
-realizar_teste(df_nlr, "nlr")
+variavel = "nlr"
+graficos(df_nlr, "grupo", variavel)
+teste <- realizar_teste(df_nlr, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### colesterol Total:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "colesterol_total")
-realizar_teste(df1, "colesterol_total")
+variavel = "colesterol_total"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### hdl:
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "hdl")
-realizar_teste(df1, "hdl")
+variavel = "hdl"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### ldl_dosado:
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "ldl_dosado")
-realizar_teste(df1, "ldl_dosado")
+variavel = "ldl_dosado"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### vldl:
@@ -781,20 +823,26 @@ df_vldl <- df1 %>%
 df_vldl$vldl %>% summary()
 ```
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df_vldl, "grupo", "vldl")
-realizar_teste(df_vldl, "vldl")
+variavel = "vldl"
+graficos(df_vldl, "grupo", variavel)
+teste <- realizar_teste(df_vldl, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### nao_hdl:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "nao_hdl")
-realizar_teste(df1, "nao_hdl")
+variavel = "nao_hdl"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### triglicerides:
@@ -819,17 +867,25 @@ df_triglicerides$triglicerides %>% summary()
 Não rejeita-se a hipótese nula.
 
 ```{r}
-graficos(df_triglicerides, "grupo", "triglicerides")
-realizar_teste(df_triglicerides, "triglicerides")
+variavel = "triglicerides"
+graficos(df_triglicerides, "grupo", variavel)
+teste <- realizar_teste(df_triglicerides, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### hba1c: **Aqui também encontramos influentes mas não tiramos
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "hba1c")
-realizar_teste(df1, "hba1c")
+variavel = "hba1c"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### creatinina:
@@ -851,11 +907,14 @@ df_creatinina <- df1 %>%
 df_creatinina$creatinina %>% summary()
 ```
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df_creatinina, "grupo", "creatinina")
-realizar_teste(df_creatinina, "creatinina")
+variavel = "hba1c"
+graficos(df_creatinina, "grupo", variavel)
+teste <- realizar_teste(df_creatinina, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### filtr_glomerular:
@@ -880,85 +939,110 @@ df_filtr_glomerular$filtr_glomerular %>% summary()
 Não rejeita-se a hipótese nula.
 
 ```{r}
-graficos(df_filtr_glomerular, "grupo", "filtr_glomerular")
-realizar_teste(df_filtr_glomerular, "filtr_glomerular")
+variavel = "filtr_glomerular"
+graficos(df_filtr_glomerular, "grupo", variavel)
+teste <- realizar_teste(df_filtr_glomerular, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### tgp_alt:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "tgp_alt")
-realizar_teste(df1, "tgp_alt")
+variavel = "tgp_alt"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### tgo_ast:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "tgo_ast")
-realizar_teste(df1, "tgo_ast")
+variavel = "tgo_ast"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### acido_urico:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "acido_urico")
-realizar_teste(df1, "acido_urico")
+variavel = "acido_urico"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### ck: ** Erro no teste
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "ck")
+variavel = "ck"
+graficos(df1, "grupo", variavel)
 
 df_filtro <- df1 %>% 
   drop_na(ck)
+
+#teste <- realizar_teste(df1, variavel)
+
+#resultado <- resumo_testes(teste, variavel)
+#tabela_resumo <- rbind(tabela_resumo, resultado)
+#resultado
 
 #realizar_teste(df_filtro, "ck")
 ```
 
 ### gama_gt:
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
-graficos(df1, "grupo", "gama_gt")
-realizar_teste(df1, "gama_gt")
+variavel = "gama_gt"
+graficos(df1, "grupo", variavel)
+teste <- realizar_teste(df1, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### quantos_anos_evento ** não sei se podemos aplicar esse teste
 
-Não rejeita-se a hipótese nula.
-
 ```{r}
+variavel = "quantos_anos_evento"
 graficos_categoricos(df2$grupo, 
-                     df2$quantos_anos_evento, 
-                     "quantos anos se passou do evento")
+                     df2$quantos_anos_evento, "quantos anos se passou do evento")
 
-#hipo_categorica(df2, "grupo", "quantos_anos_evento")
+#hipo_categorica(df2, "grupo", variavel)
 
-realizar_teste(df2, "quantos_anos_evento")
+teste <- realizar_teste(df2, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### peso_bebe
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-df2 %>% 
-  drop_na(peso_bebe) %>% 
-  graficos(., "grupo", "peso_bebe") 
-realizar_teste(df2, "peso_bebe")
+variavel = "peso_bebe"
+graficos(df2, "grupo", variavel) 
+teste <- realizar_teste(df2, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
-### peso_bebe ** Teste 
+### tipo_parto ** Teste 
 
 Rejeita-se a hipótese nula.
 
@@ -966,8 +1050,13 @@ Rejeita-se a hipótese nula.
 df2_filtro <- df2 %>% 
   filter(tipo_parto != "<NA>")
 
+variavel = "tipo_parto"
 graficos_categoricos(df2_filtro$grupo, df2_filtro$tipo_parto, "tipo de parto") 
-hipo_categorica(df2, "grupo", "tipo_parto")
+teste <- hipo_categorica(df2, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### prematuro ** Testar isso
@@ -978,40 +1067,49 @@ Rejeita-se a hipótese nula.
 df2_filtro <- df2 %>% 
   filter(prematuro != "<NA>")
 
+variavel = "prematuro"
 graficos_categoricos(df2_filtro$grupo, df2_filtro$prematuro, "prematuro") 
-hipo_categorica(df2, "grupo", "prematuro")
-```
+teste <- hipo_categorica(df2, "grupo", variavel)
 
-```{r}
-# pode usar quiquadrado
-tab <- xtabs(~ grupo + prematuro, df2_filtro)
-chisq.test(tab)
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
-
 
 ### peso_bebe
 
-Rejeita-se a hipótese nula.
-
 ```{r}
-df2 %>% 
-  drop_na(peso_bebe) %>% 
-  graficos(., "grupo", "peso_bebe") 
-realizar_teste(df2, "peso_bebe")
+variavel = "peso_bebe"
+graficos(df2, "grupo", variavel) 
+teste <- realizar_teste(df2, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### pai1
 
 ```{r}
-graficos(df3, "grupo", "pai1") 
-realizar_teste(df3, "pai1")
+variavel = "pai1"
+graficos(df3, "grupo", variavel) 
+teste <- realizar_teste(df3, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### trombomodulina
 
 ```{r}
-graficos(df3, "grupo", "trombomodulina") 
-realizar_teste(df3, "trombomodulina")
+variavel = "trombomodulina"
+graficos(df3, "grupo", variavel) 
+teste <- realizar_teste(df3, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### adma
@@ -1034,15 +1132,25 @@ df_adma$adma %>% summary()
 ```
 
 ```{r}
-graficos(df_adma, "grupo", "adma")
-realizar_teste(df_adma, "adma")
+variavel = "adma"
+graficos(df_adma, "grupo", variave)
+teste <- realizar_teste(df_adma, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### aaat1
 
 ```{r}
-graficos(df3, "grupo", "aaat1")
-realizar_teste(df3, "aaat1")
+variavel = "aaat1"
+graficos(df3, "grupo", variavel)
+teste <- realizar_teste(df3, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### sflt1 ** Obter dados faltantes primeiro
@@ -1065,8 +1173,13 @@ df_filtro$sflt1 %>% summary()
 ```
 
 ```{r}
-graficos(df_filtro, "grupo", "sflt1")
-realizar_teste(df_filtro, "sflt1")
+variavel = "sflt1"
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ### dimero
@@ -1088,11 +1201,22 @@ df_filtro$dimero %>% summary()
 ```
 
 ```{r}
-graficos(df_filtro, "grupo", "dimero")
-realizar_teste(df_filtro, "dimero")
+variavel = "dimero"
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado
 ```
 
 ## Resumo Descritivas
+
+```{r}
+tabela_resumo %>% 
+  kableExtra::kable()
+```
+
 
 # Testes da curva
 
@@ -1327,7 +1451,7 @@ fgh <- deriv(
 f.new <- fgh(Amax.est, log2EC50.est, n.est, data$abs)
 g.new <- attr(f.new, "gradient")
 
-drc.fit$predres
+#drc.fit$predres
 
 #gs <- rowSums((g.new %*% cov.fit) * g.new)
 alpha <- 0.05
@@ -1375,3 +1499,5 @@ n %>% round()
 https://dl.acm.org/doi/pdf/10.1145/503506.503509
 
 https://est.ufba.br/sites/est.ufba.br/files/kim/matd49-aula04-fisher.pdf
+
+https://www.jstor.org/stable/2527460?seq=1
