@@ -29,7 +29,7 @@ library(patchwork) # para parcionar os graficos
 
 ## Saneamento de dados
 
-### **Extraindo dados**
+### Extraindo dados
 
 Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas*
 
@@ -43,7 +43,7 @@ df4 <- read_xlsx("dados.xlsx", sheet = "Imunoturbidimetria")
 df5 <- read_xlsx("dados.xlsx", sheet = "Doenças Crônicas")
 ```
 
--   DF1: Dados Atuais
+#### DF1: Dados Atuais
 
 ```{r}
 #df1 %>% colnames()
@@ -162,10 +162,10 @@ df1 <- df1 %>%
 ```
 
 ```{r}
-df1 %>% summary()
+#df1 %>% summary()
 ```
 
--   DF2: Dados Gestacionais
+####  DF2: Dados Gestacionais
 
 ```{r}
 #df2 %>% colnames()
@@ -204,12 +204,161 @@ df2 <- df2 %>%
 ```
 
 ```{r}
-df2 %>% summary()
+#df2 %>% summary()
+```
+
+#### DF3: ELISAs
+
+```{r}
+colunas_interesse <- c(
+ "GRUPO      MN:0      MP:1", 
+ "PAI-1 (ng/mL)",
+ "Log PAI-1 (ng/mL)",
+ "TROMBOMODULINA (ng/mL)",
+ "ADMA (ng/mL)",
+ "sFlt1 (pg/mL)",
+ "Absorbâncias sFlt1",
+ "sFlt1 (pg/mL) Ajuste linear (Luiza)",
+ "AA-AT1 (ng/mL)"
+)
+renomear_colunas <- c(
+ "grupo", 
+ "pai1",
+ "logpai1",
+ "trombomodulina",
+ "adma",
+ "sflt1",
+ "absor_sflt1",
+ "sflt1_ajuste",  
+ "aaat1"
+)
+df3 <- df3 %>% select(all_of(colunas_interesse))
+colnames(df3) <- renomear_colunas
+
+df3 <- df3 %>% 
+  mutate_all(~ifelse(is.na(.), "", .)) %>% 
+  mutate_all(~ifelse(. != "< curva", as.numeric(.), .))
+```
+
+#### DF4: Imunoturbidimetria
+
+```{r}
+colunas_interesse <- c(
+ "GRUPO      MN:0      MP:1", 
+ "DÍMERO-D (ng/mL)",
+ "LOG DÍMERO-D"
+)
+renomear_colunas <- c(
+ "grupo", 
+ "dimero",
+ "logdimero"
+)
+df4 <- df4 %>% select(all_of(colunas_interesse))
+colnames(df4) <- renomear_colunas
+
+df4 <- df4 %>% 
+  mutate_all(~ifelse(is.na(.), "", .)) %>% 
+  mutate_all(as.numeric)
+```
+
+#### DF5: Doenças Crônicas
+
+```{r}
+colunas_interesse <- c(
+ "GRUPO      MN:0      MP:1", 
+ "HIPERTENSÃO 0:não   1:sim",
+ "DIABETES 0:não   1:sim",
+ "HIPERCOLESTEROLEMIA 0:não   1:sim",
+ "FIBROMIALGIA 0:não   1:sim",
+ "GLAUCOMA 0:não   1:sim",
+ "ENXAQUECA 0:não   1:sim",
+ "HIPOTIREOIDISMO 0:não   1:sim",
+ "ASMA 0:não   1:sim",
+ "ESTEATOSE HEPÁTICA 0:não   1:sim",
+ "SÍNDROME DO INTESTINO IRRITÁVEL 0:não   1:sim",
+ "HEMANGIOMA  0:não   1:sim",
+ "TROMBOFILIA  0:não   1:sim",
+ "BRONQUITE  0:não   1:sim",
+ "RINITE  0:não   1:sim",
+ "OVÁRIOS POLICÍSTICOS 0:não   1:sim",
+  "Transtorno de ansiedade generalizada (TAG)  0:não   1:sim",
+ "SINUSITE 0:não 1:sim",
+ "DEPRESSÃO 0:não   1:sim",
+ "ARTROSE 0:não   1:sim",
+ "LEUCOCITOSE 0:não   1:sim",
+ "ANEMIA 0:não   1:sim",
+ "SÍNDROME DO PÂNICO 0:não   1:sim",
+ "GASTRITE 0:não   1:sim",
+ "HEPATITE 0:não   1:sim",
+ "CRISE ALÉRGICA 0:não   1:sim",
+ "CISTITE 0:não   1:sim",
+ "ANEMIA FALCIFORME 0: não 1:sim",
+ "MIOMA UTERINO 0: não 1: sim",
+ "CÁLCULO RENAL 0: não 1: sim",
+ "CALCIFICAÇÃO MAMÁRIA 0: não 1: sim",
+ "HIPOGLICEMIA 0: não 1: sim",
+ "DERRAME DE VISTA 0: não 1: sim",
+ "HIDRADENITE 0: não 1: sim",
+ "GLOMERULOESCLEREOSE  0: não 1: sim",
+ "PRÉ-DIABETES 0: não 1: sim",
+  "BIPOLAR 0: não 1: sim",
+  "TDAH 0: não 1: sim",
+  "TEA 0: não 1: sim",
+  "DOENÇA DE STILL 0: não 1: sim"
+)
+
+renomear_colunas <- c(
+ "grupo", 
+ "hipertensao",
+ "diabetes",
+ "hipercolesterolemia",
+ "fibromialgia",
+ "glaucoma",
+ "enxaqueca",
+ "hipotireoidismo",
+ "asma",
+ "esteatose_hepatica",
+ "sindrome_intestino_irritavel",
+ "hemangioma",
+ "trombofilia",
+ "bronquite",
+ "rinite",
+ "ovario_policistico",
+ "TAG",
+ "sinusite",
+ "depressao",
+ "artrose",
+ "leucocitose",
+ "anemia",
+ "sindrome_panico",
+ "gastrite",
+ "hepatite",
+ "crise_alergica",
+ "cistite",
+ "anemia_falciforme",
+ "mioma_uterino",
+ "calculo_renal",
+ "calcificacao_mamaria",
+ "hipoglicemia",
+ "derrame de vista",
+ "hidradenite",
+ "glomeruloesclerose",
+ "pre_diabetes",
+ "bipolaridade",
+ "TDAH",
+ "TEA",
+ "Doenca_Still"
+)
+
+df5 <- df5 %>% select(all_of(colunas_interesse))
+colnames(df5) <- renomear_colunas
+
+df5 <- df5 %>% 
+  mutate_all(~ifelse(is.na(.), "", .)) %>% 
+  mutate_all(as.numeric)
 ```
 
 # Descritivas e Testes de Médias
-
-## Funções que serão aplicadas:
 
 ```{r}
 cor_verde = c("#4fb6a7")
@@ -229,9 +378,11 @@ tema = theme_minimal() +
 theme_set(tema)
 ```
 
+## Funções que serão aplicadas:
+
 * Funções de gráficos numéricos e categóricos
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 graficos <- function(dados, grupo, variavel, texto = "variável"){
   
   dados <- dados %>% 
@@ -241,35 +392,25 @@ graficos <- function(dados, grupo, variavel, texto = "variável"){
     group_by(grupo) %>% 
     summarise(
       `Média` = mean( !!sym(variavel) , na.rm = TRUE) %>% round(2),
-      `Desvio Padrão`= sd( !!sym(variavel) , na.rm = TRUE) %>% round(2),
-      `Valores nulos` = is.na( !!sym(variavel) ) %>% sum() %>% round(2),
-      `Tamanho da amostra` = n() %>% round()) %>% 
+      `Des. Padrão`= sd( !!sym(variavel) , na.rm = TRUE) %>% round(2),
+      `Nulos` = is.na( !!sym(variavel) ) %>% sum() %>% round(2),
+      `Quant.` = n() %>% round()) %>% 
     t()
   
   tabela <- data.frame(
     "Métrica" = row.names(tab)[2:5], 
-    "Controle" = as.numeric(tab[c(-1),1]),
-    "Tratamento" = as.numeric(tab[c(-1),2])) %>% 
+    "Cont." = as.numeric(tab[c(-1),1]),
+    "Trat." = as.numeric(tab[c(-1),2])) %>% 
     as_tibble()
-  
-  #tabela <- dados %>%
-  #  dplyr::summarise(
-  #  `Média` = mean( !!sym(variavel) , na.rm = TRUE) %>% round(2),
-  #  `Desvio Padrão`= sd( !!sym(variavel) , na.rm = TRUE) %>% round(2),
-  #  `Valores nulos` = is.na( !!sym(variavel) ) %>% sum() %>% round(2),
-  #  `Tamanho da amostra` = n() %>% round()
-  #  ) %>%
-  #  tidyr::pivot_longer(dplyr::everything(), names_to = "Variável", values_to = "Valores")
   
   dados <- dados %>% filter(! is.na(variavel) )
   
   g1 <- dados %>%
     ggplot(aes(x = !!sym(grupo), y = !!sym(variavel), fill = !!sym(grupo))) + 
     geom_boxplot() + 
-    labs(title = "Descritivas\n", x = "Grupos", y = str_to_upper(variavel), fill = "Grupos") + 
+    labs(title = "Descritivas\n", x = "Grupos", y = str_to_upper(variavel), fill = "Grupos") +
     tema +
     scale_fill_manual(values=c(cor_verde, cor_roxa))
-
 
   g2 <- dados %>% 
     ggplot(aes(x = !!sym(variavel))) +
@@ -329,11 +470,11 @@ permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
     g2_perm <- sorteio[((N/2)+1):N]
     dif[i] <- mean(g1_perm)-mean(g2_perm)
   }
-  valorp<- 2 * length(dif[dif<difobs])/n
+  valorp<- 2 * length(dif[dif > abs(difobs) ])/n # cauda superior
   alpha <- 0.05
   
   cat(paste("Teste permutação\n",
-            "Hipotese Nula: Medias iguais para os grupos\n",
+            "Hipotese Alternativa: Medias diferentes para os grupos\n",
             paste0("Nivel de significancia de ", alpha),
             "pvalor =", valorp), 
       "\n", if_else(valorp >= alpha/2, "Não rejeita-se H0", "Rejeita-se H0"))
@@ -361,12 +502,18 @@ realizar_teste <- function(dataframe, variavel) {
   if (shapiro1$p.value <= 0.05 || shapiro2$p.value <= 0.05) {
     permutacoes(grupo_MN, grupo_MP)
   } else {
-    resultado_teste <- t.test(grupo_MN, grupo_MP, alternative = "greater") 
+    resultado_teste <- t.test(grupo_MN, grupo_MP, alternative = "two.sided") 
     return(resultado_teste)
   }
 }
-#realizar_teste(df3,"logpai1")
 ```
+
+* Função Resumo hipóteses
+
+```{r}
+
+```
+
 
 ## Análise por variável:
 
@@ -379,7 +526,7 @@ graficos(df1, "grupo", "idade")
 realizar_teste(df1, "idade")
 ```
 
-### Escolaridade: ** Falta aplicar teste para frequência dos categporicos
+### Escolaridade: ** Falta aplicar teste para frequência dos categóricos
 
 ```{r}
 graficos_categoricos(df1$grupo, df1$escolaridade, "escolaridade")
@@ -407,8 +554,6 @@ Rejeita-se a hipótese nula.
 ```{r}
 graficos(df1, "grupo", "imc")
 realizar_teste(df1, "imc")
-
-
 ```
 
 ### Gordura:
@@ -717,7 +862,7 @@ df_filtro <- df1 %>%
 #realizar_teste(df_filtro, "ck")
 ```
 
-### gama_gt: ** Erro no teste
+### gama_gt:
 
 Não rejeita-se a hipótese nula.
 
@@ -783,12 +928,7 @@ realizar_teste(df2, "peso_bebe")
 
 
 
-```{r}
-## testes
-graficos(df1, "grupo", "imc")
-graficos_categoricos(df1$grupo, df1$num_gestacoes, "número de gestações")
-realizar_teste(df1, "idade")
-```
+
 
 ## Resumo Descritivas
 
