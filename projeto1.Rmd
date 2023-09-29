@@ -188,8 +188,6 @@ detach("package:MASS", unload = TRUE)
 Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas*
 
 ```{r}
-rm(list = ls()) # limpa enviroment
-
 df1 <- read_xlsx("dados.xlsx", sheet = "Dados Atuais")
 df2 <- read_xlsx("dados.xlsx", sheet = "Dados Gestacionais")
 df3 <- read_xlsx("dados.xlsx", sheet = "ELISAs")
@@ -715,6 +713,37 @@ resumo_testes <- function(teste, variavel){
 }
 ```
 
+* Função para tratar dados extremos nos testes de hipóteses
+
+```{r}
+retira_extremos <- function(dados, coluna, ponto_corte){
+  
+  print_resumo <- function(res, momento){
+    cat(
+      paste("Resumo dos dados", momento, "da remoção:\n"),
+      "Média:", mean(res, na.rm = T) %>% round(2),"\n",
+      "Des. Padrão:", sd(res, na.rm = T) %>% round(2),"\n",
+      "Nulos:", is.na(res) %>% sum(),"\n",
+      "Total de observações:", res %>% length(),"\n\n")}
+  
+  cat("Foi encontrado observações extremas, elas serão retiradas.\n") 
+
+  resumo <- dados %>% select(coluna) %>% pull(coluna)
+  print_resumo(resumo, "antes")
+  
+  n_corte <- resumo[resumo > ponto_corte] %>% length()
+  cat(paste(n_corte, "observações serão retirados entre nulos e extremos\n"))
+  
+  df_filtro <- dados %>% filter( !!sym(coluna) < ponto_corte)
+  
+  novo_resumo <- df_filtro %>% select(coluna) %>% pull(coluna)
+  print_resumo(novo_resumo, "depois")
+  
+  return(df_filtro)
+}
+```
+
+
 ## Análise por variável:
 
 ### Idade:
@@ -939,27 +968,13 @@ resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 
 ### Razão neutrófilo/linfócito NLR:
 
-Foi encontrado uma observação outlier, ela será retirada. 
-
-* Relação antes da retirada:
-```{r}
-df1$nlr %>% summary()
-df1$nlr[df1$nlr > 6]
-```
-
-* Após retirada:
-
-```{r}
-df_nlr <- df1 %>% 
-  filter(nlr < 6)
-
-df_nlr$nlr %>% summary()
-```
-
 ```{r}
 variavel = "nlr"
-graficos(df_nlr, "grupo", variavel)
-teste <- realizar_teste(df_nlr, variavel)
+
+df_filtro <- retira_extremos(df1, variavel, 4)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
@@ -1004,27 +1019,13 @@ resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 
 ### VLDL:
 
-Foi encontrado observação outlier, elas serão retiradas. 
-
-* Relação antes da retirada:
-```{r}
-df1$vldl %>% summary()
-df1$vldl[df1$vldl > 45]
-```
-
-* Após retirada:
-
-```{r}
-df_vldl <- df1 %>% 
-  filter(vldl < 45)
-
-df_vldl$vldl %>% summary()
-```
-
 ```{r}
 variavel = "vldl"
-graficos(df_vldl, "grupo", variavel)
-teste <- realizar_teste(df_vldl, variavel)
+
+df_filtro <- retira_extremos(df1, variavel, 45)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
@@ -1045,29 +1046,12 @@ resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 
 ### Triglicérides:
 
-Foi encontrado observação outlier, elas serão retiradas. 
-
-* Relação antes da retirada:
-```{r}
-df1$triglicerides %>% summary()
-df1$triglicerides[df1$triglicerides > 300]
-```
-
-* Após retirada:
-
-```{r}
-df_triglicerides <- df1 %>% 
-  filter(triglicerides < 300)
-
-df_triglicerides$triglicerides %>% summary()
-```
-
-Não rejeita-se a hipótese nula.
-
 ```{r}
 variavel = "triglicerides"
-graficos(df_triglicerides, "grupo", variavel)
-teste <- realizar_teste(df_triglicerides, variavel)
+df_filtro <- retira_extremos(df1, variavel, 300)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
@@ -1088,27 +1072,12 @@ resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 
 ### Creatinina:
 
-Foi encontrado observação outlier, elas serão retiradas. 
-
-* Relação antes da retirada:
-```{r}
-df1$creatinina %>% summary()
-df1$creatinina[df1$creatinina > 4]
-```
-
-* Após retirada:
-
-```{r}
-df_creatinina <- df1 %>% 
-  filter(creatinina < 4)
-
-df_creatinina$creatinina %>% summary()
-```
-
 ```{r}
 variavel = "hba1c"
-graficos(df_creatinina, "grupo", variavel)
-teste <- realizar_teste(df_creatinina, variavel)
+df_filtro <- retira_extremos(df1, variavel, 4)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
@@ -1117,29 +1086,12 @@ resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 
 ### Ritmo de filtração glomerular:
 
-Foi encontrado observação outlier, elas serão retiradas. 
-
-* Relação antes da retirada:
-```{r}
-df1$filtr_glomerular %>% summary()
-df1$filtr_glomerular[df1$filtr_glomerular > 3200]
-```
-
-* Após retirada:
-
-```{r}
-df_filtr_glomerular <- df1 %>% 
-  filter(filtr_glomerular < 3200)
-
-df_filtr_glomerular$filtr_glomerular %>% summary()
-```
-
-Não rejeita-se a hipótese nula.
-
 ```{r}
 variavel = "filtr_glomerular"
-graficos(df_filtr_glomerular, "grupo", variavel)
-teste <- realizar_teste(df_filtr_glomerular, variavel)
+df_filtro <- retira_extremos(df1, variavel, 3200)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
@@ -1322,27 +1274,12 @@ resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 
 ### ADMA ng/mL:
 
-Foi encontrado observação outlier, elas serão retiradas. 
-
-* Relação antes da retirada:
-```{r}
-df3$adma %>% summary()
-#df3$adma[df3$adma > 250]
-```
-
-* Após retirada:
-
-```{r}
-df_adma <- df3 %>% 
-  filter(adma < 250)
-
-df_adma$adma %>% summary()
-```
-
 ```{r}
 variavel = "adma"
-graficos(df_adma, "grupo", variavel)
-teste <- realizar_teste(df_adma, variavel)
+df_filtro <- retira_extremos(df3, variavel, 250)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
@@ -1361,27 +1298,59 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 ```
 
-### Sflt1 ** Obter dados faltantes primeiro
-
-Foi encontrado observação outlier, elas serão retiradas. 
-
-* Relação antes da retirada:
-```{r}
-df3$sflt1 %>% summary()
-#df3$sflt1[df3$sflt1 > 1000]
-```
-
-* Após retirada:
-
-```{r}
-df_filtro <- df3 %>% 
-  filter(sflt1 < 200)
-
-df_filtro$sflt1 %>% summary()
-```
+### Sflt1 sem previsões
 
 ```{r}
 variavel = "sflt1"
+
+df_filtro <- retira_extremos(df3, variavel, 200)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+```
+
+### Sflt1 com previsões feitas pelo ajuste da curva
+
+```{r}
+df_est = results %>% rename(absor_sflt1 = abs)
+df = left_join(df3, df_est, relationship = "many-to-many")
+
+df3 <- df %>% 
+  mutate(sflt1_geral = ifelse(is.na(sflt1), concentration.est, sflt1))
+```
+
+```{r}
+variavel = "sflt1_geral"
+
+df_filtro <- retira_extremos(df3, variavel, 200)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+```
+
+### Sflt1 com previsões feitas pelo método da Luiza
+
+```{r}
+df_est = resultado_luiza %>% rename(absor_sflt1 = abs)
+df = left_join(df3, df_est, relationship = "many-to-many")
+
+df3 <- df %>% 
+  mutate(sflt1_luiza = ifelse(is.na(sflt1), `Ajuste Luiza`, sflt1))
+```
+
+```{r}
+variavel = "sflt1_luiza"
+
+df_filtro <- retira_extremos(df3, variavel, 200)
+
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
@@ -1392,24 +1361,11 @@ resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
 
 ### Dímero-D ng/mL:
 
-Foi encontrado observação outlier, elas serão retiradas. 
-
-* Relação antes da retirada:
-```{r}
-df4$dimero %>% summary()
-```
-
-* Após retirada:
-
-```{r}
-df_filtro <- df4 %>% 
-  filter(dimero < 1000)
-
-df_filtro$dimero %>% summary()
-```
-
 ```{r}
 variavel = "dimero"
+
+df_filtro <- retira_extremos(df4, variavel, 1000)
+
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
@@ -1586,17 +1542,29 @@ table(
 ## Resumo Descritivas
 
 ```{r}
-tabela_resumo %>% 
-  kable(caption = paste("Resultado teste de hipótese", variavel))
+tabela_resumo_ordenada <- tabela_resumo %>%  arrange(Pvalor) 
+
+tabela_resumo_ordenada %>% 
+  kable(caption = "Resumo de todos os resultados dos testes")
 ```
 
-Resumo Descritivas favoráveis para o estudo das variáveis que impactam na média ou frequência dentro do grupo *Controle* e *Tratamento*.
+Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na média ou frequência dentro do grupo *Controle* e *Tratamento* para um nível de significância de $\alpha = 0,05$.
 
 ```{r}
-tabela_resumo %>% 
-  filter("Conclusão" == "Rejeita-se H0") %>% 
-  kable(caption = paste("Resultado teste de hipótese", variavel))
+tabela_resumo_ordenada %>% 
+  filter(Pvalor <= 0.05) %>% 
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 5% de significância")
 ```
+
+Caso fosse assumido um nível de significância de $\alpha = 0,10$, as seguintes variáveis seriam candidatas a impactar no grupo.
+
+```{r}
+tabela_resumo_ordenada %>% 
+  filter(Pvalor <= 0.1) %>% 
+  mutate("Conclusão" = "Rejeita-se H0") %>% 
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 10% de significância")
+```
+
 
 # Referências
 
