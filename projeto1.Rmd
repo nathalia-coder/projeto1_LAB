@@ -17,17 +17,22 @@ knitr::opts_chunk$set(
   )
 ```
 
+# Introdução
+
+# Metodologia
+
 # Pacotes
 
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(readxl)
 library(patchwork) # para parcionar os graficos
+library(kableExtra)
 ```
 
 # Análises
 
-## Saneamento de dados
+## Tratamento de dados
 
 ### Extraindo dados
 
@@ -63,7 +68,8 @@ coluna_numerica <- function(lista){
 
 ```{r}
 colunas_interesse <- c(
-  "GRUPO      MN:0      MP:1", 
+  "GRUPO      MN:0      MP:1",
+  "ETNIA                1:branca   2:parda   3:negra",
   "IDADE    anos",
   "ESCOLARIDADE COMPLETA  0: 4ª série completa   1:fundamental completo 2:médio completo 3:ensino técnico completo 4:superior completo 5:pós-graduação completa",
   "NÚMERO GESTAÇÕES",
@@ -93,11 +99,16 @@ colunas_interesse <- c(
   "TGO/AST",
   "Ácido Úrico",
   "CK",
-  "Gama GT"
+  "Gama GT",
+  "USA ANTI-HIPERTENSIVO 0:não 1:sim",
+  "USA MEDICAMENTO PARA DIABETES 0:não 1:sim",
+  "USA MEDICAMENTO PARA HIPERCOLESTEROLEMIA 0:não 1:sim",
+  "TABAGISTA 0: não   1:sim" 
   )
 
 renomear_colunas <- c(
-  "grupo", 
+  "grupo",
+  "etnia",
   "idade",
   "escolaridade",
   "num_gestacoes",
@@ -127,7 +138,11 @@ renomear_colunas <- c(
   "tgo_ast",
   "acido_urico",
   "ck",
-  "gama_gt"
+  "gama_gt",
+  "anti_hiper",
+  "medic_diabetes",
+  "medic_hipercol",
+  "tabagista"
   )
 
 
@@ -139,6 +154,7 @@ df1 <- df1 %>%
   filter(! grupos_nulos) %>% 
   mutate(
     grupo = as.factor(grupo),
+    etnia = coluna_numerica(etnia),
     escolaridade = as.factor(escolaridade),
     peso = coluna_numerica(peso),
     imc = coluna_na_numerica(imc, "#DIV/0!", NA) %>% coluna_numerica(),
@@ -483,11 +499,11 @@ permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
   
   tipo_teste <- "Teste permutação"
   
-  cat(paste("Teste permutação\n",
-            "Hipotese Alternativa: Medias diferentes para os grupos\n",
-            paste0("Nivel de significancia de ", alpha),
-            "pvalor =", valorp), 
-      "\n", if_else(valorp >= alpha/2, "Não rejeita-se H0", "Rejeita-se H0"))
+  #cat(paste("Teste permutação\n",
+  #          "Hipotese Alternativa: Medias diferentes para os grupos\n",
+  #          paste0("Nivel de significancia de ", alpha),
+  #          "pvalor =", valorp), 
+  #    "\n", if_else(valorp >= alpha, "Não rejeita-se H0", "Rejeita-se H0"))
   
   return(list(method = tipo_teste, p.value = valorp))
   } 
@@ -531,7 +547,6 @@ hipo_categorica <- function(dados, grupo, variavel){
 }
 ```
 
-
 * Função Resumo hipóteses
 
 ```{r}
@@ -551,9 +566,7 @@ resumo_testes <- function(teste, variavel){
 }
 ```
 
-
 ## Análise por variável:
-
 
 ### Idade:
 
@@ -564,7 +577,31 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- resultado
-resultado
+resultado %>% kable(caption = "Título")
+```
+
+### Etnia:
+
+```{r}
+variavel <- "etnia"
+graficos_categoricos(df1$grupo, df1$etnia, variavel)
+teste <- hipo_categorica(df1, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- resultado
+resultado %>% kable(caption = "Título")
+
+# Tabela de percentual
+df_tab1 <- df1 %>% 
+  mutate(grupo = ifelse(grupo == 0, "Controle", "Tratamento"))
+
+tab <- df_tab1 %>% 
+  mutate(etnia = ifelse(etnia == 1, "Branca",
+                         ifelse(etnia == 2, "Parda", "Negra")))
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(etnia)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
 ```
 
 ### Escolaridade:
@@ -573,23 +610,41 @@ resultado
 variavel <- "escolaridade"
 graficos_categoricos(df1$grupo, df1$escolaridade, variavel)
 teste <- hipo_categorica(df1, "grupo", variavel)
+
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### Número de Gestações:
+```{r}
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(escolaridade = ifelse(escolaridade == 0, "4ª série",
+                        ifelse(escolaridade == 1, "Fundamental",
+                        ifelse(escolaridade == 2, "Ensino Médio", 
+                        ifelse(escolaridade == 3, "Ensino técnico",
+                        ifelse(escolaridade == 4, "Superior",
+                                                  "Pós-graduação"))))))
+  
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(escolaridade)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Há quantos anos foi a gestação de interesse :
 
 ```{r}
 variavel = "num_gestacoes"
-graficos_categoricos(df1$grupo, df1$num_gestacoes, "Número de Gestações")
+graficos_categoricos(df1$grupo, df1$num_gestacoes, "Há quantos anos foi a gestação de interesse ")
 teste <- hipo_categorica(df1, "grupo", variavel)
+
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### Peso:
+### Peso da mulher:
 
 ```{r}
 variavel = "peso"
@@ -598,7 +653,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
 ### IMC:
@@ -610,12 +665,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### Gordura:
-
-Rejeita-se a hipótese nula.
+### Percentual de gordura:
 
 ```{r}
 variavel = "gordura"
@@ -624,7 +677,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
 ### Pressão Sistólica:
@@ -636,7 +689,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
 ### Pressão Diastólica:
@@ -648,12 +701,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### Pressão Média:
-
-Rejeita-se a hipótese nula.
+### Pressão arterial média:
 
 ```{r}
 variavel = "pressao_media"
@@ -662,10 +713,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### Cintura:
+### Circunferência de cintura:
 
 ```{r}
 variavel = "cintura"
@@ -674,10 +725,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### Abdomen:
+### Circunferência de abdômen:
 
 ```{r}
 variavel = "abdomen"
@@ -686,12 +737,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### Quadril:
-
-Rejeita-se a hipótese nula.
+### Circunferência de quadril:
 
 ```{r}
 variavel = "quadril"
@@ -700,7 +749,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
 ### Relação cintura vs quadril:
@@ -712,10 +761,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### neu:
+### Neutrófilos:
 
 ```{r}
 variavel = "neu"
@@ -724,10 +773,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### lym:
+### Linfócitos:
 
 ```{r}
 variavel = "lym"
@@ -736,10 +785,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### nlr:
+### Razão neutrófilo/linfócito NLR:
 
 Foi encontrado uma observação outlier, ela será retirada. 
 
@@ -765,10 +814,10 @@ teste <- realizar_teste(df_nlr, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### colesterol Total:
+### Colesterol Total:
 
 ```{r}
 variavel = "colesterol_total"
@@ -777,10 +826,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### hdl:
+### HDL:
 
 ```{r}
 variavel = "hdl"
@@ -789,10 +838,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### ldl_dosado:
+### LDL dosado:
 
 ```{r}
 variavel = "ldl_dosado"
@@ -801,10 +850,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### vldl:
+### VLDL:
 
 Foi encontrado observação outlier, elas serão retiradas. 
 
@@ -830,10 +879,10 @@ teste <- realizar_teste(df_vldl, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### nao_hdl:
+### Não-HDL:
 
 ```{r}
 variavel = "nao_hdl"
@@ -842,10 +891,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### triglicerides:
+### Triglicérides:
 
 Foi encontrado observação outlier, elas serão retiradas. 
 
@@ -873,10 +922,10 @@ teste <- realizar_teste(df_triglicerides, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### hba1c: **Aqui também encontramos influentes mas não tiramos
+### Hemoglobina glicada HbA1c: **Aqui também encontramos influentes mas não tiramos
 
 ```{r}
 variavel = "hba1c"
@@ -885,10 +934,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### creatinina:
+### Creatinina:
 
 Foi encontrado observação outlier, elas serão retiradas. 
 
@@ -914,10 +963,10 @@ teste <- realizar_teste(df_creatinina, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### filtr_glomerular:
+### Ritmo de filtração glomerular:
 
 Foi encontrado observação outlier, elas serão retiradas. 
 
@@ -945,10 +994,10 @@ teste <- realizar_teste(df_filtr_glomerular, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### tgp_alt:
+### TGP/ALT:
 
 ```{r}
 variavel = "tgp_alt"
@@ -957,10 +1006,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### tgo_ast:
+### TGO/AST:
 
 ```{r}
 variavel = "tgo_ast"
@@ -969,10 +1018,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### acido_urico:
+### Ácido úrico:
 
 ```{r}
 variavel = "acido_urico"
@@ -981,10 +1030,10 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### ck: ** Erro no teste
+### CK: ** Erro no teste
 
 ```{r}
 variavel = "ck"
@@ -997,12 +1046,12 @@ df_filtro <- df1 %>%
 
 #resultado <- resumo_testes(teste, variavel)
 #tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado
+#resultado %>% kable(caption = "Título")
 
 #realizar_teste(df_filtro, "ck")
 ```
 
-### gama_gt:
+### Gama GT:
 
 ```{r}
 variavel = "gama_gt"
@@ -1011,7 +1060,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
 ### quantos_anos_evento ** não sei se podemos aplicar esse teste
@@ -1027,10 +1076,10 @@ teste <- realizar_teste(df2, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### peso_bebe
+### Peso do bebê:
 
 ```{r}
 variavel = "peso_bebe"
@@ -1039,29 +1088,40 @@ teste <- realizar_teste(df2, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### tipo_parto ** Teste 
-
-Rejeita-se a hipótese nula.
+### Tipo Parto
 
 ```{r}
 df2_filtro <- df2 %>% 
   filter(tipo_parto != "<NA>")
 
 variavel = "tipo_parto"
-graficos_categoricos(df2_filtro$grupo, df2_filtro$tipo_parto, "tipo de parto") 
+graficos_categoricos(df2_filtro$grupo, df2_filtro$tipo_parto, "Tipo de parto") 
 teste <- hipo_categorica(df2, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### prematuro ** Testar isso
+```{r}
+# Tabela de percentual
+df_tab2 <- df2 %>% 
+  mutate(grupo = ifelse(grupo == 0, "Controle", "Tratamento"))
 
-Rejeita-se a hipótese nula.
+tab <- df_tab2 %>% 
+  mutate(tipo_parto = ifelse(tipo_parto == 0, "Normal",
+                      ifelse(tipo_parto == 1, "Cesariana", 
+                      ifelse(tipo_parto == 2, "Fórceps", "Induzido"))))
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(tipo_parto)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Prematuro
 
 ```{r}
 df2_filtro <- df2 %>% 
@@ -1073,22 +1133,21 @@ teste <- hipo_categorica(df2, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
-
-### peso_bebe
 
 ```{r}
-variavel = "peso_bebe"
-graficos(df2, "grupo", variavel) 
-teste <- realizar_teste(df2, variavel)
+# Tabela de percentual
+tab <- df_tab2 %>% 
+  mutate(prematuro = ifelse(prematuro == 0, "Não","Sim"))
 
-resultado <- resumo_testes(teste, variavel)
-tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(prematuro)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
 ```
 
-### pai1
+### PAI-1 ng/mL:
 
 ```{r}
 variavel = "pai1"
@@ -1097,10 +1156,10 @@ teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### trombomodulina
+### Trombomodulina ng/mL:
 
 ```{r}
 variavel = "trombomodulina"
@@ -1109,10 +1168,10 @@ teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### adma
+### ADMA ng/mL:
 
 Foi encontrado observação outlier, elas serão retiradas. 
 
@@ -1138,10 +1197,10 @@ teste <- realizar_teste(df_adma, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### aaat1
+### AA-AT1 ng/mL:
 
 ```{r}
 variavel = "aaat1"
@@ -1150,7 +1209,7 @@ teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
 ### sflt1 ** Obter dados faltantes primeiro
@@ -1179,10 +1238,10 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
 ```
 
-### dimero
+### Dímero-D ng/mL:
 
 Foi encontrado observação outlier, elas serão retiradas. 
 
@@ -1207,14 +1266,187 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado
+resultado %>% kable(caption = "Título")
+```
+
+### Hipertensão
+
+```{r}
+variavel = "hipertensao"
+graficos_categoricos(df5$grupo, df5$hipertensao, "Hipertensão")
+teste <- hipo_categorica(df5, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = "Título")
+```
+
+```{r}
+# Tabela de percentual
+df_tab5 <- df5 %>% 
+  mutate(grupo = ifelse(grupo == 0, "Controle", "Tratamento"))
+
+tab <- df_tab5 %>% 
+  mutate(hipertensao = ifelse(hipertensao == 0, "Não","Sim"))
+
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(hipertensao)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Anti-hipertensivo
+
+```{r}
+variavel = "anti_hiper"
+graficos_categoricos(df1$grupo, df1$anti_hiper, "Anti-hipertensivo")
+teste <- hipo_categorica(df1, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = "Título")
+```
+
+```{r}
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(anti_hiper = ifelse(anti_hiper == 0, "Não","Sim"))
+
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(anti_hiper)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Diabetes
+
+```{r}
+variavel = "diabetes"
+graficos_categoricos(df5$grupo, df5$diabetes, "Diabetes")
+teste <- hipo_categorica(df5, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = "Título")
+```
+
+```{r}
+# Tabela de percentual
+tab <- df_tab5 %>% 
+  mutate(diabetes = ifelse(diabetes == 0, "Não","Sim"))
+
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(diabetes)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Medicamento para diabetes
+
+```{r}
+variavel = "medic_diabetes"
+graficos_categoricos(df1$grupo, df1$medic_diabetes, "Medicamento para diabetes")
+teste <- hipo_categorica(df1, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = "Título")
+```
+
+```{r}
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(medic_diabetes = ifelse(medic_diabetes == 0, "Não","Sim"))
+
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(medic_diabetes)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Hipercolesterolemia
+
+```{r}
+variavel = "hipercolesterolemia"
+graficos_categoricos(df5$grupo, df5$hipercolesterolemia,"Hipercolesterolemia")
+teste <- hipo_categorica(df5, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = "Título")
+```
+
+```{r}
+# Tabela de percentual
+tab <- df_tab5 %>% 
+  mutate(hipercolesterolemia = ifelse(hipercolesterolemia == 0, "Não","Sim"))
+
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(hipercolesterolemia)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Medicamento para hipercolesterolemia
+
+```{r}
+variavel = "medic_hipercol"
+graficos_categoricos(df1$grupo, df1$medic_hipercol, 
+                     "Medicamento para hipercolesterolemia")
+teste <- hipo_categorica(df1, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = "Título")
+```
+
+```{r}
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(medic_hipercol = ifelse(medic_hipercol == 0, "Não","Sim"))
+
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(medic_hipercol)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
+```
+
+### Fumantes
+
+```{r}
+variavel = "tabagista"
+graficos_categoricos(df1$grupo, df1$tabagista, "Fumantes")
+teste <- hipo_categorica(df1, "grupo", variavel)
+
+resultado <- resumo_testes(teste, variavel)
+tabela_resumo <- rbind(tabela_resumo, resultado)
+resultado %>% kable(caption = "Título")
+```
+
+```{r}
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(tabagista = ifelse(tabagista == 0, "Não","Sim"))
+
+table(
+  tab %>% pull(grupo), 
+  tab %>% pull(tabagista)) %>% 
+  prop.table(margin = 1) %>% round(4) * 100
 ```
 
 ## Resumo Descritivas
 
 ```{r}
 tabela_resumo %>% 
-  kableExtra::kable()
+  kable(caption = "Título")
+```
+
+Resumo Descritivas favoráveis para o estudo das variáveis que impactam na média ou frequência dentro do grupo *Controle* e *Tratamento*.
+
+```{r}
+tabela_resumo %>% 
+  filter("Conclusão" == "Rejeita-se H0") %>% 
+  kable(caption = "Título")
 ```
 
 
@@ -1464,7 +1696,7 @@ alpha <- 0.05
 results <- newdata %>% 
   dplyr::mutate(concentration.est = 2^log2concentration.est)
 
-results
+results # resultados ja na escala desejada
 ```
 
 
