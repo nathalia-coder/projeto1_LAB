@@ -49,16 +49,16 @@ var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
 beta <- 0.1
-gama <- c(0.1, 0.5, 1, 2, 5, 10) # erro
+delta <- c(0.1, 0.5, 1, 2, 5, 10) # erro
 
 z2 <- qnorm(1 - alpha/2)
 zbeta <- qnorm(1 - beta)
 
 #se o erro aumenta, o n diminui. peq erros maior n
-n = ((var1 + var2) * (z2 + zbeta)^2) / (gama^2) 
+n = ((var1 + var2) * (z2 + zbeta)^2) / (delta^2) 
 
 tibble(
-  "Erro" = gama,
+  "Erro" = delta,
   "Tamanho Amostral" = n %>% round()
 ) %>% 
   kable(
@@ -119,7 +119,8 @@ plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2,
 ggplot(as_tibble(drc.fit$predres)) +
   geom_point(aes(`Predicted values`, Residuals),
      size = 3, color = "cornflowerblue") +
-  geom_hline(yintercept = 0, lwd = 0.2)
+  geom_hline(yintercept = 0, lwd = 0.2) +
+  labs(title = "Gráfico dos resíduos")
 ```
 
 ```{r}
@@ -155,10 +156,11 @@ results <- resultado %>%
 
 # resultados ja na escala desejada
 left_join(results, resultado_luiza) %>% 
+  arrange(abs) %>% 
   rename("Abssorbância" = abs, "Concentração Estimada" = concentration.est) %>% 
   kable(
-    caption = "Comparativo das estimações para concentração de Sflt1 abaixo da curva",
-    align = "c")
+    caption = "Comparativo das estimações para concentração de Sflt1 abaixo da curva"
+    )
 ```
 
 ```{r}
@@ -185,7 +187,7 @@ detach("package:MASS", unload = TRUE)
 
 ### Extraindo dados
 
-Colunas usadas: Dados Atuais, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas*
+Colunas usadas: *Dados Atuais*, *Dados Gestacionais*, *ELISAs*, *Imunoturbidimetria*,*Doenças Crônicas*
 
 ```{r}
 df1 <- read_xlsx("dados.xlsx", sheet = "Dados Atuais")
@@ -390,7 +392,8 @@ df3 <- df3 %>%
   mutate_all(~ifelse(is.na(.), "", .)) %>% 
   mutate_all(~ifelse(. != "< curva", as.numeric(.), .))
 
-df3 <- df3 %>% mutate(
+df3 <- df3 %>% drop_na(grupo) %>% 
+  mutate(
   pai1 = coluna_numerica(pai1),
   logpai1 = coluna_numerica(logpai1),
   trombomodulina = coluna_numerica(trombomodulina),
@@ -557,7 +560,7 @@ theme_set(tema)
 graficos <- function(dados, grupo, variavel, texto = "variável"){
   
   dados <- dados %>% 
-    mutate(grupo = ifelse(grupo == "0", "Controle", "Tratamento"))
+    mutate(grupo = ifelse(grupo == "0", "Grupo MN", "Grupo MP"))
   
   tab <- dados %>% 
     group_by(grupo) %>% 
@@ -570,8 +573,8 @@ graficos <- function(dados, grupo, variavel, texto = "variável"){
   
   tabela <- data.frame(
     "Métrica" = row.names(tab)[2:5], 
-    "Cont." = as.numeric(tab[c(-1),1]),
-    "Trat." = as.numeric(tab[c(-1),2])) %>% 
+    "MN" = as.numeric(tab[c(-1),1]),
+    "MP" = as.numeric(tab[c(-1),2])) %>% 
     as_tibble()
   
   dados <- dados %>% filter(! is.na(variavel) )
@@ -605,7 +608,7 @@ graficos_categoricos <- function(lista1, lista2, variavel){
     margin = 2) #freq da escolaridade dentro dos grupos, ex: freq do grupo 2 no grupo 1
   
   perc <- data.frame(tabela) %>% 
-    mutate(lista1 = ifelse(lista1 == "0", "Controle", "Tratamento")) %>% 
+    mutate(lista1 = ifelse(lista1 == "0", "Grupo MN", "Grupo MP")) %>% 
     rename(`Frequência` = Freq)
   
   g1 <- perc %>% 
@@ -655,7 +658,6 @@ permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
   return(list(method = tipo_teste, p.value = valorp))
   } 
 ```
-
 
 ```{r}
 realizar_teste <- function(dataframe, variavel) {
@@ -755,7 +757,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- resultado
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Etnia:
@@ -767,11 +769,11 @@ teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- resultado
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 
 # Tabela de percentual
 df_tab1 <- df1 %>% 
-  mutate(grupo = ifelse(grupo == 0, "Controle", "Tratamento"))
+  mutate(grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab1 %>% 
   mutate(etnia = ifelse(etnia == 1, "Branca",
@@ -791,7 +793,7 @@ teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -814,12 +816,12 @@ table(
 
 ```{r}
 variavel = "num_gestacoes"
-graficos_categoricos(df1$grupo, df1$num_gestacoes, "Há quantos anos foi a gestação de interesse ")
+graficos_categoricos(df1$grupo, df1$num_gestacoes, "Há quantos anos foi a gestação de interesse")
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Peso da mulher:
@@ -831,7 +833,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### IMC:
@@ -843,7 +845,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Percentual de gordura:
@@ -855,7 +857,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Pressão Sistólica:
@@ -867,7 +869,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Pressão Diastólica:
@@ -879,7 +881,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Pressão arterial média:
@@ -891,7 +893,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Circunferência de cintura:
@@ -903,7 +905,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Circunferência de abdômen:
@@ -915,7 +917,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Circunferência de quadril:
@@ -927,7 +929,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Relação cintura vs quadril:
@@ -939,7 +941,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Neutrófilos:
@@ -951,7 +953,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Linfócitos:
@@ -963,7 +965,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Razão neutrófilo/linfócito NLR:
@@ -978,7 +980,7 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Colesterol Total:
@@ -990,7 +992,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### HDL:
@@ -1002,7 +1004,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### LDL dosado:
@@ -1014,7 +1016,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### VLDL:
@@ -1029,7 +1031,7 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Não-HDL:
@@ -1041,7 +1043,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Triglicérides:
@@ -1055,19 +1057,22 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
-### Hemoglobina glicada HbA1c: **Aqui também encontramos influentes mas não tiramos
+### Hemoglobina glicada HbA1c:
 
 ```{r}
 variavel = "hba1c"
-graficos(df1, "grupo", variavel)
-teste <- realizar_teste(df1, variavel)
+
+df_filtro <- retira_extremos(df1, variavel, 6)
+
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Creatinina:
@@ -1081,21 +1086,21 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Ritmo de filtração glomerular:
 
 ```{r}
 variavel = "filtr_glomerular"
-df_filtro <- retira_extremos(df1, variavel, 3200)
+df_filtro <- retira_extremos(df1, variavel, 400)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### TGP/ALT:
@@ -1107,7 +1112,7 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### TGO/AST:
@@ -1119,19 +1124,21 @@ teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Ácido úrico:
 
 ```{r}
 variavel = "acido_urico"
-graficos(df1, "grupo", variavel)
-teste <- realizar_teste(df1, variavel)
+
+df_filtro <- retira_extremos(df1, variavel, 8)
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### CK: ** Erro no teste
@@ -1147,7 +1154,7 @@ df_filtro <- df1 %>%
 
 #resultado <- resumo_testes(teste, variavel)
 #tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+#resultado %>% kable(caption = "Resultado teste de hipótese")
 
 #realizar_teste(df_filtro, "ck")
 ```
@@ -1156,12 +1163,14 @@ df_filtro <- df1 %>%
 
 ```{r}
 variavel = "gama_gt"
-graficos(df1, "grupo", variavel)
-teste <- realizar_teste(df1, variavel)
+
+df_filtro <- retira_extremos(df1, variavel, 50)
+graficos(df_filtro, "grupo", variavel)
+teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### quantos_anos_evento ** não sei se podemos aplicar esse teste
@@ -1177,7 +1186,7 @@ teste <- realizar_teste(df2, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Peso do bebê:
@@ -1189,7 +1198,7 @@ teste <- realizar_teste(df2, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Tipo Parto
@@ -1204,13 +1213,13 @@ teste <- hipo_categorica(df2, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
 # Tabela de percentual
 df_tab2 <- df2 %>% 
-  mutate(grupo = ifelse(grupo == 0, "Controle", "Tratamento"))
+  mutate(grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab2 %>% 
   mutate(tipo_parto = ifelse(tipo_parto == 0, "Normal",
@@ -1234,7 +1243,7 @@ teste <- hipo_categorica(df2, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -1257,7 +1266,7 @@ teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Trombomodulina ng/mL:
@@ -1269,7 +1278,7 @@ teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### ADMA ng/mL:
@@ -1283,7 +1292,7 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### AA-AT1 ng/mL:
@@ -1295,7 +1304,7 @@ teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Sflt1 sem previsões
@@ -1310,7 +1319,7 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Sflt1 com previsões feitas pelo ajuste da curva
@@ -1333,7 +1342,7 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Sflt1 com previsões feitas pelo método da Luiza
@@ -1356,7 +1365,7 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Dímero-D ng/mL:
@@ -1371,7 +1380,7 @@ teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ### Hipertensão
@@ -1383,13 +1392,13 @@ teste <- hipo_categorica(df5, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
 # Tabela de percentual
 df_tab5 <- df5 %>% 
-  mutate(grupo = ifelse(grupo == 0, "Controle", "Tratamento"))
+  mutate(grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab5 %>% 
   mutate(hipertensao = ifelse(hipertensao == 0, "Não","Sim"))
@@ -1409,7 +1418,7 @@ teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -1432,7 +1441,7 @@ teste <- hipo_categorica(df5, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -1455,7 +1464,7 @@ teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -1478,7 +1487,7 @@ teste <- hipo_categorica(df5, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -1502,7 +1511,7 @@ teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -1525,7 +1534,7 @@ teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-resultado %>% kable(caption = paste("Resultado teste de hipótese", variavel))
+resultado %>% kable(caption = "Resultado teste de hipótese")
 ```
 
 ```{r}
@@ -1542,13 +1551,13 @@ table(
 ## Resumo Descritivas
 
 ```{r}
-tabela_resumo_ordenada <- tabela_resumo %>%  arrange(Pvalor) 
+tabela_resumo_ordenada <- tabela_resumo %>% arrange(Pvalor) 
 
 tabela_resumo_ordenada %>% 
   kable(caption = "Resumo de todos os resultados dos testes")
 ```
 
-Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na média ou frequência dentro do grupo *Controle* e *Tratamento* para um nível de significância de $\alpha = 0,05$.
+Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na média ou frequência dentro do grupo *Grupo MN* e *Grupo MP* para um nível de significância de $\alpha = 0,05$.
 
 ```{r}
 tabela_resumo_ordenada %>% 
