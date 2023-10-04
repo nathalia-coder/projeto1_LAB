@@ -5,11 +5,10 @@ author:
 - Nathalia Gabriella Ferreira dos Santos
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
-  pdf_document2:
+  pdf_document:
     number_sections: yes
     fig_caption: yes
-header-includes: \usepackage[brazil]{babel}
+#header-includes: \usepackage[brazil]{babel}
 editor_options:
   chunk_output_type: console
 ---
@@ -30,9 +29,29 @@ library(patchwork) # para parcionar os graficos
 library(kableExtra)
 ```
 
-```{r}
+```{r limpa_env}
 rm(list = ls())
 ```
+
+
+```{r}
+# Função Resumo testes de hipoteses
+resumo_testes <- function(teste, variavel){
+    pvalor <- teste$p.value
+    metodo <- teste$method  
+    alpha <- 0.05
+    conclusao <- if_else(pvalor >= alpha, "Não rejeita-se H0", "Rejeita-se H0")
+    
+    lista <- list(
+      Nome = variavel,
+      `Método` = metodo,
+      Pvalor = pvalor %>% round(4),
+      `Conclusão` = conclusao)
+    
+    return(lista %>% as_tibble() )
+}
+```
+
 
 # Introdução
 
@@ -42,7 +61,7 @@ rm(list = ls())
 
 # Tamanho Amostral
 
-Foi repassado:
+Para o cálculo do tamanho da amostra onde o objetivo do estudo era comparar dois grupos: grupo tratamento com um controle, no contexto do trabalho o grupo controle seriam as mulheres que tiveram gestações saudáveis *(MN)* e o grupo tratamento seriam mulheres que tiveram pré-eclâmpsia *(MP)*. As variâncias para os grupos serão denotados por $\sigma^2_{MN}$ e $\sigma^2_{MP}$, respectivamente, e foram obtidas por meio de estudo piloto e repassado pela cliente para o estudo.
 
 As variâncias para a **pressão sistólica** são:
 
@@ -50,9 +69,9 @@ As variâncias para a **pressão sistólica** são:
 
 * Grupo MP: 514,95
 
-Será considerado um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$.
+Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que:
 
-```{r}
+```{r calc_amostral}
 var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
@@ -74,28 +93,40 @@ tibble(
     format.args = list(big.mark = "."))
 ```
 
+O *erro* aqui é chamado a diferença das médias do grupo MN e MP. Nota-se que quanto menor o erro, ou seja, quão próximo deseja-se que as médias dos grupos sejam "iguais", maior será a amostra a ser avaliada para garantir boa estimação. 
 
 # Curva de concentração do Sflt1
 
-```{r}
+Devido ao não registro de valores de *concentração* de Sflt1 (provavelmente devido a baixa acurácia do equipamento na medição para valores pequenos de concentração), e tendo o resultado da *absorbância* observada, foi solicitado a estimação teórica dessas concentrações.
+
+
+É conhecido por meio da literatura que essa concentração a ser estimada segue uma equação conhecida como **Four parameter logistic regression** (Modelo de Regressão Logística de 4 Parâmetros) a qual é muito usada para dados de ensaio imunoabsorvente enzimático - ELISA (Enzyme-linked immunosorbent assay). Cabe então, a estimação dos parâmetros da curva por meio da regressão específica do problema.
+
+
+Esse modelo de regressão possui como variável resposta a **absorbância** e como variável explicativa a **concentração**. Entretanto, o objetivo final da estimação é predizer valores de concentração para uma absorbância conhecida. Assim, a princípio usou-se os dados teóricos disponibilizados para estimar os parâmetros. Foi buscado na literatura ajustes semelhantes e optou-se pela implementação *LL2.4* contida no pacote *drc* do R-Studio. A função *LL2.4* fornece a parametrização da função por meio da log-logística de quatro parâmetros, uma função de auto-inicialização (caso o algoritmo seja iterativo e parta de um "chute inicial"), e os nomes dos parâmetros. Como está sendo usada a transformação $log_{2}$ para estimar os parâmetros, para conversão final da concentração estimada será aplicada a inversa da transformação para achar o valor real da concentração.
+
+* **c** indica a inclinação da curva (Slope)
+
+
+* **c** indica o limite inferior (Amin)
+
+
+* **d** indica o limite superior (Amax)
+
+
+* **e** indica o ponto de inflexão (ED50 que nessa parametrização é log2ED50)
+
+
+O resultado encontrado foi:
+
+
+```{r dados_curva}
 resultado <- read_xlsx("curva.xlsx", sheet = "prev") # valores a serem preditos
 resultado_luiza <- read_xlsx("curva.xlsx", sheet = "ajust") %>% 
   rename("Ajuste Luiza" = ajust)
 ```
 
-## Curva com base teórica
-
-Modelo a ser usado para estimação dos parâmetros:
-
-* Modelo Logístico de 4 parâmetros
-
-**Variável resposta: Absorbância**
-
-**Variável explicativa: Concentração**
-
-Referência: https://janalin.github.io/analyse-ELISA/results.html
-
-```{r}
+```{r ajuste_curva}
 library(drc)
 
 data <- read_xlsx("dados_teoricos.xlsx")
@@ -108,30 +139,60 @@ new <- data.frame(
 drc.fit <- drm(abs ~ conc,
   data = data,
   fct = LL2.4( 
-    names = c("Slope", "Amin", "Amax", "log2EC50")
+    names = c("Slope", "Amin", "Amax", "log2ED50")
     )
 )
 
 # Extraindo coefs
 coefs.data <- setNames(
   drc.fit$coefficients %>% round(4),
-  c("b", "a", "d", "c")
+  c("b", "c", "d", "e")
 )
-cbind(coefs.data)
+cbind(coefs.data) %>% kable(caption = "Valores estimados dos parâmetros")
 
-summary(drc.fit)
+#summary(drc.fit)
+```
 
+Para testar a significância dos parâmetros, um intervalo de confiança foi obtido. Exceto o parâmetro de máximo e mínimo, conclui-se que todos demais são significativos.
+
+```{r ic_ajuste}
+confint(drc.fit) %>% round(3) %>% kable(caption = "Intervalo de confiança para os parâmetros")
+
+logLik(drc.fit)
+```
+
+Por meio do gráfico é possível notar o quão bem a curva se ajustou aos dados teóricos.
+
+```{r fig.cap="Gráfico da estimação da curva para os dados teóricos"}
 plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
      cex=1.2, cex.axis=1.2, cex.lab=1.2)
+```
 
+
+## Análise de resíduos
+
+A fim de validar alguns pressupostos da regressão e a partir do gráfico dos resíduos, nota-se que a homocedasticidade dos resíduos é válida.
+
+```{r fig.cap="Gráfico dos valores ajustados pelos resíduos do modelo"}
 ggplot(as_tibble(drc.fit$predres)) +
   geom_point(aes(`Predicted values`, Residuals),
      size = 3, color = "cornflowerblue") +
   geom_hline(yintercept = 0, lwd = 0.2) +
-  labs(title = "Gráfico dos resíduos")
+  labs(title = "Gráfico dos valores ajustados pelos resíduos")
 ```
 
+De mesmo modo, sobre a hipótese nula de que os resíduos possuem distribuição normal, para o mesmo $\alpha = 0,05$, dado o $p-valor$ observado, não rejeita-se a hipótese nula.
+
 ```{r}
+residuos <- drc.fit$predres[,2] 
+teste <- residuos %>% shapiro.test()
+resumo_testes(teste, "Resíduos") %>% 
+  kable(caption = "Resumo teste de normalidade dos resíduos")
+```
+
+Logo conclui-se que a estimação parece se adequar bem aos dados e pode-se seguir para a estimação da concentração por meio desses parâmetros.
+
+```{r eval=FALSE, include=FALSE}
 abs_predita <- predict(object = drc.fit, new)
 new$abs_inter <- abs_predita # prevista
 #new %>% head() # ver se precisamos elevar os dados ao quadrado
@@ -144,7 +205,12 @@ plot(log2(new$conc), new$abs, type = "line")
 
 ## Estimação da concentração por imputação do limite inferior
 
-Candidato a mínimo será o mínimo observado na amostra, demais serão os estimados.
+
+Para estimação da concentração, como foi feita uma parametrização, a *Log2-concentração* será obstida e então convertida para escala padrão. Buscando-se na literatura referências, foi encontrado que além dos valores estimados, como deseja-se estimar concentrações abaixo do limite inferior, um novo candidato a mínimo deveria ser estipulado. Nesse caso, optou-se pelo mínimo ser o menor valor de concentração observado na amostra (`r min(resultado$abs)`). Esse valor está contido no Intervalo de Confiança para o mínimo. Os demais coeficientes serão os mesmos estimados.
+
+
+As concentrações encontradas podem ser vistas na tabela que segue:
+
 
 ```{r}
 prev.conc = resultado$abs
@@ -153,7 +219,7 @@ slope.est <- coef(drc.fit)[1]
 Amax.est <- coef(drc.fit)[3]
 log2EC50.est <- coef(drc.fit)[4]
 # Set Amin to blank values
-Amin <- min(resultado$abs) # media dos valores a serem previsto
+Amin <- min(resultado$abs) # media dos valores a serem previsto # zero também poderia ser
 
 log2concentration.est <- sapply(
   prev.conc, function(A){(1/slope.est) * (log( ((Amax.est - A)/(A - Amin))) + log2EC50.est*slope.est)}
@@ -165,22 +231,32 @@ results <- resultado %>%
 # resultados ja na escala desejada
 left_join(results, resultado_luiza) %>% 
   arrange(abs) %>% 
-  rename("Abssorbância" = abs, "Concentração Estimada" = concentration.est) %>% 
+  rename("Absorbância" = abs, "Concentração Estimada" = concentration.est) %>% 
   kable(
     caption = "Comparativo das estimações para concentração de Sflt1 abaixo da curva"
     )
 ```
 
+Por fim, nota-se que os valores preditos parecem estar próximos do esperado para o comportamento dos dados teóricos.
+
 ```{r}
 novo_results <- results %>% rename(conc = concentration.est)
 
 novo_df <- rbind(data, novo_results)
-plot(log2(novo_df$conc), novo_df$abs)
-plot(log2(new$conc), new$abs, type = "line")
+novo_df <- novo_df %>% mutate(log2conc = log2(conc))
 
-novo_df <- rbind(data, novo_results, novo_data)
-plot(log2(novo_df$conc), novo_df$abs)
-plot(log2(new$conc), new$abs, type = "line")
+novo_df %>% 
+  ggplot(aes(x = log2conc, y = abs)) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "red") + 
+  geom_point() +
+  labs(x = "Concentração", y = "Absorbância", title = "Gráfico")
+
+plot(novo_df$log2conc, novo_df$abs)
+#plot(novo_df$log2conc, novo_df$abs, type = "line")
+
+#novo_df <- rbind(data, novo_results, novo_data)
+#plot(log2(novo_df$conc), novo_df$abs)
+#plot(log2(new$conc), new$abs, type = "line")
 ```
 
 ```{r}
@@ -715,24 +791,6 @@ hipo_categorica <- function(dados, grupo, variavel){
 }
 ```
 
-* Função Resumo hipóteses
-
-```{r}
-resumo_testes <- function(teste, variavel){
-    pvalor <- teste$p.value
-    metodo <- teste$method  
-    alpha <- 0.05
-    conclusao <- if_else(pvalor >= alpha, "Não rejeita-se H0", "Rejeita-se H0")
-    
-    lista <- list(
-      Nome = variavel,
-      `Método` = metodo,
-      Pvalor = pvalor %>% round(4),
-      `Conclusão` = conclusao)
-    
-    return(lista %>% as_tibble() )
-}
-```
 
 * Função para tratar dados extremos nos testes de hipóteses
 
@@ -768,7 +826,7 @@ retira_extremos <- function(dados, coluna, ponto_corte){
 
 ### Idade:
 
-```{r idade, fig.cap="Análise descritiva por grupo para a variável idade"}
+```{r, fig.cap="Análise descritiva por grupo para a variável idade"}
 variavel <- "idade"
 graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
@@ -1641,7 +1699,7 @@ var_cat <- c("iniciais", "grupo")
 
 dfmodelo <- dfmodelo %>% mutate_at(vars(-var_cat), as.numeric)
 
-dfmodelo$alta_pressao <- ifelse(dfmodelo$pressao_sis > 140 | dfmodelo$pressao_dias > 90, "1", "0")
+dfmodelo$alta_pressao <- ifelse(dfmodelo$pressao_sis > 140 | dfmodelo$pressao_dias > 90, 1, 0)
 
 realizar_teste2 <- function(dataframe, variavel) {
 
@@ -1667,15 +1725,67 @@ realizar_teste2 <- function(dataframe, variavel) {
 col_teste_num <- c("pressao_sis", "pressao_dias","idade", "imc", "gordura", "cintura", "quadril",
                "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")
 
-tabela_resumo <-  resumo_testes( realizar_teste2(dfmodelo, "pressao_sis"),"pressao_sis")
+tabela_resumo <-  resumo_testes( realizar_teste2(dfmodelo, "idade"),"idade")
 
-for (col in col_teste_num[-1]) {
+for (col in col_teste_num[-c(1,2,3)]) {
     teste_hiper <- realizar_teste2(dfmodelo, col)
     resultado <- resumo_testes(teste_hiper, col)
     tabela_resumo <- rbind(tabela_resumo, resultado)
 }
 
 tabela_resumo %>% arrange(Pvalor)
+
+
+library(lmtest)
+library(DescTools)
+library(nnet)
+library(psych)
+pairs.panels(dfmodelo[4:12])
+
+# aqui entraram só as variáveis com p-valor < 0.3
+modelo<- glm(alta_pressao ~ grupo + imc + cintura + cintura_quadril + idade + quadril + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo)
+vif(modelo)
+
+# aqui fica apenas grupo, idade e ldl
+# no gráfico da pra ver que ia dar problema de multicolinearidade
+modelo1<- glm(alta_pressao ~ grupo + idade + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo1)
+vif(modelo1) #vif ta top
+
+# colocando cada uma das seguintes variáveis: imc, gordura, cintura, quadril e cintura_quadril
+
+modelo2<- glm(alta_pressao ~ grupo + idade + imc + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo2)
+
+modelo3<- glm(alta_pressao ~ grupo + idade + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo3)
+
+modelo4<- glm(alta_pressao ~ grupo + idade + cintura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo4)
+
+modelo5<- glm(alta_pressao ~ grupo + idade + quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo5)
+
+modelo6<- glm(alta_pressao ~ grupo + idade + cintura_quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo6)
+
+
+# Stepwise para definir variaveis
+modelostepwise <- step(modelo, direction = "both", trace = 1, k = log(nrow(dfmodelo)))
+summary(modelostepwise)
+
+
+coeftest(modelo)
+#razao de chances
+exp(coef(modelo))
+
+hnp(modelo) #verifecar pressuposto
+# Descrição
+# Gera gráficos (semi) normais com envelopes de simulação para diagnósticos comuns a partir de modelos ajustados
+# para uma variedade de classes de modelo. A função hnp() é escrita de forma que seja relativamente fácil estendê-la
+# a novas classes de modelos e diferentes diagnósticos que ainda não estão implementados. Alguns exemplos
+# conjuntos de dados estão incluídos.
 ```
 
 
@@ -1688,3 +1798,9 @@ https://est.ufba.br/sites/est.ufba.br/files/kim/matd49-aula04-fisher.pdf
 https://www.jstor.org/stable/2527460?seq=1
 
 http://ndl.ethernet.edu.et/bitstream/123456789/15304/1/9103.pdf
+
+https://janalin.github.io/analyse-ELISA/results.html
+
+https://cran.r-project.org/web/packages/drc/drc.pdf
+
+https://nomato.files.wordpress.com/2015/03/curvas-de-dose-resposta-no-software-r.pdf
