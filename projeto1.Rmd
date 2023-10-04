@@ -8,6 +8,7 @@ output:
   pdf_document:
     number_sections: yes
     fig_caption: yes
+    fig.align: "center"
 #header-includes: \usepackage[brazil]{babel}
 editor_options:
   chunk_output_type: console
@@ -27,6 +28,7 @@ library(tidyverse)
 library(readxl)
 library(patchwork) # para parcionar os graficos
 library(kableExtra)
+library(janitor)
 ```
 
 ```{r limpa_env}
@@ -802,6 +804,18 @@ retira_extremos <- function(dados, coluna, ponto_corte){
   
   return(df_filtro)
 }
+
+# Funcao tabela resumo de frequencia
+funcao_tabela <- function(dados, grupo, variavel){
+  titulo <- paste("Tabela de proporção de", variavel,"por grupo")
+  return(
+    dados %>% 
+    tabyl( !!sym(grupo), !!sym(variavel), show_na = F) %>% 
+    adorn_percentages() %>% 
+    adorn_rounding(4) %>%  adorn_pct_formatting(digits = 2) %>% 
+      kable(caption = titulo)
+  )
+}
 ```
 
 ## Análise por variável:
@@ -850,15 +864,13 @@ tabela_resumo <- resultado
 
 # Tabela de percentual
 df_tab1 <- df1 %>% 
-  mutate(grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
+  mutate(grupo = ifelse(Grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab1 %>% 
   mutate(etnia = ifelse(etnia == 1, "Branca",
                          ifelse(etnia == 2, "Parda", "Negra")))
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(etnia)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+
+funcao_tabela(tab, "Grupo", "etnia")
 ```
 
 ### Escolaridade:
@@ -883,10 +895,7 @@ tab <- df_tab1 %>%
                         ifelse(escolaridade == 4, "Superior",
                                                   "Pós-graduação"))))))
   
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(escolaridade)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "escolaridade")
 ```
 
 ### Há quantos anos foi a gestação de interesse :
@@ -1295,16 +1304,14 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 ```{r}
 # Tabela de percentual
 df_tab2 <- df2 %>% 
-  mutate(grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
+  mutate(grupo = ifelse(Grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab2 %>% 
   mutate(tipo_parto = ifelse(tipo_parto == 0, "Normal",
                       ifelse(tipo_parto == 1, "Cesariana", 
                       ifelse(tipo_parto == 2, "Fórceps", "Induzido"))))
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(tipo_parto)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+
+funcao_tabela(tab, "Grupo", "tipo_parto")
 ```
 
 ### Prematuro
@@ -1327,10 +1334,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 tab <- df_tab2 %>% 
   mutate(prematuro = ifelse(prematuro == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(prematuro)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "prematuro")
 ```
 
 ### PAI-1 ng/mL:
@@ -1474,15 +1478,12 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 ```{r}
 # Tabela de percentual
 df_tab5 <- df5 %>% 
-  mutate(grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
+  mutate(grupo = ifelse(Grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab5 %>% 
   mutate(hipertensao = ifelse(hipertensao == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(hipertensao)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "hipertensao")
 ```
 
 ### Anti-hipertensivo
@@ -1502,10 +1503,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 tab <- df_tab1 %>% 
   mutate(anti_hiper = ifelse(anti_hiper == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(anti_hiper)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "anti_hiper")
 ```
 
 ### Diabetes
@@ -1525,10 +1523,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 tab <- df_tab5 %>% 
   mutate(diabetes = ifelse(diabetes == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(diabetes)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "diabetes")
 ```
 
 ### Medicamento para diabetes
@@ -1548,10 +1543,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 tab <- df_tab1 %>% 
   mutate(medic_diabetes = ifelse(medic_diabetes == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(medic_diabetes)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "medic_diabetes")
 ```
 
 ### Hipercolesterolemia
@@ -1571,10 +1563,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 tab <- df_tab5 %>% 
   mutate(hipercolesterolemia = ifelse(hipercolesterolemia == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(hipercolesterolemia)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "hipercolesterolemia")
 ```
 
 ### Medicamento para hipercolesterolemia
@@ -1595,10 +1584,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 tab <- df_tab1 %>% 
   mutate(medic_hipercol = ifelse(medic_hipercol == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(medic_hipercol)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "medic_hipercol")
 ```
 
 ### Fumantes
@@ -1618,10 +1604,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 tab <- df_tab1 %>% 
   mutate(tabagista = ifelse(tabagista == 0, "Não","Sim"))
 
-table(
-  tab %>% pull(grupo), 
-  tab %>% pull(tabagista)) %>% 
-  prop.table(margin = 1) %>% round(4) * 100
+funcao_tabela(tab, "Grupo", "tabagista")
 ```
 
 ## Resumo testes de hipóteses
