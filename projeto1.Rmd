@@ -157,8 +157,6 @@ Para testar a significância dos parâmetros, um intervalo de confiança foi obt
 
 ```{r ic_ajuste}
 confint(drc.fit) %>% round(3) %>% kable(caption = "Intervalo de confiança para os parâmetros")
-
-logLik(drc.fit)
 ```
 
 Por meio do gráfico é possível notar o quão bem a curva se ajustou aos dados teóricos.
