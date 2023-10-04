@@ -183,7 +183,7 @@ ggplot(as_tibble(drc.fit$predres)) +
 
 De mesmo modo, sobre a hipótese nula de que os resíduos possuem distribuição normal, para o mesmo $\alpha = 0,05$, dado o $p-valor$ observado, não rejeita-se a hipótese nula.
 
-```{r}
+```{r analise_residuos}
 residuos <- drc.fit$predres[,2] 
 teste <- residuos %>% shapiro.test()
 resumo_testes(teste, "Resíduos") %>% 
@@ -239,7 +239,7 @@ left_join(results, resultado_luiza) %>%
 
 Por fim, nota-se que os valores preditos parecem estar próximos do esperado para o comportamento dos dados teóricos.
 
-```{r}
+```{r fig.cap="Concentração preditas com dados teóricos"}
 novo_results <- results %>% rename(conc = concentration.est)
 
 novo_df <- rbind(data, novo_results)
@@ -251,7 +251,7 @@ novo_df %>%
   geom_point() +
   labs(x = "Concentração", y = "Absorbância", title = "Gráfico")
 
-plot(novo_df$log2conc, novo_df$abs)
+#plot(novo_df$log2conc, novo_df$abs)
 #plot(novo_df$log2conc, novo_df$abs, type = "line")
 
 #novo_df <- rbind(data, novo_results, novo_data)
