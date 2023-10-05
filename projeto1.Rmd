@@ -8,7 +8,7 @@ output:
   pdf_document:
     number_sections: yes
     fig_caption: yes
-#header-includes: \usepackage[brazil]{babel}
+header-includes: \usepackage[brazil]{babel}
 editor_options:
   chunk_output_type: console
 ---
@@ -797,8 +797,49 @@ hipo_categorica <- function(dados, grupo, variavel){
 }
 
 # Função para tratar dados extremos nos testes de hipóteses
-retira_extremos <- function(dados, coluna, ponto_corte){
+retira_extremos <- function(dados_originais, coluna, ponto_corte){
+  # remocao
+  resumo <- dados_originais %>% select(coluna) %>% pull(coluna)
+  n_corte <- resumo[resumo > ponto_corte] %>% length()
+  df_filtro <- dados_originais %>% filter( !!sym(coluna) < ponto_corte)
+  return(df_filtro)
+}
+
+# Funcao para resumir retiradas de extremos
+descritiva_extremos <- function(dados_originais, dados_filtro , coluna){
   
+  # Antes remocao  
+  tab_antes <- dados_originais %>% 
+    summarise(
+      `Média` = mean( !!sym(coluna) , na.rm = TRUE) %>% round(2),
+      `Des. Padrão`= sd( !!sym(coluna) , na.rm = TRUE) %>% round(2),
+      `Nulos` = is.na( !!sym(coluna) ) %>% sum() %>% round(2),
+      `Quant.` = n() %>% round()) %>% 
+    t()
+  
+  # Apos remocao  
+  tab_apos <- dados_filtro %>% 
+    summarise(
+      `Media` = mean( !!sym(coluna) , na.rm = TRUE) %>% round(2),
+      `DP`= sd( !!sym(coluna) , na.rm = TRUE) %>% round(2),
+      `Nulos` = is.na( !!sym(coluna) ) %>% sum() %>% round(2),
+      `Quant.` = n() %>% round()) %>% 
+    t()
+  
+  tabela <- data.frame(
+    "Métrica" = row.names(tab_antes), 
+    `Antes da retirada` = as.numeric(tab_antes),
+    `Após a retirada` = as.numeric(tab_apos)) %>% 
+    as_tibble()
+  
+  return(
+    tabela %>% kable(caption = "Resumo da retirada")
+    )
+}
+
+# Função para tratar dados extremos nos testes de hipóteses
+retira_extremos2 <- function(dados, coluna, ponto_corte){
+
   print_resumo <- function(res, momento){
     cat(
       paste("Resumo dos dados", momento, "da remoção:\n"),
@@ -822,6 +863,7 @@ retira_extremos <- function(dados, coluna, ponto_corte){
   
   return(df_filtro)
 }
+
 
 # Funcao tabela resumo de frequencia
 funcao_tabela <- function(dados, grupo, variavel){
@@ -1054,6 +1096,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 variavel = "nlr"
 
 df_filtro <- retira_extremos(df1, variavel, 4)
+descritiva_extremos(df1, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1105,6 +1148,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 variavel = "vldl"
 
 df_filtro <- retira_extremos(df1, variavel, 45)
+descritiva_extremos(df1, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1130,7 +1174,9 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 
 ```{r, fig.cap="Análise descritiva por grupo para a variável triglicérides",out.width = "70%", fig.align='center'}
 variavel = "triglicerides"
+
 df_filtro <- retira_extremos(df1, variavel, 300)
+descritiva_extremos(df1, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1146,6 +1192,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 variavel = "hba1c"
 
 df_filtro <- retira_extremos(df1, variavel, 6)
+descritiva_extremos(df1, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1159,7 +1206,9 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 
 ```{r, fig.cap="Análise descritiva por grupo para a variável creatinina",out.width = "70%", fig.align='center'}
 variavel = "hba1c"
+
 df_filtro <- retira_extremos(df1, variavel, 4)
+descritiva_extremos(df1, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1173,7 +1222,9 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 
 ```{r, fig.cap="Análise descritiva por grupo para a variável filtração glomerular",out.width = "70%", fig.align='center'}
 variavel = "filtr_glomerular"
+
 df_filtro <- retira_extremos(df1, variavel, 400)
+descritiva_extremos(df1, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1213,6 +1264,8 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 variavel = "acido_urico"
 
 df_filtro <- retira_extremos(df1, variavel, 8)
+descritiva_extremos(df1, df_filtro, variavel)
+
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
@@ -1244,6 +1297,8 @@ df1 %>%
 variavel = "gama_gt"
 
 df_filtro <- retira_extremos(df1, variavel, 50)
+descritiva_extremos(df1, df_filtro, variavel)
+
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
@@ -1357,7 +1412,9 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 
 ```{r, fig.cap="Análise descritiva por grupo para a variável ADMA",out.width = "70%", fig.align='center'}
 variavel = "adma"
+
 df_filtro <- retira_extremos(df3, variavel, 250)
+descritiva_extremos(df3, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1385,6 +1442,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 variavel = "sflt1"
 
 df_filtro <- retira_extremos(df3, variavel, 200)
+descritiva_extremos(df3, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1406,6 +1464,7 @@ df3 <- df %>%
 variavel = "sflt1_geral"
 
 df_filtro <- retira_extremos(df3, variavel, 200)
+descritiva_extremos(df3, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1427,6 +1486,7 @@ df3 <- df %>%
 variavel = "sflt1_luiza"
 
 df_filtro <- retira_extremos(df3, variavel, 200)
+descritiva_extremos(df3, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1442,6 +1502,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 variavel = "dimero"
 
 df_filtro <- retira_extremos(df4, variavel, 1000)
+descritiva_extremos(df4, df_filtro, variavel)
 
 graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
@@ -1632,141 +1693,57 @@ tabela_resumo_ordenada %>%
 
 ## Modelo Linear Generalizado para hipertensão
 
+
 ```{r}
+library(hnp)
 library(car)
-
-## adicionando "2" nos nomes que são repetidos
-
-posicoes_duplicadas <- which(duplicated(df1$iniciais))
-df1$iniciais[posicoes_duplicadas] <- paste0(df1$iniciais[posicoes_duplicadas], "2")
-
-posicoes_duplicadas <- which(duplicated(df3$iniciais))
-df3$iniciais[posicoes_duplicadas] <- paste0(df3$iniciais[posicoes_duplicadas], "2")
-
-posicoes_duplicadas <- which(duplicated(df4$iniciais))
-df4$iniciais[posicoes_duplicadas] <- paste0(df4$iniciais[posicoes_duplicadas], "2")
-
-## juntando data frames
-
-dfreg <- df1 %>%
-  left_join(df3, by = "iniciais") %>%
-  left_join(df4, by = "iniciais")
-
-dfreg %>% head()
-
-## data frame só com as variáveis que eu vou precisar
-
-dfreg<- cbind(dfreg$iniciais, dfreg$pressao_sis, dfreg$pressao_dias, dfreg$grupo.x, dfreg$idade, dfreg$tabagista, dfreg$imc, dfreg$gordura, dfreg$cintura, dfreg$quadril, dfreg$cintura_quadril, dfreg$colesterol_total, dfreg$hdl, dfreg$ldl_dosado, dfreg$triglicerides, dfreg$hba1c, dfreg$pai1, dfreg$aaat1, dfreg$dimero)
-
-# nome pras colunas do df regressao
-
-colnames(dfreg) <- c("iniciais", "pressao_sis", "pressao_dias", "grupo", "idade", "tabagista", "imc", "gordura", "cintura", "quadril", "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides", "hba1c", "pai1", "aaat1", "dimero")
-
-## colocando em ordem crescente a quantidade de na presentes em cada coluna
-
-sort(colMeans(is.na(dfreg)))
-```
-
-
-```{r}
-# novo df que será usado para a regressão
-
-dfmodelo <- dfreg[, c("iniciais","pressao_sis", "pressao_dias","grupo", "idade", "tabagista", "imc", "gordura", "cintura", "quadril","cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")] %>% na.omit %>% as_tibble()
-
-
-var_cat <- c("iniciais", "grupo")
-
-dfmodelo <- dfmodelo %>% mutate_at(vars(-var_cat), as.numeric)
-
-dfmodelo$alta_pressao <- ifelse(dfmodelo$pressao_sis > 140 | dfmodelo$pressao_dias > 90, 1, 0)
-
-realizar_teste2 <- function(dataframe, variavel) {
-
-  grupo_1<- dataframe %>%
-    filter(alta_pressao == "0") %>%
-    pull(variavel)
-  
-  grupo_2<- dataframe %>%
-    filter(alta_pressao == "1") %>%
-    pull(variavel)
-
-  shapiro1 <- shapiro.test(grupo_1)
-  shapiro2 <- shapiro.test(grupo_2)
-
-  if (shapiro1$p.value <= 0.05 || shapiro2$p.value <= 0.05) {
-    permutacoes(grupo_1, grupo_2)
-  } else {
-    resultado_teste <- t.test(grupo_1, grupo_2, alternative = "two.sided") 
-    return(resultado_teste)
-  }
-}
-
-col_teste_num <- c("pressao_sis", "pressao_dias","idade", "imc", "gordura", "cintura", "quadril",
-               "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")
-
-tabela_resumo <-  resumo_testes( realizar_teste2(dfmodelo, "idade"),"idade")
-
-for (col in col_teste_num[-c(1,2,3)]) {
-    teste_hiper <- realizar_teste2(dfmodelo, col)
-    resultado <- resumo_testes(teste_hiper, col)
-    tabela_resumo <- rbind(tabela_resumo, resultado)
-}
-
-tabela_resumo %>% arrange(Pvalor)
-
-
 library(lmtest)
 library(DescTools)
 library(nnet)
 library(psych)
+library(gtsummary)
 pairs.panels(dfmodelo[4:12])
+```
 
-# aqui entraram só as variáveis com p-valor < 0.3
+
+A análise da matriz de dispersão e da correlação entre as vaiáveis pode ajudar a identificar a multicolinearidade, que ocorre quando duas ou mais variáveis independentes estão altamente correlacionadas entre si. Isso pode ser observado em gráficos de dispersão onde as variáveis estão fortemente alinhadas. É possível identificar uma relação linear positiva entre as seguintes variáveis: imc, gordura, cintura e quadril.
+
+```{r include=FALSE}
+# aqui entraram só as variáveis com p-valor < 0.25
 modelo<- glm(alta_pressao ~ grupo + imc + cintura + cintura_quadril + idade + quadril + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
 summary(modelo)
 vif(modelo)
 
-# aqui fica apenas grupo, idade e ldl
-# no gráfico da pra ver que ia dar problema de multicolinearidade
-modelo1<- glm(alta_pressao ~ grupo + idade + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo1)
-vif(modelo1) #vif ta top
-
-# colocando cada uma das seguintes variáveis: imc, gordura, cintura, quadril e cintura_quadril
-
-modelo2<- glm(alta_pressao ~ grupo + idade + imc + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+modelo2<- glm(alta_pressao ~ grupo + imc, data = dfmodelo, family = "binomial"(link = 'logit'))
 summary(modelo2)
+vif(modelo2)
+exp(coef(modelo2))
+exp(confint(modelo2))
+tbl_regression(modelo2, exponentiate = TRUE)
 
-modelo3<- glm(alta_pressao ~ grupo + idade + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo3)
-
-modelo4<- glm(alta_pressao ~ grupo + idade + cintura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+modelo4<- glm(alta_pressao ~ grupo + imc + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
 summary(modelo4)
-
-modelo5<- glm(alta_pressao ~ grupo + idade + quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo5)
-
-modelo6<- glm(alta_pressao ~ grupo + idade + cintura_quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo6)
+vif(modelo4)
+exp(coef(modelo4))
+exp(confint(modelo4))
+tbl_regression(modelo4, exponentiate = TRUE)
 
 
-# Stepwise para definir variaveis
-modelostepwise <- step(modelo, direction = "both", trace = 1, k = log(nrow(dfmodelo)))
-summary(modelostepwise)
+AIC(modelo2, modelo4)
+BIC(modelo2, modelo4)
+anova(modelo2, modelo4, test = "Chisq")
 
+#modelo4 será nosso modelo final
 
-coeftest(modelo)
-#razao de chances
-exp(coef(modelo))
-
-#hnp(modelo) #verifecar pressuposto
-# Descrição
-# Gera gráficos (semi) normais com envelopes de simulação para diagnósticos comuns a partir de modelos ajustados
-# para uma variedade de classes de modelo. A função hnp() é escrita de forma que seja relativamente fácil estendê-la
-# a novas classes de modelos e diferentes diagnósticos que ainda não estão implementados. Alguns exemplos
-# conjuntos de dados estão incluídos.
+#verificação
+hnp(modelo4)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
 ```
 
+
+```{r}
+tbl_regression(modelo4, exponentiate = TRUE)
+```
 
 # Referências
 
@@ -1776,8 +1753,8 @@ https://est.ufba.br/sites/est.ufba.br/files/kim/matd49-aula04-fisher.pdf
 
 https://www.jstor.org/stable/2527460?seq=1
 
-http://ndl.ethernet.edu.et/bitstream/123456789/15304/1/9103.pdf
 
+http://ndl.ethernet.edu.et/bitstream/123456789/15304/1/9103.pdf
 https://janalin.github.io/analyse-ELISA/results.html
 
 https://cran.r-project.org/web/packages/drc/drc.pdf
