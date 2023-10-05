@@ -1693,6 +1693,140 @@ tabela_resumo_ordenada %>%
 
 ## Modelo Linear Generalizado para hipertensão
 
+```{r}
+library(car)
+
+## adicionando "2" nos nomes que são repetidos
+
+posicoes_duplicadas <- which(duplicated(df1$iniciais))
+df1$iniciais[posicoes_duplicadas] <- paste0(df1$iniciais[posicoes_duplicadas], "2")
+
+posicoes_duplicadas <- which(duplicated(df3$iniciais))
+df3$iniciais[posicoes_duplicadas] <- paste0(df3$iniciais[posicoes_duplicadas], "2")
+
+posicoes_duplicadas <- which(duplicated(df4$iniciais))
+df4$iniciais[posicoes_duplicadas] <- paste0(df4$iniciais[posicoes_duplicadas], "2")
+
+## juntando data frames
+
+dfreg <- df1 %>%
+  left_join(df3, by = "iniciais") %>%
+  left_join(df4, by = "iniciais")
+
+dfreg %>% head()
+
+## data frame só com as variáveis que eu vou precisar
+
+dfreg<- cbind(dfreg$iniciais, dfreg$pressao_sis, dfreg$pressao_dias, dfreg$grupo.x, dfreg$idade, dfreg$tabagista, dfreg$imc, dfreg$gordura, dfreg$cintura, dfreg$quadril, dfreg$cintura_quadril, dfreg$colesterol_total, dfreg$hdl, dfreg$ldl_dosado, dfreg$triglicerides, dfreg$hba1c, dfreg$pai1, dfreg$aaat1, dfreg$dimero)
+
+# nome pras colunas do df regressao
+
+colnames(dfreg) <- c("iniciais", "pressao_sis", "pressao_dias", "grupo", "idade", "tabagista", "imc", "gordura", "cintura", "quadril", "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides", "hba1c", "pai1", "aaat1", "dimero")
+
+## colocando em ordem crescente a quantidade de na presentes em cada coluna
+
+sort(colMeans(is.na(dfreg)))
+```
+
+
+```{r}
+# novo df que será usado para a regressão
+
+dfmodelo <- dfreg[, c("iniciais","pressao_sis", "pressao_dias","grupo", "idade", "tabagista", "imc", "gordura", "cintura", "quadril","cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")] %>% na.omit %>% as_tibble()
+
+
+var_cat <- c("iniciais", "grupo")
+
+dfmodelo <- dfmodelo %>% mutate_at(vars(-var_cat), as.numeric)
+
+dfmodelo$alta_pressao <- ifelse(dfmodelo$pressao_sis > 140 | dfmodelo$pressao_dias > 90, 1, 0)
+
+realizar_teste2 <- function(dataframe, variavel) {
+  
+  grupo_1<- dataframe %>%
+    filter(alta_pressao == "0") %>%
+    pull(variavel)
+  
+  grupo_2<- dataframe %>%
+    filter(alta_pressao == "1") %>%
+    pull(variavel)
+  
+  shapiro1 <- shapiro.test(grupo_1)
+  shapiro2 <- shapiro.test(grupo_2)
+  
+  if (shapiro1$p.value <= 0.05 || shapiro2$p.value <= 0.05) {
+    permutacoes(grupo_1, grupo_2)
+  } else {
+    resultado_teste <- t.test(grupo_1, grupo_2, alternative = "two.sided") 
+    return(resultado_teste)
+  }
+}
+
+col_teste_num <- c("pressao_sis", "pressao_dias","idade", "imc", "gordura", "cintura", "quadril",
+                   "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")
+
+tabela_resumo <-  resumo_testes( realizar_teste2(dfmodelo, "idade"),"idade")
+
+for (col in col_teste_num[-c(1,2,3)]) {
+  teste_hiper <- realizar_teste2(dfmodelo, col)
+  resultado <- resumo_testes(teste_hiper, col)
+  tabela_resumo <- rbind(tabela_resumo, resultado)
+}
+
+tabela_resumo %>% arrange(Pvalor)
+
+
+library(lmtest)
+library(DescTools)
+library(nnet)
+library(psych)
+pairs.panels(dfmodelo[4:12])
+
+# aqui entraram só as variáveis com p-valor < 0.3
+modelo<- glm(alta_pressao ~ grupo + imc + cintura + cintura_quadril + idade + quadril + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo)
+vif(modelo)
+
+# aqui fica apenas grupo, idade e ldl
+# no gráfico da pra ver que ia dar problema de multicolinearidade
+modelo1<- glm(alta_pressao ~ grupo + idade + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo1)
+vif(modelo1) #vif ta top
+
+# colocando cada uma das seguintes variáveis: imc, gordura, cintura, quadril e cintura_quadril
+
+modelo2<- glm(alta_pressao ~ grupo + idade + imc + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo2)
+
+modelo3<- glm(alta_pressao ~ grupo + idade + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo3)
+
+modelo4<- glm(alta_pressao ~ grupo + idade + cintura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo4)
+
+modelo5<- glm(alta_pressao ~ grupo + idade + quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo5)
+
+modelo6<- glm(alta_pressao ~ grupo + idade + cintura_quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo6)
+
+
+# Stepwise para definir variaveis
+modelostepwise <- step(modelo, direction = "both", trace = 1, k = log(nrow(dfmodelo)))
+summary(modelostepwise)
+
+
+coeftest(modelo)
+#razao de chances
+exp(coef(modelo))
+
+#hnp(modelo) #verifecar pressuposto
+# Descrição
+# Gera gráficos (semi) normais com envelopes de simulação para diagnósticos comuns a partir de modelos ajustados
+# para uma variedade de classes de modelo. A função hnp() é escrita de forma que seja relativamente fácil estendê-la
+# a novas classes de modelos e diferentes diagnósticos que ainda não estão implementados. Alguns exemplos
+# conjuntos de dados estão incluídos.
+```
 
 ```{r}
 library(hnp)
