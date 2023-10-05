@@ -8,7 +8,7 @@ output:
   pdf_document:
     number_sections: yes
     fig_caption: yes
-header-includes: \usepackage[brazil]{babel}
+#header-includes: \usepackage[brazil]{babel}
 editor_options:
   chunk_output_type: console
 ---
@@ -88,7 +88,7 @@ As variâncias para a **pressão sistólica** são:
 
 * Grupo MP: 514,95
 
-Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que:
+Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que os resultados encontrados estão na *Tabela 1*.
 
 ```{r calc_amostral}
 var1 <- 196.9
@@ -122,9 +122,16 @@ Devido ao não registro de valores de *concentração* de Sflt1 (provavelmente d
 É conhecido por meio da literatura que essa concentração a ser estimada segue uma equação conhecida como **Four parameter logistic regression** (Modelo de Regressão Logística de 4 Parâmetros) a qual é muito usada para dados de ensaio imunoabsorvente enzimático - ELISA (Enzyme-linked immunosorbent assay). Cabe então, a estimação dos parâmetros da curva por meio da regressão específica do problema.
 
 
-Esse modelo de regressão possui como variável resposta a **absorbância** e como variável explicativa a **concentração**. Entretanto, o objetivo final da estimação é predizer valores de concentração para uma absorbância conhecida. Assim, a princípio usou-se os dados teóricos disponibilizados para estimar os parâmetros. Foi buscado na literatura ajustes semelhantes e optou-se pela implementação *LL2.4* contida no pacote *drc* do R-Studio. A função *LL2.4* fornece a parametrização da função por meio da log-logística de quatro parâmetros, uma função de auto-inicialização (caso o algoritmo seja iterativo e parta de um "chute inicial"), e os nomes dos parâmetros. Como está sendo usada a transformação $log_{2}$ para estimar os parâmetros, para conversão final da concentração estimada será aplicada a inversa da transformação para achar o valor real da concentração.
+Esse modelo de regressão possui como variável resposta a **absorbância** e como variável explicativa a **concentração**. Entretanto, o objetivo final da estimação é predizer valores de concentração para uma absorbância conhecida. Assim, a princípio usou-se os dados teóricos disponibilizados para estimar os parâmetros. Foi buscado na literatura ajustes semelhantes e optou-se pela implementação *LL2.4* contida no pacote *drc* (Analysis of Dose-Response Curves ou Análise de Curvas Dose-Resposta) implementado no R-Studio. 
 
-* **c** indica a inclinação da curva (Slope)
+
+A função *LL2.4* fornece a reparametrização da função por meio da transformação log no parâmetro de concentração e no ponto de inflexão, dado por:
+
+
+> Colocar imagem da fórmula
+
+
+* **b** indica a inclinação da curva (Slope)
 
 
 * **c** indica o limite inferior (Amin)
@@ -136,7 +143,10 @@ Esse modelo de regressão possui como variável resposta a **absorbância** e co
 * **e** indica o ponto de inflexão (ED50 que nessa parametrização é log2ED50)
 
 
-O resultado encontrado foi:
+Além disso, a função permite auto-inicialização (caso o algoritmo seja iterativo e parta de um "chute inicial"), e a imputação dos nomes dos parâmetros. Como está sendo usada a transformação $log_{2}$ para estimar os parâmetros, para conversão final da concentração estimada será aplicada a inversa da transformação para achar o valor real da concentração.
+
+
+O resultado encontrado para a estimação dos parâmetros está na *Tabela 2*.
 
 
 ```{r dados_curva}
@@ -169,16 +179,18 @@ coefs.data <- setNames(
 )
 cbind(coefs.data) %>% kable(caption = "Valores estimados dos parâmetros")
 
-#summary(drc.fit)
+resumo <- summary(drc.fit)
 ```
 
-Para testar a significância dos parâmetros, um intervalo de confiança foi obtido. Exceto o parâmetro de máximo e mínimo, conclui-se que todos demais são significativos.
+Para testar a significância dos parâmetros, um intervalo de confiança foi obtido, *Tabela 3*. Exceto o parâmetro de máximo e mínimo, conclui-se que todos demais são significativos. Pelo método do $p-valor$, caso o nível de significância $\alpha = 0,10$, apenas o ponto de máximo seria não significativo.
+
 
 ```{r ic_ajuste}
-confint(drc.fit) %>% round(3) %>% kable(caption = "Intervalo de confiança para os parâmetros")
+confint(drc.fit) %>% round(3) %>% 
+  kable(caption = "Intervalo de confiança para os parâmetros")
 ```
 
-Por meio do gráfico é possível notar o quão bem a curva se ajustou aos dados teóricos.
+Por meio da *Figura 1* é possível notar o quão bem a curva se ajustou aos dados teóricos.
 
 ```{r fig.cap="Gráfico da estimação da curva para os dados teóricos",out.width = "70%", fig.align='center'}
 plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
@@ -188,7 +200,7 @@ plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2,
 
 ### Análise de resíduos
 
-A fim de validar alguns pressupostos da regressão e a partir do gráfico dos resíduos, nota-se que a homocedasticidade dos resíduos é válida.
+A fim de validar alguns pressupostos da regressão e a partir da *Figura 2* dos resíduos, nota-se que a homocedasticidade dos resíduos é válida.
 
 ```{r fig.cap="Gráfico dos valores ajustados pelos resíduos do modelo",out.width = "70%", fig.align='center'}
 ggplot(as_tibble(drc.fit$predres)) +
@@ -198,7 +210,7 @@ ggplot(as_tibble(drc.fit$predres)) +
   labs(title = "Gráfico dos valores ajustados pelos resíduos")
 ```
 
-De mesmo modo, sobre a hipótese nula de que os resíduos possuem distribuição normal, para o mesmo $\alpha = 0,05$, dado o $p-valor$ observado, não rejeita-se a hipótese nula.
+De mesmo modo, sobre a *Tabela 4*, sobre a hipótese nula de que os resíduos possuem distribuição normal, para o mesmo $\alpha = 0,05$, dado o $p-valor$ observado, não rejeita-se a hipótese nula. Não foi encontrado pressuposto de normalidade dos resíduos na literatura, entretanto, optou-se por reportar.
 
 ```{r analise_residuos}
 residuos <- drc.fit$predres[,2] 
@@ -226,7 +238,7 @@ plot(log2(new$conc), new$abs, type = "line")
 Para estimação da concentração, como foi feita uma parametrização, a *Log2-concentração* será obstida e então convertida para escala padrão. Buscando-se na literatura referências, foi encontrado que além dos valores estimados, como deseja-se estimar concentrações abaixo do limite inferior, um novo candidato a mínimo deveria ser estipulado. Nesse caso, optou-se pelo mínimo ser o menor valor de concentração observado na amostra (`r min(resultado$abs)`). Esse valor está contido no Intervalo de Confiança para o mínimo. Os demais coeficientes serão os mesmos estimados.
 
 
-As concentrações encontradas podem ser vistas na tabela que segue:
+As concentrações encontradas podem ser vistas na *Tabela 5*.
 
 
 ```{r}
@@ -282,10 +294,10 @@ detach("package:drc", unload = TRUE)
 detach("package:MASS", unload = TRUE)
 ```
 
-## Análises descritivas por grupo
+## Análises descritivas
 
 
-A seguir, será apresentada algumas medidas de resumo para as variáveis de interesse contidas no banco de dados. Essas descritivas foram levantadas para avaliar principalmente o comportamento da variável em cada grupo, *Grupo MN* e *Grupo MP*.
+Em seguida foi levantado algumas medidas de resumo para as variáveis de interesse contidas no banco de dados. Essas descritivas foram levantadas com o objetivo de avaliar principalmente o efeito da variável em cada grupo, *Grupo MN* e *Grupo MP*.
 
 
 Em síntese, as medidas descritivas escolhidas para os dados contínuos refletem:
@@ -300,10 +312,13 @@ Em síntese, as medidas descritivas escolhidas para os dados contínuos refletem
 * Histograma: a frequência geral da variável de interesse.
 
 
-Caso fossem encontrados dados extremos, visando melhores estimativas, eles foram retirados das medidas de resumo.
+Caso fossem encontrados dados extremos, visando melhores estimativas, eles foram retirados das medidas de resumo. Seus resultados gerais antes e após a retirada foram colocados em uma tabela chamada "Resumo de retirada". 
 
 
 Para os dados categóricos, a medida descritiva escolhida foi um gráfico de barras para avaliar a proporção de cada grupo (*MN* e *MP*) dentro de cada categoria. Dentre algumas variáveis categóricas, foi gerado uma tabela de frequência para avaliar a proporção da categoria dentro de cada grupo (*MN* e *MP*).
+
+
+Essas análises descritivas estão contidas na seção de **Apêndice** desse relatório.
 
 
 ```{r importa_dados}
@@ -849,7 +864,10 @@ descritiva_extremos <- function(dados_originais, dados_filtro , coluna){
     as_tibble()
   
   return(
-    tabela %>% kable(caption = "Resumo da retirada")
+    tabela %>% kable(caption = "Resumo da retirada") %>% 
+      footnote(paste0("Variável de referência: ", coluna))
+      #footnote(general = coluna,
+               #general_title = "Variável de referência: ")
     )
 }
 
@@ -893,442 +911,246 @@ funcao_tabela <- function(dados, grupo, variavel){
 }
 ```
 
-### Idade:
 
-```{r, fig.cap="Análise descritiva por grupo para a variável idade",out.width = "70%", fig.align='center'}
+```{r descritivas_por_variavel}
+### Idade:
 variavel <- "idade"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- resultado
-##resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Etnia:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável etnia",out.width = "70%", fig.align='center'}
 variavel <- "etnia"
-graficos_categoricos(df1$grupo, df1$etnia, variavel)
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- resultado
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-df_tab1 <- df1 %>% 
-  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
-
-tab <- df_tab1 %>% 
-  mutate(etnia = ifelse(etnia == 1, "Branca",
-                         ifelse(etnia == 2, "Parda", "Negra")))
-
-funcao_tabela(tab, "Grupo", "etnia")
-```
 
 ### Escolaridade:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável escolaridade",out.width = "70%", fig.align='center'}
 variavel <- "escolaridade"
-graficos_categoricos(df1$grupo, df1$escolaridade, variavel)
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-tab <- df_tab1 %>% 
-  mutate(escolaridade = ifelse(escolaridade == 0, "4ª série",
-                        ifelse(escolaridade == 1, "Fundamental",
-                        ifelse(escolaridade == 2, "Ensino Médio", 
-                        ifelse(escolaridade == 3, "Ensino técnico",
-                        ifelse(escolaridade == 4, "Superior",
-                                                  "Pós-graduação"))))))
-  
-funcao_tabela(tab, "Grupo", "escolaridade")
-```
 
 ### Há quantos anos foi a gestação de interesse :
-
-```{r, fig.cap="Análise descritiva por grupo para a variável há quantos anos foi a gestação de interesse",out.width = "70%", fig.align='center'}
 variavel = "num_gestacoes"
-graficos_categoricos(df1$grupo, df1$num_gestacoes, "Há quantos anos foi a gestação de interesse")
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Peso da mulher:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável peso",out.width = "70%", fig.align='center'}
 variavel = "peso"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### IMC:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável IMC",out.width = "70%", fig.align='center'}
 variavel = "imc"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Percentual de gordura:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável gordura",out.width = "70%", fig.align='center'}
 variavel = "gordura"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Pressão Sistólica:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável pressão sistólica",out.width = "70%", fig.align='center'}
 variavel = "pressao_sis"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Pressão Diastólica:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável pressão diastólica",out.width = "70%", fig.align='center'}
 variavel = "pressao_dias"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Pressão arterial média:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável pressão média",out.width = "70%", fig.align='center'}
 variavel = "pressao_media"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Circunferência de cintura:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável cintura",out.width = "70%", fig.align='center'}
 variavel = "cintura"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Circunferência de abdômen:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável circunferência do abdômen",out.width = "70%", fig.align='center'}
 variavel = "abdomen"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Circunferência de quadril:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável quadril",out.width = "70%", fig.align='center'}
 variavel = "quadril"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Relação cintura vs quadril:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável de relação da cintura vs quadril",out.width = "70%", fig.align='center'}
 variavel = "cintura_quadril"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Neutrófilos:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável neutrófilos",out.width = "70%", fig.align='center'}
 variavel = "neu"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Linfócitos:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável linfócitos",out.width = "70%", fig.align='center'}
 variavel = "lym"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Razão neutrófilo/linfócito NLR:
-
-```{r, , fig.cap="Análise descritiva por grupo para a variável NLR",out.width = "70%", fig.align='center'}
 variavel = "nlr"
 
 df_filtro <- retira_extremos(df1, variavel, 4)
-descritiva_extremos(df1, df_filtro, variavel)
-
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Colesterol Total:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável colesterol total",out.width = "70%", fig.align='center'}
 variavel = "colesterol_total"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### HDL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável HDL",out.width = "70%", fig.align='center'}
 variavel = "hdl"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### LDL dosado:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável LDL dosado",out.width = "70%", fig.align='center'}
 variavel = "ldl_dosado"
-graficos(df1, "grupo", variavel)
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### VLDL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável VLDL",out.width = "70%", fig.align='center'}
 variavel = "vldl"
 
 df_filtro <- retira_extremos(df1, variavel, 45)
-descritiva_extremos(df1, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Não-HDL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável Não-HDL",out.width = "70%", fig.align='center'}
 variavel = "nao_hdl"
-graficos(df1, "grupo", variavel)
+
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Triglicérides:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável triglicérides",out.width = "70%", fig.align='center'}
 variavel = "triglicerides"
 
 df_filtro <- retira_extremos(df1, variavel, 300)
-descritiva_extremos(df1, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Hemoglobina glicada HbA1c:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável HbA1c",out.width = "70%", fig.align='center'}
 variavel = "hba1c"
 
 df_filtro <- retira_extremos(df1, variavel, 6)
-descritiva_extremos(df1, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Creatinina:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável creatinina",out.width = "70%", fig.align='center'}
-variavel = "hba1c"
+variavel = "creatinina"
 
 df_filtro <- retira_extremos(df1, variavel, 4)
-descritiva_extremos(df1, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Ritmo de filtração glomerular:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável filtração glomerular",out.width = "70%", fig.align='center'}
 variavel = "filtr_glomerular"
 
 df_filtro <- retira_extremos(df1, variavel, 400)
-descritiva_extremos(df1, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### TGP/ALT:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável TGP/ALT",out.width = "70%", fig.align='center'}
 variavel = "tgp_alt"
-graficos(df1, "grupo", variavel)
+
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### TGO/AST:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável TGO/AST",out.width = "70%", fig.align='center'}
 variavel = "tgo_ast"
-graficos(df1, "grupo", variavel)
+
 teste <- realizar_teste(df1, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Ácido úrico:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável ácido úrico",out.width = "70%", fig.align='center'}
 variavel = "acido_urico"
 
 df_filtro <- retira_extremos(df1, variavel, 8)
-descritiva_extremos(df1, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
-
-### CK:
-
-Há apenas 2 observações no grupo MN de CK, logo, não é possível realizar o teste de médias.
-
-```{r, fig.cap="Análise descritiva por grupo para a variável CK",out.width = "70%", fig.align='center'}
-variavel = "ck"
-graficos(df1, "grupo", variavel)
-
-df1 %>%
-  mutate(Grupo = ifelse(grupo == "0", "MN", "MP")) %>%
-  group_by(grupo) %>% 
-  summarise(
-    Nulos = sum(is.na(ck)),
-    `Nao nulos` = sum(!is.na(ck))
-    ) %>% kable(caption = "Quantidade de nulos e não nulos por grupo de CK")
-```
 
 ### Gama GT:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável Gama GT",out.width = "70%", fig.align='center'}
 variavel = "gama_gt"
 
 df_filtro <- retira_extremos(df1, variavel, 50)
-descritiva_extremos(df1, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Há quantos anos foi a gestação de interesse
-
-```{r, fig.cap="Análise descritiva por grupo para a variável quantos anos passou-se do evento",out.width = "70%", fig.align='center'}
 variavel = "quantos_anos_evento"
-graficos_categoricos(df2$grupo, 
-                     df2$quantos_anos_evento, "quantos anos foi a gestação de interesse")
 
 tab = xtabs(~ df2$grupo + df2$quantos_anos_evento) # tabela de frequencia
 teste <- fisher.test(tab, simulate.p.value = T)
@@ -1336,141 +1158,78 @@ teste$method <- "Fisher's Exact Test for Count Data simulated"
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Peso do bebê:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável peso do bebê",out.width = "70%", fig.align='center'}
 variavel = "peso_bebe"
-graficos(df2, "grupo", variavel) 
+
 teste <- realizar_teste(df2, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Tipo Parto
-
-```{r, fig.cap="Análise descritiva por grupo para a variável tipo de parto",out.width = "70%", fig.align='center'}
 df2_filtro <- df2 %>% 
   filter(tipo_parto != "<NA>")
 
 variavel = "tipo_parto"
-graficos_categoricos(df2_filtro$grupo, df2_filtro$tipo_parto, "Tipo de parto") 
 teste <- hipo_categorica(df2, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-df_tab2 <- df2 %>% 
-  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
-
-tab <- df_tab2 %>% 
-  mutate(tipo_parto = ifelse(tipo_parto == 0, "Normal",
-                      ifelse(tipo_parto == 1, "Cesariana", 
-                      ifelse(tipo_parto == 2, "Fórceps", "Induzido"))))
-
-funcao_tabela(tab, "Grupo", "tipo_parto")
-```
 
 ### Prematuro
-
-```{r, fig.cap="Análise descritiva por grupo para a variável prematuro",out.width = "70%", fig.align='center'}
 df2_filtro <- df2 %>% 
   filter(prematuro != "<NA>")
 
 variavel = "prematuro"
-graficos_categoricos(df2_filtro$grupo, df2_filtro$prematuro, "prematuro") 
 teste <- hipo_categorica(df2, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
-
-```{r}
-# Tabela de percentual
-tab <- df_tab2 %>% 
-  mutate(prematuro = ifelse(prematuro == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "prematuro")
-```
 
 ### PAI-1 ng/mL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável PAI-1",out.width = "70%", fig.align='center'}
 variavel = "pai1"
-graficos(df3, "grupo", variavel) 
+
 teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Trombomodulina ng/mL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável trombomodulina",out.width = "70%", fig.align='center'}
 variavel = "trombomodulina"
-graficos(df3, "grupo", variavel) 
 teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### ADMA ng/mL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável ADMA",out.width = "70%", fig.align='center'}
 variavel = "adma"
 
 df_filtro <- retira_extremos(df3, variavel, 250)
-descritiva_extremos(df3, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### AA-AT1 ng/mL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável AA-AT1",out.width = "70%", fig.align='center'}
 variavel = "aaat1"
-graficos(df3, "grupo", variavel)
 teste <- realizar_teste(df3, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Sflt1 sem previsões
-
-```{r, fig.cap="Análise descritiva por grupo para a variável sflt1 sem previsões",out.width = "70%", fig.align='center'}
 variavel = "sflt1"
 
 df_filtro <- retira_extremos(df3, variavel, 200)
-descritiva_extremos(df3, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Sflt1 com previsões feitas pelo ajuste da curva
-
-```{r, fig.cap="Análise descritiva por grupo para a variável Sflt1 com previsões feitas pelo ajuste da curva",out.width = "70%", fig.align='center'}
 df_est = results %>% rename(absor_sflt1 = abs)
 df = left_join(df3, df_est, relationship = "many-to-many")
 
@@ -1480,19 +1239,13 @@ df3 <- df %>%
 variavel = "sflt1_geral"
 
 df_filtro <- retira_extremos(df3, variavel, 200)
-descritiva_extremos(df3, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Sflt1 com previsões feitas pelo método da Luiza
-
-```{r, fig.cap="Análise descritiva por grupo para a variável Sflt1 com previsões feitas pelo método da Luiza",out.width = "70%", fig.align='center'}
 df_est = resultado_luiza %>% rename(absor_sflt1 = abs)
 df = left_join(df3, df_est, relationship = "many-to-many")
 
@@ -1502,164 +1255,73 @@ df3 <- df %>%
 variavel = "sflt1_luiza"
 
 df_filtro <- retira_extremos(df3, variavel, 200)
-descritiva_extremos(df3, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Dímero-D ng/mL:
-
-```{r, fig.cap="Análise descritiva por grupo para a variável dimero",out.width = "70%", fig.align='center'}
 variavel = "dimero"
 
 df_filtro <- retira_extremos(df4, variavel, 1000)
-descritiva_extremos(df4, df_filtro, variavel)
 
-graficos(df_filtro, "grupo", variavel)
 teste <- realizar_teste(df_filtro, variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-```
 
 ### Hipertensão
-
-```{r, fig.cap="Análise descritiva por grupo para a variável hipertensão",out.width = "70%", fig.align='center'}
 variavel = "hipertensao"
-graficos_categoricos(df5$grupo, df5$hipertensao, "Hipertensão")
 teste <- hipo_categorica(df5, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-df_tab5 <- df5 %>% 
-  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
-
-tab <- df_tab5 %>% 
-  mutate(hipertensao = ifelse(hipertensao == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "hipertensao")
-```
 
 ### Anti-hipertensivo
-
-```{r, fig.cap="Análise descritiva por grupo para a variável anti-hipertensivo",out.width = "70%", fig.align='center'}
 variavel = "anti_hiper"
-graficos_categoricos(df1$grupo, df1$anti_hiper, "Anti-hipertensivo")
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-tab <- df_tab1 %>% 
-  mutate(anti_hiper = ifelse(anti_hiper == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "anti_hiper")
-```
 
 ### Diabetes
-
-```{r, fig.cap="Análise descritiva por grupo para a variável diabetes",out.width = "70%", fig.align='center'}
 variavel = "diabetes"
-graficos_categoricos(df5$grupo, df5$diabetes, "Diabetes")
 teste <- hipo_categorica(df5, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-tab <- df_tab5 %>% 
-  mutate(diabetes = ifelse(diabetes == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "diabetes")
-```
 
 ### Medicamento para diabetes
-
-```{r, fig.cap="Análise descritiva por grupo para a variável medicamento para diabetes",out.width = "70%", fig.align='center'}
 variavel = "medic_diabetes"
-graficos_categoricos(df1$grupo, df1$medic_diabetes, "Medicamento para diabetes")
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-tab <- df_tab1 %>% 
-  mutate(medic_diabetes = ifelse(medic_diabetes == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "medic_diabetes")
-```
 
 ### Hipercolesterolemia
-
-```{r, fig.cap="Análise descritiva por grupo para a variável hipercolesterolemia",out.width = "70%", fig.align='center'}
 variavel = "hipercolesterolemia"
-graficos_categoricos(df5$grupo, df5$hipercolesterolemia,"Hipercolesterolemia")
 teste <- hipo_categorica(df5, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-tab <- df_tab5 %>% 
-  mutate(hipercolesterolemia = ifelse(hipercolesterolemia == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "hipercolesterolemia")
-```
 
 ### Medicamento para hipercolesterolemia
-
-```{r, fig.cap="Análise descritiva por grupo para a variável medicamento para hipercolesterolemia",out.width = "70%", fig.align='center'}
 variavel = "medic_hipercol"
-graficos_categoricos(df1$grupo, df1$medic_hipercol, 
-                     "Medicamento para hipercolesterolemia")
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-tab <- df_tab1 %>% 
-  mutate(medic_hipercol = ifelse(medic_hipercol == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "medic_hipercol")
-```
 
 ### Fumantes
-
-```{r, fig.cap="Análise descritiva por grupo para a variável fumantes",out.width = "70%", fig.align='center'}
 variavel = "tabagista"
-graficos_categoricos(df1$grupo, df1$tabagista, "Fumantes")
 teste <- hipo_categorica(df1, "grupo", variavel)
 
 resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
-#resultado %>% kable(caption = "Resultado teste de hipótese")
-
-# Tabela de percentual
-tab <- df_tab1 %>% 
-  mutate(tabagista = ifelse(tabagista == 0, "Não","Sim"))
-
-funcao_tabela(tab, "Grupo", "tabagista")
 ```
 
 ## Resumo testes de hipóteses
-
 
 Para os dados numéricos, os testes tiveram por hipótese geral:
 
@@ -1678,6 +1340,22 @@ Caso os dados atendessem a suposição de normalidade para os grupos, foi aplica
 
 
 Para as variáveis qualitativas, o Teste Exato de Fisher para tabelas de contingência $2~\cdot~m$ foi aplicado sobre a hipótese nula de que a proporção das categorias fossem iguais para ambos grupos (*MN* e *MP*).
+
+
+Há apenas 2 observações no *grupo MN* da variável **CK**, logo, não foi possível realizar o teste de médias para ele.
+
+```{r}
+### CK:
+variavel = "ck"
+
+df1 %>%
+  mutate(Grupo = ifelse(grupo == "0", "MN", "MP")) %>%
+  group_by(grupo) %>% 
+  summarise(
+    Nulos = sum(is.na(ck)),
+    `Nao nulos` = sum(!is.na(ck))
+    ) %>% kable(caption = "Quantidade de nulos e não nulos por grupo de CK")
+```
 
 
 Em seguida, será apresentado o resumo de todos testes de hipóteses aplicados as variáveis.
@@ -1893,6 +1571,501 @@ hnp(modelo4)
 
 ```{r}
 tbl_regression(modelo4, exponentiate = TRUE)
+```
+
+# Apêndice
+
+### Idade:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável idade",out.width = "70%", fig.align='center'}
+variavel <- "idade"
+graficos(df1, "grupo", variavel)
+```
+
+### Etnia:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável etnia",out.width = "70%", fig.align='center'}
+variavel <- "etnia"
+graficos_categoricos(df1$grupo, df1$etnia, variavel)
+
+# Tabela de percentual
+df_tab1 <- df1 %>% 
+  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
+
+tab <- df_tab1 %>% 
+  mutate(etnia = ifelse(etnia == 1, "Branca",
+                         ifelse(etnia == 2, "Parda", "Negra")))
+
+funcao_tabela(tab, "Grupo", "etnia")
+```
+
+### Escolaridade:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável escolaridade",out.width = "70%", fig.align='center'}
+variavel <- "escolaridade"
+graficos_categoricos(df1$grupo, df1$escolaridade, variavel)
+
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(escolaridade = ifelse(escolaridade == 0, "4ª série",
+                        ifelse(escolaridade == 1, "Fundamental",
+                        ifelse(escolaridade == 2, "Ensino Médio", 
+                        ifelse(escolaridade == 3, "Ensino técnico",
+                        ifelse(escolaridade == 4, "Superior",
+                                                  "Pós-graduação"))))))
+  
+funcao_tabela(tab, "Grupo", "escolaridade")
+```
+
+### Há quantos anos foi a gestação de interesse :
+
+```{r, fig.cap="Análise descritiva por grupo para a variável há quantos anos foi a gestação de interesse",out.width = "70%", fig.align='center'}
+variavel = "num_gestacoes"
+graficos_categoricos(df1$grupo, df1$num_gestacoes, "Há quantos anos foi a gestação de interesse")
+```
+
+### Peso da mulher:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável peso",out.width = "70%", fig.align='center'}
+variavel = "peso"
+graficos(df1, "grupo", variavel)
+```
+
+### IMC:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável IMC",out.width = "70%", fig.align='center'}
+variavel = "imc"
+graficos(df1, "grupo", variavel)
+```
+
+### Percentual de gordura:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável gordura",out.width = "70%", fig.align='center'}
+variavel = "gordura"
+graficos(df1, "grupo", variavel)
+```
+
+### Pressão Sistólica:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável pressão sistólica",out.width = "70%", fig.align='center'}
+variavel = "pressao_sis"
+graficos(df1, "grupo", variavel)
+```
+
+### Pressão Diastólica:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável pressão diastólica",out.width = "70%", fig.align='center'}
+variavel = "pressao_dias"
+graficos(df1, "grupo", variavel)
+```
+
+### Pressão arterial média:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável pressão média",out.width = "70%", fig.align='center'}
+variavel = "pressao_media"
+graficos(df1, "grupo", variavel)
+```
+
+### Circunferência de cintura:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável cintura",out.width = "70%", fig.align='center'}
+variavel = "cintura"
+graficos(df1, "grupo", variavel)
+```
+
+### Circunferência de abdômen:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável circunferência do abdômen",out.width = "70%", fig.align='center'}
+variavel = "abdomen"
+graficos(df1, "grupo", variavel)
+```
+
+### Circunferência de quadril:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável quadril",out.width = "70%", fig.align='center'}
+variavel = "quadril"
+graficos(df1, "grupo", variavel)
+```
+
+### Relação cintura vs quadril:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável de relação da cintura vs quadril",out.width = "70%", fig.align='center'}
+variavel = "cintura_quadril"
+graficos(df1, "grupo", variavel)
+```
+
+### Neutrófilos:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável neutrófilos",out.width = "70%", fig.align='center'}
+variavel = "neu"
+graficos(df1, "grupo", variavel)
+```
+
+### Linfócitos:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável linfócitos",out.width = "70%", fig.align='center'}
+variavel = "lym"
+graficos(df1, "grupo", variavel)
+```
+
+### Razão neutrófilo/linfócito NLR:
+
+```{r, , fig.cap="Análise descritiva por grupo para a variável NLR",out.width = "70%", fig.align='center'}
+variavel = "nlr"
+
+df_filtro <- retira_extremos(df1, variavel, 4)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Colesterol Total:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável colesterol total",out.width = "70%", fig.align='center'}
+variavel = "colesterol_total"
+graficos(df1, "grupo", variavel)
+```
+
+### HDL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável HDL",out.width = "70%", fig.align='center'}
+variavel = "hdl"
+graficos(df1, "grupo", variavel)
+```
+
+### LDL dosado:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável LDL dosado",out.width = "70%", fig.align='center'}
+variavel = "ldl_dosado"
+graficos(df1, "grupo", variavel)
+```
+
+### VLDL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável VLDL",out.width = "70%", fig.align='center'}
+variavel = "vldl"
+
+df_filtro <- retira_extremos(df1, variavel, 45)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Não-HDL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável Não-HDL",out.width = "70%", fig.align='center'}
+variavel = "nao_hdl"
+graficos(df1, "grupo", variavel)
+```
+
+### Triglicérides:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável triglicérides",out.width = "70%", fig.align='center'}
+variavel = "triglicerides"
+
+df_filtro <- retira_extremos(df1, variavel, 300)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Hemoglobina glicada HbA1c:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável HbA1c",out.width = "70%", fig.align='center'}
+variavel = "hba1c"
+
+df_filtro <- retira_extremos(df1, variavel, 6)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Creatinina:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável creatinina",out.width = "70%", fig.align='center'}
+variavel = "creatinina"
+
+df_filtro <- retira_extremos(df1, variavel, 4)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Ritmo de filtração glomerular:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável filtração glomerular",out.width = "70%", fig.align='center'}
+variavel = "filtr_glomerular"
+
+df_filtro <- retira_extremos(df1, variavel, 400)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### TGP/ALT:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável TGP/ALT",out.width = "70%", fig.align='center'}
+variavel = "tgp_alt"
+graficos(df1, "grupo", variavel)
+```
+
+### TGO/AST:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável TGO/AST",out.width = "70%", fig.align='center'}
+variavel = "tgo_ast"
+graficos(df1, "grupo", variavel)
+```
+
+### Ácido úrico:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável ácido úrico",out.width = "70%", fig.align='center'}
+variavel = "acido_urico"
+
+df_filtro <- retira_extremos(df1, variavel, 8)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### CK:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável CK",out.width = "70%", fig.align='center'}
+variavel = "ck"
+graficos(df1, "grupo", variavel)
+```
+
+### Gama GT:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável Gama GT",out.width = "70%", fig.align='center'}
+variavel = "gama_gt"
+
+df_filtro <- retira_extremos(df1, variavel, 50)
+descritiva_extremos(df1, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Há quantos anos foi a gestação de interesse
+
+```{r, fig.cap="Análise descritiva por grupo para a variável quantos anos passou-se do evento",out.width = "70%", fig.align='center'}
+variavel = "quantos_anos_evento"
+graficos_categoricos(df2$grupo, 
+                     df2$quantos_anos_evento, "quantos anos foi a gestação de interesse")
+```
+
+### Peso do bebê:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável peso do bebê",out.width = "70%", fig.align='center'}
+variavel = "peso_bebe"
+graficos(df2, "grupo", variavel) 
+```
+
+### Tipo Parto
+
+```{r, fig.cap="Análise descritiva por grupo para a variável tipo de parto",out.width = "70%", fig.align='center'}
+df2_filtro <- df2 %>% 
+  filter(tipo_parto != "<NA>")
+
+variavel = "tipo_parto"
+graficos_categoricos(df2_filtro$grupo, df2_filtro$tipo_parto, "Tipo de parto") 
+
+# Tabela de percentual
+df_tab2 <- df2 %>% 
+  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
+
+tab <- df_tab2 %>% 
+  mutate(tipo_parto = ifelse(tipo_parto == 0, "Normal",
+                      ifelse(tipo_parto == 1, "Cesariana", 
+                      ifelse(tipo_parto == 2, "Fórceps", "Induzido"))))
+
+funcao_tabela(tab, "Grupo", "tipo_parto")
+```
+
+### Prematuro
+
+```{r, fig.cap="Análise descritiva por grupo para a variável prematuro",out.width = "70%", fig.align='center'}
+df2_filtro <- df2 %>% 
+  filter(prematuro != "<NA>")
+
+variavel = "prematuro"
+graficos_categoricos(df2_filtro$grupo, df2_filtro$prematuro, "prematuro") 
+
+# Tabela de percentual
+tab <- df_tab2 %>% 
+  mutate(prematuro = ifelse(prematuro == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "prematuro")
+```
+
+### PAI-1 ng/mL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável PAI-1",out.width = "70%", fig.align='center'}
+variavel = "pai1"
+graficos(df3, "grupo", variavel) 
+```
+
+### Trombomodulina ng/mL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável trombomodulina",out.width = "70%", fig.align='center'}
+variavel = "trombomodulina"
+graficos(df3, "grupo", variavel) 
+```
+
+### ADMA ng/mL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável ADMA",out.width = "70%", fig.align='center'}
+variavel = "adma"
+
+df_filtro <- retira_extremos(df3, variavel, 250)
+descritiva_extremos(df3, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### AA-AT1 ng/mL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável AA-AT1",out.width = "70%", fig.align='center'}
+variavel = "aaat1"
+graficos(df3, "grupo", variavel)
+```
+
+### Sflt1 sem previsões
+
+```{r, fig.cap="Análise descritiva por grupo para a variável sflt1 sem previsões",out.width = "70%", fig.align='center'}
+variavel = "sflt1"
+
+df_filtro <- retira_extremos(df3, variavel, 200)
+descritiva_extremos(df3, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Sflt1 com previsões feitas pelo ajuste da curva
+
+```{r, fig.cap="Análise descritiva por grupo para a variável Sflt1 com previsões feitas pelo ajuste da curva",out.width = "70%", fig.align='center'}
+variavel = "sflt1_geral"
+
+df_filtro <- retira_extremos(df3, variavel, 200)
+descritiva_extremos(df3, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Sflt1 com previsões feitas pelo método da Luiza
+
+```{r, fig.cap="Análise descritiva por grupo para a variável Sflt1 com previsões feitas pelo método da Luiza",out.width = "70%", fig.align='center'}
+variavel = "sflt1_luiza"
+
+df_filtro <- retira_extremos(df3, variavel, 200)
+descritiva_extremos(df3, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Dímero-D ng/mL:
+
+```{r, fig.cap="Análise descritiva por grupo para a variável dimero",out.width = "70%", fig.align='center'}
+variavel = "dimero"
+
+df_filtro <- retira_extremos(df4, variavel, 1000)
+descritiva_extremos(df4, df_filtro, variavel)
+
+graficos(df_filtro, "grupo", variavel)
+```
+
+### Hipertensão
+
+```{r, fig.cap="Análise descritiva por grupo para a variável hipertensão",out.width = "70%", fig.align='center'}
+variavel = "hipertensao"
+graficos_categoricos(df5$grupo, df5$hipertensao, "Hipertensão")
+
+# Tabela de percentual
+df_tab5 <- df5 %>% 
+  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
+
+tab <- df_tab5 %>% 
+  mutate(hipertensao = ifelse(hipertensao == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "hipertensao")
+```
+
+### Anti-hipertensivo
+
+```{r, fig.cap="Análise descritiva por grupo para a variável anti-hipertensivo",out.width = "70%", fig.align='center'}
+variavel = "anti_hiper"
+graficos_categoricos(df1$grupo, df1$anti_hiper, "Anti-hipertensivo")
+
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(anti_hiper = ifelse(anti_hiper == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "anti_hiper")
+```
+
+### Diabetes
+
+```{r, fig.cap="Análise descritiva por grupo para a variável diabetes",out.width = "70%", fig.align='center'}
+variavel = "diabetes"
+graficos_categoricos(df5$grupo, df5$diabetes, "Diabetes")
+
+# Tabela de percentual
+tab <- df_tab5 %>% 
+  mutate(diabetes = ifelse(diabetes == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "diabetes")
+```
+
+### Medicamento para diabetes
+
+```{r, fig.cap="Análise descritiva por grupo para a variável medicamento para diabetes",out.width = "70%", fig.align='center'}
+variavel = "medic_diabetes"
+graficos_categoricos(df1$grupo, df1$medic_diabetes, "Medicamento para diabetes")
+
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(medic_diabetes = ifelse(medic_diabetes == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "medic_diabetes")
+```
+
+### Hipercolesterolemia
+
+```{r, fig.cap="Análise descritiva por grupo para a variável hipercolesterolemia",out.width = "70%", fig.align='center'}
+variavel = "hipercolesterolemia"
+graficos_categoricos(df5$grupo, df5$hipercolesterolemia,"Hipercolesterolemia")
+
+# Tabela de percentual
+tab <- df_tab5 %>% 
+  mutate(hipercolesterolemia = ifelse(hipercolesterolemia == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "hipercolesterolemia")
+```
+
+### Medicamento para hipercolesterolemia
+
+```{r, fig.cap="Análise descritiva por grupo para a variável medicamento para hipercolesterolemia",out.width = "70%", fig.align='center'}
+variavel = "medic_hipercol"
+graficos_categoricos(df1$grupo, df1$medic_hipercol, 
+                     "Medicamento para hipercolesterolemia")
+
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(medic_hipercol = ifelse(medic_hipercol == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "medic_hipercol")
+```
+
+### Fumantes
+
+```{r, fig.cap="Análise descritiva por grupo para a variável fumantes",out.width = "70%", fig.align='center'}
+variavel = "tabagista"
+graficos_categoricos(df1$grupo, df1$tabagista, "Fumantes")
+
+# Tabela de percentual
+tab <- df_tab1 %>% 
+  mutate(tabagista = ifelse(tabagista == 0, "Não","Sim"))
+
+funcao_tabela(tab, "Grupo", "tabagista")
 ```
 
 # Referências
