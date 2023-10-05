@@ -240,7 +240,7 @@ left_join(results, resultado_luiza) %>%
 
 Por fim, nota-se que os valores preditos parecem estar próximos do esperado para o comportamento dos dados teóricos.
 
-```{r fig.cap="Concentração preditas com dados teóricos"}
+```{r fig.cap="Concentração preditas com dados teóricos",out.width = "70%", fig.align='center'}
 novo_results <- results %>% rename(conc = concentration.est)
 
 novo_df <- rbind(data, novo_results)
