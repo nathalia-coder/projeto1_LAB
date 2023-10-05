@@ -40,7 +40,7 @@ resumo_testes <- function(teste, variavel){
     pvalor <- teste$p.value
     metodo <- teste$method  
     alpha <- 0.05
-    conclusao <- if_else(pvalor >= alpha, "Não rejeita-se H0", "Rejeita-se H0")
+    conclusao <- if_else(pvalor >= alpha, "Não significativo", "Significativo")
     
     lista <- list(
       Nome = variavel,
@@ -1304,7 +1304,7 @@ Caso fosse assumido um nível de significância de $\alpha = 0,10$, as seguintes
 ```{r}
 tabela_resumo_ordenada %>% 
   filter(Pvalor <= 0.1) %>% 
-  mutate("Conclusão" = "Rejeita-se H0") %>% 
+  mutate("Conclusão" = "Significativo") %>% 
   kable(caption = "Resumo de todos os resultados favoráveis dos testes para 10% de significância")
 ```
 
