@@ -2003,7 +2003,9 @@ funcao_tabela(tab, "Grupo", "tabagista")
 
 <https://www.jstor.org/stable/2527460?seq=1>
 
-<http://ndl.ethernet.edu.et/bitstream/123456789/15304/1/9103.pdf> <https://janalin.github.io/analyse-ELISA/results.html>
+<http://ndl.ethernet.edu.et/bitstream/123456789/15304/1/9103.pdf> 
+
+<https://janalin.github.io/analyse-ELISA/results.html>
 
 <https://cran.r-project.org/web/packages/drc/drc.pdf>
 
