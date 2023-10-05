@@ -8,7 +8,6 @@ output:
   pdf_document:
     number_sections: yes
     fig_caption: yes
-    fig.align: "center"
 #header-includes: \usepackage[brazil]{babel}
 editor_options:
   chunk_output_type: console
@@ -864,7 +863,7 @@ tabela_resumo <- resultado
 
 # Tabela de percentual
 df_tab1 <- df1 %>% 
-  mutate(grupo = ifelse(Grupo == 0, "Grupo MN", "Grupo MP"))
+  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab1 %>% 
   mutate(etnia = ifelse(etnia == 1, "Branca",
@@ -1304,7 +1303,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 ```{r}
 # Tabela de percentual
 df_tab2 <- df2 %>% 
-  mutate(grupo = ifelse(Grupo == 0, "Grupo MN", "Grupo MP"))
+  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab2 %>% 
   mutate(tipo_parto = ifelse(tipo_parto == 0, "Normal",
@@ -1478,7 +1477,7 @@ tabela_resumo <- rbind(tabela_resumo, resultado)
 ```{r}
 # Tabela de percentual
 df_tab5 <- df5 %>% 
-  mutate(grupo = ifelse(Grupo == 0, "Grupo MN", "Grupo MP"))
+  mutate(Grupo = ifelse(grupo == 0, "Grupo MN", "Grupo MP"))
 
 tab <- df_tab5 %>% 
   mutate(hipertensao = ifelse(hipertensao == 0, "Não","Sim"))
