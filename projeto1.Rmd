@@ -177,10 +177,10 @@ plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2,
 
 ### Análise de resíduos
 
-A fim de validar alguns pressupostos da regressão e a partir da *Figura 2* dos resíduos, nota-se que a homocedasticidade dos resíduos é válida.
+A fim de validar alguns pressupostos da regressão e a partir da *Figura 2* (contida no *apêndice*), sobre os resíduos, nota-se que a homocedasticidade é válida.
 
 ```{r fig.cap="Gráfico dos valores ajustados pelos resíduos do modelo",out.width = "70%", fig.align='center'}
-ggplot(as_tibble(drc.fit$predres)) +
+grafico_residuos <- ggplot(as_tibble(drc.fit$predres)) +
   geom_point(aes(`Predicted values`, Residuals),
      size = 3, color = "cornflowerblue") +
   geom_hline(yintercept = 0, lwd = 0.2) +
@@ -252,7 +252,7 @@ novo_df %>%
   ggplot(aes(x = log2conc, y = abs)) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "red") + 
   geom_point() +
-  labs(x = "Concentração", y = "Absorbância", title = "Gráfico")
+  labs(x = "Concentração", y = "Absorbância", title = "Gráfico de adequação do modelo")
 
 #plot(novo_df$log2conc, novo_df$abs)
 #plot(novo_df$log2conc, novo_df$abs, type = "line")
@@ -1494,6 +1494,13 @@ tbl_regression(modelo4, exponentiate = TRUE)
 ```
 
 # Apêndice
+
+## Resíduos curva
+
+```{r fig.cap="Gráfico dos valores ajustados pelos resíduos do modelo",out.width = "70%", fig.align='center'}
+grafico_residuos
+```
+
 
 ## Idade:
 
