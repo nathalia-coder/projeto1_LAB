@@ -34,6 +34,24 @@ library(janitor)
 rm(list = ls())
 ```
 
+```{r tema_graficos}
+cor_verde = c("#4fb6a7")
+cor_roxa = c("#652177")
+
+cores = colorRampPalette(c("#4fb6a7","#652177"))
+tema = theme_minimal() + 
+       theme(axis.title.y = element_text(angle = 90, margin = unit(c(0.3, 0.5, 0.3, 0), "cm")),
+             axis.title.x = element_text(margin = unit(c(0.3, 0, 0, 0), "cm")),
+             axis.line.x = element_line(linewidth = 0.6, linetype=1),
+             axis.line.y = element_line(linewidth = 0.6, linetype=1),
+             axis.ticks.y = element_line(linewidth = 0.6, linetype = 1),
+             axis.text = element_text(size=10),
+             legend.position = "right",
+             plot.margin = unit(c(0.3, 0.4, 0.3, 0.4), "cm"),
+             plot.subtitle = element_text(hjust = 0.5, vjust= 4))
+theme_set(tema)
+```
+
 ```{r}
 # Função Resumo testes de hipoteses
 resumo_testes <- function(teste, variavel){
@@ -90,6 +108,7 @@ As variâncias para a **pressão sistólica** são:
 Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que os resultados encontrados estão na *Tabela 1*.
 
 O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$.
+
 
 ## Curva de concentração do Sflt1
 
@@ -166,12 +185,23 @@ Para as variáveis qualitativas, o *Teste Exato de Fisher* para tabelas de conti
 
 ## Tamanho Amostral
 
+A *Tabela 1* consta os resultados. 
+
+Além disso, dados as médias para a **pressão sistólica** também do estudo piloto, são elas:
+
+-   Grupo MN: 122.02
+
+-   Grupo MP: 132.05
+
+
+Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo nota-se que a tabela contempla esse valor.
+
 ```{r calc_amostral}
 var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
 beta <- 0.1
-delta <- c(0.1, 0.5, 1, 2, 5, 10) # erro
+delta <- c(0.5, 1, 2, 5, 10) # erro
 
 z2 <- qnorm(1 - alpha/2)
 zbeta <- qnorm(1 - beta)
@@ -214,11 +244,11 @@ drc.fit <- drm(abs ~ conc,
 )
 
 # Extraindo coefs
-coefs.data <- setNames(
+`Coeficientes Estimados` <- setNames(
   drc.fit$coefficients %>% round(4),
-  c("b", "c", "d", "e")
+  c("Slope", "Amin", "Amax", "log2ED50")
 )
-cbind(coefs.data) %>% kable(caption = "Valores estimados dos parâmetros")
+cbind(`Coeficientes Estimados`) %>% kable(caption = "Valores estimados dos parâmetros")
 
 resumo <- summary(drc.fit)
 ```
@@ -228,21 +258,21 @@ confint(drc.fit) %>% round(3) %>%
   kable(caption = "Intervalo de confiança para os parâmetros")
 ```
 
-Por meio da *Figura 1* é possível notar o quão bem a curva se ajustou aos dados teóricos.
+Por meio da *Figura 2* é possível notar o comportamento da curva para os dados teóricos. Na *Figura 3*, tem-se as previsões para os dados abaixo da curva juntamente com os dados teóricos. A *tabela 5* consta todos resultados encontrados e foi deixado a referência repassada pela pesquisadora.
 
-```{r fig.cap="Gráfico da estimação da curva para os dados teóricos",out.width = "70%", fig.align='center'}
+```{r fig.cap="Gráfico da curva com os dados teóricos",out.width = "70%", fig.align='center'}
 plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
      cex=1.2, cex.axis=1.2, cex.lab=1.2)
 ```
 
 ### Análise de resíduos
 
-A fim de validar alguns pressupostos da regressão e a partir da *Figura 2* (contida no *apêndice*), sobre os resíduos, nota-se que a homocedasticidade é válida.
+A fim de validar alguns pressupostos da regressão e a partir da *Figura 4* (contida no *apêndice*), sobre os resíduos, nota-se que a homocedasticidade é válida.
 
 ```{r fig.cap="Gráfico dos valores ajustados pelos resíduos do modelo",out.width = "70%", fig.align='center'}
 grafico_residuos <- ggplot(as_tibble(drc.fit$predres)) +
   geom_point(aes(`Predicted values`, Residuals),
-     size = 3, color = "cornflowerblue") +
+     size = 3, color = cor_roxa) +
   geom_hline(yintercept = 0, lwd = 0.2) +
   labs(title = "Gráfico dos valores ajustados pelos resíduos") +
   theme_minimal()
@@ -305,19 +335,15 @@ novo_results <- results %>% rename(conc = concentration.est)
 novo_df <- rbind(data, novo_results)
 novo_df <- novo_df %>% mutate(log2conc = log2(conc))
 
+nteo <- nrow(data)
+nres <- nrow(results)
+novo_df$Origem <- c(rep("Teórico",nteo), rep("Estimado",nres))
+
 novo_df %>% 
-  ggplot(aes(x = log2conc, y = abs)) +
-  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "red") + 
-  geom_point() +
-  labs(x = "Concentração", y = "Absorbância", title = "Gráfico de adequação do modelo") +
+  ggplot(aes(x = log2conc, y = abs, color = Origem)) +
+  geom_point(size = 3) +
+  labs(x = "Log-Concentração", y = "Absorbância", title = "Gráfico de adequação do modelo") +
   theme_minimal()
-
-#plot(novo_df$log2conc, novo_df$abs)
-#plot(novo_df$log2conc, novo_df$abs, type = "line")
-
-#novo_df <- rbind(data, novo_results, novo_data)
-#plot(log2(novo_df$conc), novo_df$abs)
-#plot(log2(new$conc), new$abs, type = "line")
 ```
 
 ```{r}
@@ -675,24 +701,6 @@ colnames(df5) <- renomear_colunas
 
 df5 <- df5 %>% 
   mutate_at(vars(-iniciais), as.numeric)
-```
-
-```{r tema_graficos}
-cor_verde = c("#4fb6a7")
-cor_roxa = c("#652177")
-
-cores = colorRampPalette(c("#4fb6a7","#652177"))
-tema = theme_minimal() + 
-       theme(axis.title.y = element_text(angle = 90, margin = unit(c(0.3, 0.5, 0.3, 0), "cm")),
-             axis.title.x = element_text(margin = unit(c(0.3, 0, 0, 0), "cm")),
-             axis.line.x = element_line(linewidth = 0.6, linetype=1),
-             axis.line.y = element_line(linewidth = 0.6, linetype=1),
-             axis.ticks.y = element_line(linewidth = 0.6, linetype = 1),
-             axis.text = element_text(size=10),
-             legend.position = "right",
-             plot.margin = unit(c(0.3, 0.4, 0.3, 0.4), "cm"),
-             plot.subtitle = element_text(hjust = 0.5, vjust= 4))
-theme_set(tema)
 ```
 
 ```{r funcoes_aplicadas_descritivas}
@@ -1306,7 +1314,7 @@ Caso os dados atendessem a suposição de normalidade para os grupos, foi aplica
 
 Para as variáveis qualitativas, o *Teste Exato de Fisher* para tabelas de contingência $2~\cdot~m$ foi aplicado sobre a hipótese nula de que a proporção das categorias fossem iguais para ambos grupos (*MN* e *MP*).
 
-Há apenas 2 observações no *grupo MN* da variável **CK**, logo, não foi possível realizar o teste de médias para ele.
+Há apenas 2 observações no *grupo MN* da variável **CK** (*Tabela 6*), logo, não foi possível realizar o teste de médias para ele.
 
 ```{r}
 ### CK:
@@ -1321,7 +1329,7 @@ df1 %>%
     ) %>% kable(caption = "Quantidade de nulos e não nulos por grupo de CK")
 ```
 
-Em seguida, será apresentado o resumo de todos testes de hipóteses aplicados as variáveis.
+Em seguida,na *Tabela 7*, será apresentado o resumo de todos testes de hipóteses aplicados as variáveis.
 
 ```{r}
 tabela_resumo_ordenada <- tabela_resumo %>% arrange(Pvalor) 
@@ -1330,21 +1338,21 @@ tabela_resumo_ordenada %>%
   kable(caption = "Resumo de todos os resultados dos testes")
 ```
 
-Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na média ou frequência dentro do grupo *Grupo MN* e *Grupo MP* para um nível de significância de $\alpha = 0,05$.
+Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na média ou frequência dentro do grupo *Grupo MN* e *Grupo MP* para um nível de significância de $\alpha = 0,05$ está contido na *Tabela 8*.
 
 ```{r}
 tabela_resumo_ordenada %>% 
   filter(Pvalor <= 0.05) %>% 
-  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 5% de significância")
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.05 de significância")
 ```
 
-Caso fosse assumido um nível de significância de $\alpha = 0,10$, as seguintes variáveis seriam candidatas a impactar no grupo.
+A *Tabela 9* indica as as seguintes variáveis seriam candidatas a impactar no grupo, caso fosse assumido um nível de significância de $\alpha = 0,10$.
 
 ```{r}
 tabela_resumo_ordenada %>% 
   filter(Pvalor <= 0.1) %>% 
   mutate("Conclusão" = "Significativo") %>% 
-  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 10% de significância")
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.1 de significância")
 ```
 
 ## Modelo Linear Generalizado para hipertensão
