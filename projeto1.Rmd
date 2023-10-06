@@ -117,6 +117,32 @@ O resultado encontrado para a estimação dos parâmetros está na *Tabela 2*.
 
 Para testar a significância dos parâmetros, um intervalo de confiança foi obtido, *Tabela 3*. Exceto o parâmetro de máximo e mínimo, conclui-se que todos demais são significativos. Pelo método do $p-valor$, caso o nível de significância $\alpha = 0,10$, apenas o ponto de máximo seria não significativo.
 
+Por meio da *Figura 1* é possível notar o quão bem a curva se ajustou aos dados teóricos.
+
+### Estimação da concentração por imputação do limite inferior
+
+Para estimação da concentração, como foi feita uma parametrização, a *Log2-concentração* será obstida e então convertida para escala padrão. Buscando-se na literatura referências, foi encontrado que além dos valores estimados, como deseja-se estimar concentrações abaixo do limite inferior, um novo candidato a mínimo deveria ser estipulado. Nesse caso, optou-se pelo mínimo ser o menor valor de concentração observado na amostra (`r min(resultado$abs)`). Esse valor está contido no Intervalo de Confiança para o mínimo. Os demais coeficientes serão os mesmos estimados.
+
+As concentrações encontradas podem ser vistas na *Tabela 5*.
+
+## Análises descritivas
+
+Em seguida foi levantado algumas medidas de resumo para as variáveis de interesse contidas no banco de dados. Essas descritivas foram levantadas com o objetivo de avaliar principalmente o efeito da variável em cada grupo, *Grupo MN* e *Grupo MP*.
+
+Em síntese, as medidas descritivas escolhidas para os dados contínuos refletem:
+
+-   Boxplot: comparativo do comportamento dos dados para cada grupo e se há informações discrepantes;
+
+-   Tabela: medidas de resumos de tendência central e variabilidade, indicativo de nulos e número de observações encontradas e
+
+-   Histograma: a frequência geral da variável de interesse.
+
+Caso fossem encontrados dados extremos, visando melhores estimativas, eles foram retirados das medidas de resumo. Seus resultados gerais antes e após a retirada foram colocados em uma tabela chamada "Resumo de retirada".
+
+Para os dados categóricos, a medida descritiva escolhida foi um gráfico de barras para avaliar a proporção de cada grupo (*MN* e *MP*) dentro de cada categoria. Dentre algumas variáveis categóricas, foi gerado uma tabela de frequência para avaliar a proporção da categoria dentro de cada grupo (*MN* e *MP*).
+
+Essas análises descritivas estão contidas na seção de **Apêndice** desse relatório.
+
 # Resultados
 
 ## Tamanho Amostral
@@ -191,6 +217,7 @@ Por meio da *Figura 1* é possível notar o quão bem a curva se ajustou aos dad
 plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
      cex=1.2, cex.axis=1.2, cex.lab=1.2)
 ```
+
 ### Análise de resíduos
 
 A fim de validar alguns pressupostos da regressão e a partir da *Figura 2* (contida no *apêndice*), sobre os resíduos, nota-se que a homocedasticidade é válida.
@@ -200,7 +227,8 @@ grafico_residuos <- ggplot(as_tibble(drc.fit$predres)) +
   geom_point(aes(`Predicted values`, Residuals),
      size = 3, color = "cornflowerblue") +
   geom_hline(yintercept = 0, lwd = 0.2) +
-  labs(title = "Gráfico dos valores ajustados pelos resíduos")
+  labs(title = "Gráfico dos valores ajustados pelos resíduos") +
+  theme_minimal()
 ```
 
 De mesmo modo, sobre a *Tabela 4*, sobre a hipótese nula de que os resíduos possuem distribuição normal, para o mesmo $\alpha = 0,05$, dado o $p-valor$ observado, não rejeita-se a hipótese nula. Não foi encontrado pressuposto de normalidade dos resíduos na literatura, entretanto, optou-se por reportar.
@@ -227,10 +255,6 @@ plot(log2(new$conc), new$abs, type = "line")
 
 ### Estimação da concentração por imputação do limite inferior
 
-Para estimação da concentração, como foi feita uma parametrização, a *Log2-concentração* será obstida e então convertida para escala padrão. Buscando-se na literatura referências, foi encontrado que além dos valores estimados, como deseja-se estimar concentrações abaixo do limite inferior, um novo candidato a mínimo deveria ser estipulado. Nesse caso, optou-se pelo mínimo ser o menor valor de concentração observado na amostra (`r min(resultado$abs)`). Esse valor está contido no Intervalo de Confiança para o mínimo. Os demais coeficientes serão os mesmos estimados.
-
-As concentrações encontradas podem ser vistas na *Tabela 5*.
-
 ```{r}
 prev.conc = resultado$abs
 
@@ -256,7 +280,7 @@ left_join(results, resultado_luiza) %>%
     )
 ```
 
-Por fim, nota-se que os valores preditos parecem estar próximos do esperado para o comportamento dos dados teóricos.
+Nota-se que os valores preditos parecem estar próximos do esperado para o comportamento dos dados teóricos.
 
 ```{r fig.cap="Concentração preditas com dados teóricos",out.width = "70%", fig.align='center'}
 novo_results <- results %>% rename(conc = concentration.est)
@@ -268,7 +292,8 @@ novo_df %>%
   ggplot(aes(x = log2conc, y = abs)) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "red") + 
   geom_point() +
-  labs(x = "Concentração", y = "Absorbância", title = "Gráfico de adequação do modelo")
+  labs(x = "Concentração", y = "Absorbância", title = "Gráfico de adequação do modelo") +
+  theme_minimal()
 
 #plot(novo_df$log2conc, novo_df$abs)
 #plot(novo_df$log2conc, novo_df$abs, type = "line")
@@ -277,13 +302,6 @@ novo_df %>%
 #plot(log2(novo_df$conc), novo_df$abs)
 #plot(log2(new$conc), new$abs, type = "line")
 ```
-
-```{r}
-# tirando pacotes que podem dar conflito com o dplyr
-detach("package:drc", unload = TRUE)
-detach("package:MASS", unload = TRUE)
-```
-
 ## Análises descritivas
 
 Em seguida foi levantado algumas medidas de resumo para as variáveis de interesse contidas no banco de dados. Essas descritivas foram levantadas com o objetivo de avaliar principalmente o efeito da variável em cada grupo, *Grupo MN* e *Grupo MP*.
@@ -413,7 +431,7 @@ renomear_colunas <- c(
 df1 <- df1 %>% dplyr::select(all_of(colunas_interesse))
 colnames(df1) <- renomear_colunas
 
-grupos_nulos <- df1 %>% select(grupo) %>% is.na()
+grupos_nulos <- df1 %>% dplyr::select(grupo) %>% is.na()
 df1 <- df1 %>% 
   filter(! grupos_nulos) %>% 
   mutate(
@@ -464,10 +482,10 @@ renomear_colunas <- c(
   "prematuro"
   )
 
-df2 <- df2 %>% select(all_of(colunas_interesse))
+df2 <- df2 %>% dplyr::select(all_of(colunas_interesse))
 colnames(df2) <- renomear_colunas
 
-grupos_nulos <- df2 %>% select(grupo) %>% is.na()
+grupos_nulos <- df2 %>% dplyr::select(grupo) %>% is.na()
 df2 <- df2 %>% 
   filter(! grupos_nulos) %>% 
   mutate(
@@ -507,7 +525,7 @@ renomear_colunas <- c(
  "sflt1_ajuste",  
  "aaat1"
 )
-df3 <- df3 %>% select(all_of(colunas_interesse))
+df3 <- df3 %>% dplyr::select(all_of(colunas_interesse))
 colnames(df3) <- renomear_colunas
 
 df3 <- df3 %>% drop_na(grupo) %>% 
@@ -544,7 +562,7 @@ renomear_colunas <- c(
  "dimero",
  "logdimero"
 )
-df4 <- df4 %>% select(all_of(colunas_interesse))
+df4 <- df4 %>% dplyr::select(all_of(colunas_interesse))
 colnames(df4) <- renomear_colunas
 
 df4 <- df4 %>% 
@@ -647,7 +665,7 @@ renomear_colunas <- c(
  "Doenca_Still"
 )
 
-df5 <- df5 %>% select(all_of(colunas_interesse))
+df5 <- df5 %>% dplyr::select(all_of(colunas_interesse))
 colnames(df5) <- renomear_colunas
 
 df5 <- df5 %>% 
@@ -804,7 +822,7 @@ hipo_categorica <- function(dados, grupo, variavel){
 # Função para tratar dados extremos nos testes de hipóteses
 retira_extremos <- function(dados_originais, coluna, ponto_corte){
   # remocao
-  resumo <- dados_originais %>% select(coluna) %>% pull(coluna)
+  resumo <- dados_originais %>% dplyr::select(coluna) %>% pull(coluna)
   n_corte <- resumo[resumo > ponto_corte] %>% length()
   df_filtro <- dados_originais %>% filter( !!sym(coluna) < ponto_corte)
   return(df_filtro)
