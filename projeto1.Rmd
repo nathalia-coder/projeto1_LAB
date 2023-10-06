@@ -54,19 +54,28 @@ resumo_testes <- function(teste, variavel){
 
 # Introdução
 
-Este trabalho tem como objetivo explorar uma ampla gama de dados relacionados às mulheres que tiveram ou não pré-eclâmpsia, incluindo características físicas, resultados de exames laboratoriais, histórico de doenças e hábitos. A pré-eclâmpsia, uma condição médica complexa que afeta mulheres grávidas, é de grande interesse para a comunidade médica devido às suas implicações para a saúde materna e neonatal.
-
 A pré-eclâmpsia, caracterizada por hipertensão arterial e danos a órgãos, é uma complicação gestacional que geralmente se manifesta após a 20ª semana de gravidez. Ela é frequentemente acompanhada de sintomas como aumento da pressão arterial, presença de proteína na urina, edema e, em casos mais graves, eclâmpsia, que pode resultar em convulsões. Esta condição não apenas representa uma ameaça direta à saúde da mãe, mas também pode ter sérias consequências para o feto, incluindo restrição de crescimento intrauterino e parto prematuro. A magnitude do problema da pré-eclâmpsia é evidente nas estatísticas globais de saúde materna. A pré-eclâmpsia é um fator de risco para complicações de saúde a longo prazo para a mãe, como doença cardíaca e hipertensão.
 
 Neste estudo, realizamos uma análise estatística abrangente. Isso incluiu a utilização de regressão logística para identificar fatores relevantes associados à pré-eclâmpsia, uma análise descritiva dos dados coletados para melhor compreensão do perfil das pacientes, bem como o cálculo amostral para determinar o tamanho ideal da amostra para garantir resultados confiáveis. Além disso, investigamos a curva logística de quatro parâmetros para preencher eventuais valores faltantes nos dados. Esta análise estatística detalhada visa aprimorar nossa compreensão da pré-eclâmpsia, suas causas potenciais e possíveis estratégias de prevenção, contribuindo assim para o avanço das práticas médicas e políticas de saúde relacionadas à gravidez.
 
 Através deste estudo multidisciplinar, esperamos fornecer insights valiosos para profissionais de saúde, pesquisadores e formuladores de políticas, a fim de melhorar o diagnóstico precoce, o tratamento e a prevenção da pré-eclâmpsia, com o objetivo de promover a saúde materna e neonatal em todo o mundo.
 
+Este trabalho tem como objetivo explorar uma ampla gama de dados relacionados às mulheres que tiveram ou não pré-eclâmpsia, incluindo características físicas, resultados de exames laboratoriais, histórico de doenças e hábitos. A pré-eclâmpsia, uma condição médica complexa que afeta mulheres grávidas, é de grande interesse para a comunidade médica devido às suas implicações para a saúde materna e neonatal.
+
 # Objetivo
 
-# Metodologia
+## Objetivo Geral
 
-# Resultados
+Conduzir uma investigação abrangente sobre a pré-eclâmpsia, incluindo planejamento amostral, análise das diferenças entre mulheres saudáveis (MN) e aquelas com pré-eclâmpsia (MP), previsão de resultados relevantes não alcançados pelos equipamentos atuais e estudo da relação entre pré-eclâmpsia e hipertensão, um dos principais fatores de risco.
+
+## Objetivos Específicos
+
+ - Realizar o dimensionamento amostral, em que será calculado o tamanho da amostra de acordo com o erro esperado.
+ - Estimar as concentração de sFlt-1 que não puderam ser determinadas pelo equipamento de medição.
+ - Determinar quais fatores predizem a hipertensão, bem como realizar essa predição.
+ - Realizar testes para compreender como e comportam os grupos de mulheres com e sem pré-eclâmpsia.
+
+# Metodologia
 
 ## Tamanho Amostral
 
@@ -80,29 +89,7 @@ As variâncias para a **pressão sistólica** são:
 
 Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que os resultados encontrados estão na *Tabela 1*.
 
-```{r calc_amostral}
-var1 <- 196.9
-var2 <- 514.95
-alpha <- 0.05
-beta <- 0.1
-delta <- c(0.1, 0.5, 1, 2, 5, 10) # erro
-
-z2 <- qnorm(1 - alpha/2)
-zbeta <- qnorm(1 - beta)
-
-#se o erro aumenta, o n diminui. peq erros maior n
-n = ((var1 + var2) * (z2 + zbeta)^2) / (delta^2) 
-
-tibble(
-  "Delta" = delta,
-  "Tamanho Amostral" = n %>% round()
-) %>% 
-  kable(
-    caption = "Cálculo do tamanho amostral para diferentes erros",
-    format.args = list(big.mark = "."))
-```
-
-O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$. Nota-se que quanto menor o delta, ou seja, quão próximo deseja-se que as médias dos grupos sejam "iguais", maior será a amostra a ser avaliada para garantir boa estimação.
+O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$.
 
 ## Curva de concentração do Sflt1
 
@@ -127,6 +114,38 @@ A função *LL2.4* fornece a reparametrização da função por meio da transfor
 Além disso, a função permite auto-inicialização (caso o algoritmo seja iterativo e parta de um "chute inicial"), e a imputação dos nomes dos parâmetros. Como está sendo usada a transformação $log_{2}$ para estimar os parâmetros, para conversão final da concentração estimada será aplicada a inversa da transformação para achar o valor real da concentração.
 
 O resultado encontrado para a estimação dos parâmetros está na *Tabela 2*.
+
+Para testar a significância dos parâmetros, um intervalo de confiança foi obtido, *Tabela 3*. Exceto o parâmetro de máximo e mínimo, conclui-se que todos demais são significativos. Pelo método do $p-valor$, caso o nível de significância $\alpha = 0,10$, apenas o ponto de máximo seria não significativo.
+
+# Resultados
+
+## Tamanho Amostral
+
+```{r calc_amostral}
+var1 <- 196.9
+var2 <- 514.95
+alpha <- 0.05
+beta <- 0.1
+delta <- c(0.1, 0.5, 1, 2, 5, 10) # erro
+
+z2 <- qnorm(1 - alpha/2)
+zbeta <- qnorm(1 - beta)
+
+#se o erro aumenta, o n diminui. peq erros maior n
+n = ((var1 + var2) * (z2 + zbeta)^2) / (delta^2) 
+
+tibble(
+  "Delta" = delta,
+  "Tamanho Amostral" = n %>% round()
+) %>% 
+  kable(
+    caption = "Cálculo do tamanho amostral para diferentes erros",
+    format.args = list(big.mark = "."))
+```
+
+Nota-se que quanto menor o delta, ou seja, quão próximo deseja-se que as médias dos grupos sejam "iguais", maior será a amostra a ser avaliada para garantir boa estimação.
+
+## Curva de concentração do Sflt1
 
 ```{r dados_curva}
 resultado <- read_xlsx("curva.xlsx", sheet = "prev") # valores a serem preditos
@@ -161,8 +180,6 @@ cbind(coefs.data) %>% kable(caption = "Valores estimados dos parâmetros")
 resumo <- summary(drc.fit)
 ```
 
-Para testar a significância dos parâmetros, um intervalo de confiança foi obtido, *Tabela 3*. Exceto o parâmetro de máximo e mínimo, conclui-se que todos demais são significativos. Pelo método do $p-valor$, caso o nível de significância $\alpha = 0,10$, apenas o ponto de máximo seria não significativo.
-
 ```{r ic_ajuste}
 confint(drc.fit) %>% round(3) %>% 
   kable(caption = "Intervalo de confiança para os parâmetros")
@@ -174,7 +191,6 @@ Por meio da *Figura 1* é possível notar o quão bem a curva se ajustou aos dad
 plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
      cex=1.2, cex.axis=1.2, cex.lab=1.2)
 ```
-
 ### Análise de resíduos
 
 A fim de validar alguns pressupostos da regressão e a partir da *Figura 2* (contida no *apêndice*), sobre os resíduos, nota-se que a homocedasticidade é válida.
