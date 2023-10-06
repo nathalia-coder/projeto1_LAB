@@ -34,6 +34,25 @@ library(janitor)
 rm(list = ls())
 ```
 
+```{r tema_graficos}
+cor_verde = c("#4fb6a7")
+cor_roxa = c("#652177")
+
+cores = colorRampPalette(c("#4fb6a7","#652177"))
+tema = theme_minimal() + 
+       theme(axis.title.y = element_text(angle = 90, margin = unit(c(0.3, 0.5, 0.3, 0), "cm")),
+             axis.title.x = element_text(margin = unit(c(0.3, 0, 0, 0), "cm")),
+             axis.line.x = element_line(linewidth = 0.6, linetype=1),
+             axis.line.y = element_line(linewidth = 0.6, linetype=1),
+             axis.ticks.y = element_line(linewidth = 0.6, linetype = 1),
+             axis.text = element_text(size=10),
+             legend.position = "right",
+             plot.margin = unit(c(0.3, 0.4, 0.3, 0.4), "cm"),
+             plot.subtitle = element_text(hjust = 0.5, vjust= 4))
+theme_set(tema)
+```
+
+
 ```{r}
 # Função Resumo testes de hipoteses
 resumo_testes <- function(teste, variavel){
@@ -85,7 +104,7 @@ var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
 beta <- 0.1
-delta <- c(0.1, 0.5, 1, 2, 5, 10) # erro
+delta <- c(0.5, 1, 2, 5, 10) # erro
 
 z2 <- qnorm(1 - alpha/2)
 zbeta <- qnorm(1 - beta)
@@ -103,6 +122,19 @@ tibble(
 ```
 
 O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$. Nota-se que quanto menor o delta, ou seja, quão próximo deseja-se que as médias dos grupos sejam "iguais", maior será a amostra a ser avaliada para garantir boa estimação.
+
+
+Além disso, as médias do estudo piloto para a variável **pressão sistólica** foram repassadas:
+
+-   Grupo MN: 122,02
+
+-   Grupo MP: 132.05
+
+Logo o a diferença das médias aqui é: 
+
+$\delta = |\mu_{MN} - \mu_{MP}| = |122,02 - 132,05| = $ `r abs(122.02 - 132.05)`
+
+Portanto, se enquandra no caso imputado na tabela quando $\delta \approx 10$.
 
 ## Curva de concentração do Sflt1
 
@@ -182,7 +214,7 @@ A fim de validar alguns pressupostos da regressão e a partir da *Figura 2* (con
 ```{r fig.cap="Gráfico dos valores ajustados pelos resíduos do modelo",out.width = "70%", fig.align='center'}
 grafico_residuos <- ggplot(as_tibble(drc.fit$predres)) +
   geom_point(aes(`Predicted values`, Residuals),
-     size = 3, color = "cornflowerblue") +
+     size = 3, color = cor_roxa) +
   geom_hline(yintercept = 0, lwd = 0.2) +
   labs(title = "Gráfico dos valores ajustados pelos resíduos")
 ```
@@ -205,8 +237,8 @@ new$abs_inter <- abs_predita # prevista
 
 novo_data <- new %>% dplyr::select(conc, abs_inter) %>% rename(abs = abs_inter)
 novo_df <- rbind(data, novo_data)
-#plot(log2(novo_df$conc), novo_df$abs)
-plot(log2(new$conc), new$abs, type = "line")
+#plot(log2(novo_df$conc), novo_df$abs, type = "line")
+#plot(log2(new$conc), new$abs, type = "line")
 ```
 
 ### Estimação da concentração por imputação do limite inferior
@@ -224,8 +256,13 @@ log2EC50.est <- coef(drc.fit)[4]
 # Set Amin to blank values
 Amin <- min(resultado$abs) # media dos valores a serem previsto # zero também poderia ser
 
+previsao <- function(A){
+  fA <- (1/slope.est) * (log( ((Amax.est - A)/(A - Amin))) + log2EC50.est*slope.est)
+  return(fA)
+}
+
 log2concentration.est <- sapply(
-  prev.conc, function(A){(1/slope.est) * (log( ((Amax.est - A)/(A - Amin))) + log2EC50.est*slope.est)}
+  prev.conc, previsao
   )
 
 results <- resultado %>% 
@@ -248,11 +285,14 @@ novo_results <- results %>% rename(conc = concentration.est)
 novo_df <- rbind(data, novo_results)
 novo_df <- novo_df %>% mutate(log2conc = log2(conc))
 
+nteo = 6
+novo_df$fonte <- c(rep("Teorica",nteo), rep("Estimada",nrow(novo_df) - nteo))
+
 novo_df %>% 
-  ggplot(aes(x = log2conc, y = abs)) +
-  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "red") + 
-  geom_point() +
-  labs(x = "Concentração", y = "Absorbância", title = "Gráfico de adequação do modelo")
+  ggplot(aes(x = log2conc, y = abs, color = fonte)) +
+  geom_point(size = 3) +
+  labs(x = "Concentração", y = "Absorbância", title = "Gráfico de adequação do modelo") +
+  scale_fill_manual(values = c("A" = cor_roxa, "B" = cor_verde))
 
 #plot(novo_df$log2conc, novo_df$abs)
 #plot(novo_df$log2conc, novo_df$abs, type = "line")
@@ -638,23 +678,6 @@ df5 <- df5 %>%
   mutate_at(vars(-iniciais), as.numeric)
 ```
 
-```{r tema_graficos}
-cor_verde = c("#4fb6a7")
-cor_roxa = c("#652177")
-
-cores = colorRampPalette(c("#4fb6a7","#652177"))
-tema = theme_minimal() + 
-       theme(axis.title.y = element_text(angle = 90, margin = unit(c(0.3, 0.5, 0.3, 0), "cm")),
-             axis.title.x = element_text(margin = unit(c(0.3, 0, 0, 0), "cm")),
-             axis.line.x = element_line(linewidth = 0.6, linetype=1),
-             axis.line.y = element_line(linewidth = 0.6, linetype=1),
-             axis.ticks.y = element_line(linewidth = 0.6, linetype = 1),
-             axis.text = element_text(size=10),
-             legend.position = "right",
-             plot.margin = unit(c(0.3, 0.4, 0.3, 0.4), "cm"),
-             plot.subtitle = element_text(hjust = 0.5, vjust= 4))
-theme_set(tema)
-```
 
 ```{r funcoes_aplicadas_descritivas}
 # Funcoes de gráficos numericos e categoricos
