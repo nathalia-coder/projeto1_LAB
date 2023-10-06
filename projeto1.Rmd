@@ -121,7 +121,7 @@ Por meio da *Figura 1* é possível notar o quão bem a curva se ajustou aos dad
 
 ### Estimação da concentração por imputação do limite inferior
 
-Para estimação da concentração, como foi feita uma parametrização, a *Log2-concentração* será obstida e então convertida para escala padrão. Buscando-se na literatura referências, foi encontrado que além dos valores estimados, como deseja-se estimar concentrações abaixo do limite inferior, um novo candidato a mínimo deveria ser estipulado. Nesse caso, optou-se pelo mínimo ser o menor valor de concentração observado na amostra (`r min(resultado$abs)`). Esse valor está contido no Intervalo de Confiança para o mínimo. Os demais coeficientes serão os mesmos estimados.
+Para estimação da concentração, como foi feita uma parametrização, a *Log2-concentração* será obstida e então convertida para escala padrão. Buscando-se na literatura referências, foi encontrado que além dos valores estimados, como deseja-se estimar concentrações abaixo do limite inferior, um novo candidato a mínimo deveria ser estipulado. Nesse caso, optou-se pelo mínimo ser o menor valor de concentração observado na amostra (0.048). Esse valor está contido no Intervalo de Confiança para o mínimo. Os demais coeficientes serão os mesmos estimados.
 
 As concentrações encontradas podem ser vistas na *Tabela 5*.
 
@@ -142,6 +142,25 @@ Caso fossem encontrados dados extremos, visando melhores estimativas, eles foram
 Para os dados categóricos, a medida descritiva escolhida foi um gráfico de barras para avaliar a proporção de cada grupo (*MN* e *MP*) dentro de cada categoria. Dentre algumas variáveis categóricas, foi gerado uma tabela de frequência para avaliar a proporção da categoria dentro de cada grupo (*MN* e *MP*).
 
 Essas análises descritivas estão contidas na seção de **Apêndice** desse relatório.
+
+## Resumo testes de hipóteses
+
+Para os dados numéricos, os testes tiveram por hipótese geral:
+
+```{=tex}
+\begin{eqnarray}
+        {
+        \left\{\begin{array}{lcc}
+        H_{0}: {\mu_{Grupo~MN} = \mu_{Grupo~MP}} \\
+        H_{1}: {\mu_{Grupo~MN} \neq \mu_{Grupo~MP}}
+        \end{array}\right.
+        }    \nonumber
+    \end{eqnarray}
+```
+
+Caso os dados atendessem a suposição de normalidade para os grupos, foi aplicado o *Teste T* para comparação da média de dois grupos. Caso contrário, o *Teste de Permutação* foi aplicado como teste não paramétrico. Em suma, deseja-se avaliar se a média entre os grupos é igual para uma dada variável ou se há diferença.
+
+Para as variáveis qualitativas, o *Teste Exato de Fisher* para tabelas de contingência $2~\cdot~m$ foi aplicado sobre a hipótese nula de que a proporção das categorias fossem iguais para ambos grupos (*MN* e *MP*).
 
 # Resultados
 
@@ -168,8 +187,6 @@ tibble(
     caption = "Cálculo do tamanho amostral para diferentes erros",
     format.args = list(big.mark = "."))
 ```
-
-Nota-se que quanto menor o delta, ou seja, quão próximo deseja-se que as médias dos grupos sejam "iguais", maior será a amostra a ser avaliada para garantir boa estimação.
 
 ## Curva de concentração do Sflt1
 
@@ -302,23 +319,11 @@ novo_df %>%
 #plot(log2(novo_df$conc), novo_df$abs)
 #plot(log2(new$conc), new$abs, type = "line")
 ```
-## Análises descritivas
 
-Em seguida foi levantado algumas medidas de resumo para as variáveis de interesse contidas no banco de dados. Essas descritivas foram levantadas com o objetivo de avaliar principalmente o efeito da variável em cada grupo, *Grupo MN* e *Grupo MP*.
-
-Em síntese, as medidas descritivas escolhidas para os dados contínuos refletem:
-
--   Boxplot: comparativo do comportamento dos dados para cada grupo e se há informações discrepantes;
-
--   Tabela: medidas de resumos de tendência central e variabilidade, indicativo de nulos e número de observações encontradas e
-
--   Histograma: a frequência geral da variável de interesse.
-
-Caso fossem encontrados dados extremos, visando melhores estimativas, eles foram retirados das medidas de resumo. Seus resultados gerais antes e após a retirada foram colocados em uma tabela chamada "Resumo de retirada".
-
-Para os dados categóricos, a medida descritiva escolhida foi um gráfico de barras para avaliar a proporção de cada grupo (*MN* e *MP*) dentro de cada categoria. Dentre algumas variáveis categóricas, foi gerado uma tabela de frequência para avaliar a proporção da categoria dentro de cada grupo (*MN* e *MP*).
-
-Essas análises descritivas estão contidas na seção de **Apêndice** desse relatório.
+```{r}
+# tirando pacotes que podem dar conflito com o dplyr
+detach("package:drc", unload = TRUE)
+```
 
 ```{r importa_dados}
 df1 <- read_xlsx("dados.xlsx", sheet = "Dados Atuais")
