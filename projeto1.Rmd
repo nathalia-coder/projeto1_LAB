@@ -1,14 +1,9 @@
 ---
-#title: "Projeto I"
-#author:
-#- Bárbara Oliveira Ribeiro
-#- Nathalia Gabriella Ferreira dos Santos
-#date: "`r Sys.Date()`"
 output:
+  pdf_document: default
   html_document:
     number_sections: yes
     fig_caption: yes
-#header-includes: \usepackage[brazil]{babel}
 editor_options:
   chunk_output_type: console
 ---
@@ -365,10 +360,17 @@ As variâncias para a **pressão sistólica** são:
 
 -   Grupo MP: 514,95
 
-Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que os resultados encontrados estão na *Tabela 1*.
+Além disso, as médias para a **pressão sistólica**, também do estudo piloto, são:
+
+-   Grupo MN: 122.02
+
+-   Grupo MP: 132.05
 
 O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$.
 
+Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo esse valor será fixado como diferença entre as médias.
+
+Então, escolhendo um nível de significância de $\alpha = 0,05$ e variandos-se o poder de teste de ($1 - \beta$), tem-se que os resultados encontrados estão na *Tabela 1*.
 
 ## Curva de concentração do Sflt1
 
@@ -1179,8 +1181,9 @@ funcao_tabela <- function(dados, grupo, variavel){
     tabyl( !!sym(grupo), !!sym(variavel), show_na = F) %>% 
     adorn_percentages() %>% 
     adorn_rounding(4) %>%  adorn_pct_formatting(digits = 2) %>% 
-      kable(caption = "Tabela da proporção da variavel por grupo")%>% 
-  kable_styling("striped", full_width = F)
+      kable(caption = "Tabela da proporção da variavel por grupo") %>% 
+      footnote(paste0("Variável de referência: ", variavel)) %>%
+      kable_styling("striped", full_width = F)
   )
 }
 ```
@@ -2466,7 +2469,7 @@ funcao_tabela(tab, "Grupo", "tabagista")
 
 # Conclusão
 
-Na análise, avaliamos uma amostra razoável e identificamos que o erro com delta menor que 10 é aceitável, fornecendo confiança em nossos resultados. Além disso, através da estimação da concentração por imputação do limite inferior, obtivemos uma curva logística de quatro parâmetros, permitindo assim a obtenção de valores de sFlt, resultados anteriormente inacessíveis por serem muito baixos.
+Na análise, avaliamos uma amostra razoável e identificamos que o erro com $\delta$ menor que 10 é aceitável, fornecendo confiança em nossos resultados. Além disso, através da estimação dos parâmetros da curva logística de quatro parâmetros, e por imputação do limite inferior, foi possível a obtenção de valores da concentração de sFlt, resultados anteriormente inacessíveis por serem muito baixos.
 
 Nossos resultados destacam a importância das variáveis "grupo" e "IMC" na predição da hipertensão em mulheres. O "grupo", que indicava se a mulher teve ou não pré-eclampsia mostrou-se como um fator significativo que aumenta substancialmente a probabilidade de ocorrência dessa condição. Além disso, o aumento do Índice de Massa Corporal (IMC) também se correlacionou com um maior risco de pré-eclâmpsia, enfatizando a relevância do controle do peso como parte da estratégia de prevenção.
 Essas conclusões reforçam a necessidade de considerar atentamente esses fatores ao avaliar o risco de hipertensão.
