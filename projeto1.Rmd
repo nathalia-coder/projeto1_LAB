@@ -886,7 +886,8 @@ funcao_tabela <- function(dados, grupo, variavel){
     tabyl( !!sym(grupo), !!sym(variavel), show_na = F) %>% 
     adorn_percentages() %>% 
     adorn_rounding(4) %>%  adorn_pct_formatting(digits = 2) %>% 
-      kable(caption = "Tabela da proporção da variavel por grupo")
+      kable(caption = "Tabela da proporção da variavel por grupo") %>% 
+      footnote(paste0("Variável de referência: ", variavel))
   )
 }
 ```
