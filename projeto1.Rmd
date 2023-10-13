@@ -1,6 +1,11 @@
 ---
+#title: "Projeto I"
+#author:
+#- Bárbara Oliveira Ribeiro
+#- Nathalia Gabriella Ferreira dos Santos
+#date: "`r Sys.Date()`"
 output:
-bookdown::html_document2:
+  bookdown::html_document2:
     new_session: true
     number_sections: false
     fig_caption: true
