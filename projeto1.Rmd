@@ -5,7 +5,7 @@
 #- Nathalia Gabriella Ferreira dos Santos
 #date: "`r Sys.Date()`"
 output:
-  pdf_document:
+  html_document:
     number_sections: yes
     fig_caption: yes
 #header-includes: \usepackage[brazil]{babel}
@@ -95,6 +95,266 @@ Conduzir uma investigação abrangente sobre a pré-eclâmpsia, incluindo planej
 
 # Metodologia
 
+## Variáveis utilizadas
+
+As variáveis analisadas foram:
+
+**Idade**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Anos
+
+**Escolaridade**
+
+ - Tipo de Variável: Categórica (Nível de Educação)
+
+ - Unidades de Medida: N/A
+
+ - Níveis:
+
+   - 0 – Educação infantil
+
+   - 1 - Fundamental
+
+   - 2 - Médio
+
+   - 3 - Superior
+
+   - 4 - Pós-graduação
+
+   - 5 - Técnico
+
+**Número de Gestações**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Anos Desde a Última Gestação**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Anos
+
+**Peso da Mulher**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Kilogramas
+
+**Índice de Massa Corporal (IMC)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Percentual de Gordura**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Porcentagem
+
+**Pressão Sistólica**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mmHg (milímetros de mercúrio)
+
+**Pressão Diastólica**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mmHg (milímetros de mercúrio)
+
+**Pressão Arterial Média**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mmHg (milímetros de mercúrio)
+
+**Circunferência de Cintura**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Centímetros
+
+**Circunferência de Abdômen**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Centímetros
+
+**Circunferência de Quadril**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Centímetros
+
+**Relação Cintura/Quadril**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Neutrófilos**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Contagem Absoluta
+
+**Linfócitos**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Contagem Absoluta
+
+**Razão Neutrófilo/Linfócito (NLR)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Colesterol Total**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**HDL (High-Density Lipoprotein/ Lipoproteína de Alta Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**LDL Dosado (Low-Density Lipoprotein/ Lipoproteína de Baixa Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**VLDL (Very Low-Density Lipoprotein/ Lipoproteína de Muito Baixa Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Não-HDL (Non-High-Density Lipoprotein/ Lipoproteína de Não Alta Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Triglicérides**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Hemoglobina Glicada (HbA1c)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Porcentagem
+
+**Creatinina**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Ritmo de Filtração Glomerular**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mL/min (mililitros por minuto)
+
+**TGP/ALT (Transaminase Glutâmica Pirúvica / Alanina Transaminase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**TGO/AST (Transaminase Glutâmica Oxalacética / Aspartato Transaminase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**Ácido Úrico**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**CK (Creatina Quinase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**Gama GT (Gama Glutamiltransferase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**Peso do Bebê**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Kilogramas
+
+**PAI-1 (Inibidor-1 do Ativador de Plasminogênio)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**Trombomodulina**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**ADMA (Asymmetric Dimethylarginine/ Dimetilarginina assimétrica)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**sFlt1 (Soluble Fms-Like Tyrosine Kinase-1)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A (cálculos necessários)
+
+**Dímero-D**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**Tabagismo**
+
+ - Tipo de Variável: Categórica Nominal
+
+ - Níveis:
+
+   - 0 – Não fumante
+
+   - 1 - Fumante  
+   
+**Grupo (em relação à pré-eclâmpsia)**
+
+ - Tipo de Variável: Categórica Nominal
+
+ - Níveis:
+
+   - 1 – Não teve pre-eclâmpsia
+
+   - 2 - Teve pré-eclâmpsia  
+
 ## Tamanho Amostral
 
 Para o cálculo do tamanho da amostra onde o objetivo do estudo era comparar dois grupos: grupo tratamento com um controle, no contexto do trabalho o grupo controle seriam as mulheres que tiveram gestações saudáveis *(MN)* e o grupo tratamento seriam mulheres que tiveram pré-eclâmpsia *(MP)*. Optou-se por usar a variância da pressão sistólica porque, segundo a Sociedade Brasileira de Cardiologia, ela é primerio indício para causa de doença cardiovascular, ou seja, está sendo usado como desfecho para o aumento da pressão. As variâncias para os grupos serão denotados por $\sigma^2_{MN}$ e $\sigma^2_{MP}$, respectivamente, e foram obtidas por meio de estudo piloto e repassado pela cliente para o estudo.
@@ -105,17 +365,9 @@ As variâncias para a **pressão sistólica** são:
 
 -   Grupo MP: 514,95
 
-Além disso, as médias para a **pressão sistólica**, também do estudo piloto, são:
-
--   Grupo MN: 122.02
-
--   Grupo MP: 132.05
+Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que os resultados encontrados estão na *Tabela 1*.
 
 O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$.
-
-Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo esse valor será fixado como diferença entre as médias.
-
-Então, escolhendo um nível de significância de $\alpha = 0,05$ e variandos-se o poder de teste de ($1 - \beta$), tem-se que os resultados encontrados estão na *Tabela 1*.
 
 
 ## Curva de concentração do Sflt1
@@ -189,21 +441,58 @@ Caso os dados atendessem a suposição de normalidade para os grupos, foi aplica
 
 Para as variáveis qualitativas, o *Teste Exato de Fisher* para tabelas de contingência $2~\cdot~m$ foi aplicado sobre a hipótese nula de que a proporção das categorias fossem iguais para ambos grupos (*MN* e *MP*).
 
+## Regressão Logística
+
+A regressão logística é uma técnica estatística que explora as relações entre variáveis em estudos com múltiplas categorias. No nosso contexto, a regressão logística é usada para prever a probabilidade de hipertensão em mulheres, considerando diversas variáveis explicativas.
+
+A regressão logística binária é particularmente útil para problemas de classificação com duas categorias de resultados, como "sim" ou "não". No nosso caso, a variável dependente é a presença ou ausência de hipertensão, representada como "0" (ausência) e "1" (presença).
+
+Para fins deste estudo, definimos **hipertensão** como pressão sistólica e diastólica acima de 140mmHg e 90 mmHg, respectivamente, independentemente das respostas ao questionário.
+
+Para a construção do modelo de regressão logística, começamos excluindo variáveis com um alto número de valores faltantes.
+Nossa seleção de variáveis para o modelo inicial baseou-se em testes de associação e diferença entre médias. Variáveis com p-valores menores ou iguais a 0,25 foram incluídas no modelo. Este valor de corte mais elevado foi escolhido para a pré-seleção das variáveis, considerando que variáveis com p-valores maiores seriam improváveis de contribuir significativamente para o modelo.
+
+A multicolinearidade, que ocorre quando as variáveis independentes possuem relações lineares aproximadas, foi avaliada usando uma matriz de dispersão e correlação, bem como o cálculo do Fator de Inflação da Variância (VIF). Detectamos multicolinearidade significativa entre IMC, gordura, cintura e quadril, o que poderia afetar a significância dos coeficientes de regressão. Portanto, optamos por não incluir simultaneamente essas variáveis no modelo final.
+
+Nosso **modelo final** inclui as variáveis **"grupo"** e **"IMC"**. A inclusão de "LDL" foi realizada em um modelo separado, devido à sua relevância teórica para a variável resposta. Devido à multicolinearidade, não foi possível incluir as variáveis "IMC" e "gordura" no mesmo modelo. No entanto, considerando a importância da variável "gordura", fornecemos outras opções de modelo:
+
+- Modelo 1: "grupo" e "IMC"
+- Modelo 2: "grupo", "IMC" e "LDL"
+- Modelo 3: "grupo" e "gordura"
+- Modelo 4: "grupo" e "LDL"
+
+As tabelas geradas apresentam os resultados da análise, incluindo a Razão de Chances (OD), Intervalo de Confiança de 95% (IC 95%) e p-valor. A presença do valor "1" no intervalo de confiança sugere que a variável não é estatisticamente significativa.
+
+Algumas classificações para o Índice de Massa Corporal (IMC) são:
+
+- IMC de 25 a menor que 30: Sobrepeso
+- IMC de 30 a menor que 35: Obesidade Grau I
+- IMC de 35 a menor que 40: Obesidade Grau II (considerada severa)
+- IMC maior que 40: Obesidade Grau III (considerada mórbida)
+
+As probabilidades de uma mulher ter hipertensão em relação a esses IMCs, bem como a associação com os grupos, foram calculadas.
+
 # Resultados
 
 ## Tamanho Amostral
 
 A *Tabela 1* consta os resultados. 
 
-Optou-se por variar o $\beta$ no estudo (1 - $\beta$ indica o poder do teste). Testes mais poderosos implicam em maior rigor do tamanho amostral, espera-se aumento do tamanho da amostra quando avaliar-se isso.
+Além disso, dados as médias para a **pressão sistólica** também do estudo piloto, são elas:
+
+-   Grupo MN: 122.02
+
+-   Grupo MP: 132.05
+
+
+Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo nota-se que a tabela contempla esse valor.
 
 ```{r calc_amostral}
 var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
-beta <- c(0.01,0.05,0.1)
-#delta <- c(1, 2, 5, 10) # erro
-delta = 10
+beta <- 0.1
+delta <- c(0.5, 1, 2, 5, 10) # erro
 
 z2 <- qnorm(1 - alpha/2)
 zbeta <- qnorm(1 - beta)
@@ -211,15 +500,14 @@ zbeta <- qnorm(1 - beta)
 #se o erro aumenta, o n diminui. peq erros maior n
 n = ((var1 + var2) * (z2 + zbeta)^2) / (delta^2) 
 
-tab_amostra <- tibble(
-  "Poder" = paste0( (1-beta)*100,"%"),
-  "Tamanho por grupo" = n %>% round()
-) %>% mutate("Tamanho Amostral" = 2*n) 
-
-tab_amostra %>% 
+tibble(
+  "Delta" = delta,
+  "Tamanho Amostral" = n %>% round()
+) %>% 
   kable(
-    caption = "Cálculo do tamanho amostral para diferentes betas",
-    format.args = list(big.mark = "."))
+    caption = "Cálculo do tamanho amostral para diferentes erros",
+    format.args = list(big.mark = "."))%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 ## Curva de concentração do Sflt1
@@ -252,14 +540,16 @@ drc.fit <- drm(abs ~ conc,
   drc.fit$coefficients %>% round(4),
   c("Slope", "Amin", "Amax", "log2ED50")
 )
-cbind(`Coeficientes Estimados`) %>% kable(caption = "Valores estimados dos parâmetros")
+cbind(`Coeficientes Estimados`) %>% kable(caption = "Valores estimados dos parâmetros")%>% 
+  kable_styling("striped", full_width = F)
 
 resumo <- summary(drc.fit)
 ```
 
 ```{r ic_ajuste}
 confint(drc.fit) %>% round(3) %>% 
-  kable(caption = "Intervalo de confiança para os parâmetros")
+  kable(caption = "Intervalo de confiança para os parâmetros")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Por meio da *Figura 2* é possível notar o comportamento da curva para os dados teóricos. Na *Figura 3*, tem-se as previsões para os dados abaixo da curva juntamente com os dados teóricos. A *tabela 5* consta todos resultados encontrados e foi deixado a referência repassada pela pesquisadora.
@@ -288,7 +578,8 @@ De mesmo modo, sobre a *Tabela 4*, sobre a hipótese nula de que os resíduos po
 residuos <- drc.fit$predres[,2] 
 teste <- residuos %>% shapiro.test()
 resumo_testes(teste, "Resíduos") %>% 
-  kable(caption = "Resumo teste de normalidade dos resíduos")
+  kable(caption = "Resumo teste de normalidade dos resíduos")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Logo conclui-se que a estimação parece se adequar bem aos dados e pode-se seguir para a estimação da concentração por meio desses parâmetros.
@@ -328,7 +619,8 @@ left_join(results, resultado_luiza) %>%
   rename("Absorbância" = abs, "Concentração Estimada" = concentration.est) %>% 
   kable(
     caption = "Comparativo das estimações para concentração de Sflt1 abaixo da curva"
-    )
+    )%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Nota-se que os valores preditos parecem estar próximos do esperado para o comportamento dos dados teóricos.
@@ -875,7 +1167,8 @@ descritiva_extremos <- function(dados_originais, dados_filtro , coluna){
   return(
     tabela %>% kable(caption = "Resumo da retirada") %>% 
       footnote(paste0("Variável de referência: ", coluna))
-    )
+    )%>% 
+  kable_styling("striped", full_width = F)
 }
 
 
@@ -886,8 +1179,8 @@ funcao_tabela <- function(dados, grupo, variavel){
     tabyl( !!sym(grupo), !!sym(variavel), show_na = F) %>% 
     adorn_percentages() %>% 
     adorn_rounding(4) %>%  adorn_pct_formatting(digits = 2) %>% 
-      kable(caption = "Tabela da proporção da variavel por grupo") %>% 
-      footnote(paste0("Variável de referência: ", variavel))
+      kable(caption = "Tabela da proporção da variavel por grupo")%>% 
+  kable_styling("striped", full_width = F)
   )
 }
 ```
@@ -1331,7 +1624,8 @@ df1 %>%
   summarise(
     Nulos = sum(is.na(ck)),
     `Nao nulos` = sum(!is.na(ck))
-    ) %>% kable(caption = "Quantidade de nulos e não nulos por grupo de CK")
+    ) %>% kable(caption = "Quantidade de nulos e não nulos por grupo de CK")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Em seguida,na *Tabela 7*, será apresentado o resumo de todos testes de hipóteses aplicados as variáveis.
@@ -1340,7 +1634,8 @@ Em seguida,na *Tabela 7*, será apresentado o resumo de todos testes de hipótes
 tabela_resumo_ordenada <- tabela_resumo %>% arrange(Pvalor) 
 
 tabela_resumo_ordenada %>% 
-  kable(caption = "Resumo de todos os resultados dos testes")
+  kable(caption = "Resumo de todos os resultados dos testes")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na média ou frequência dentro do grupo *Grupo MN* e *Grupo MP* para um nível de significância de $\alpha = 0,05$ está contido na *Tabela 8*.
@@ -1348,7 +1643,8 @@ Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na
 ```{r}
 tabela_resumo_ordenada %>% 
   filter(Pvalor <= 0.05) %>% 
-  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.05 de significância")
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.05 de significância")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 A *Tabela 9* indica as as seguintes variáveis seriam candidatas a impactar no grupo, caso fosse assumido um nível de significância de $\alpha = 0,10$.
@@ -1357,12 +1653,14 @@ A *Tabela 9* indica as as seguintes variáveis seriam candidatas a impactar no g
 tabela_resumo_ordenada %>% 
   filter(Pvalor <= 0.1) %>% 
   mutate("Conclusão" = "Significativo") %>% 
-  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.1 de significância")
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.1 de significância")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
-## Modelo Linear Generalizado para hipertensão
+## Regressão Logística
 
-```{r}
+```{r include=FALSE}
+library(tidyverse)
 library(car)
 
 ## adicionando "2" nos nomes que são repetidos
@@ -1377,40 +1675,83 @@ posicoes_duplicadas <- which(duplicated(df4$iniciais))
 df4$iniciais[posicoes_duplicadas] <- paste0(df4$iniciais[posicoes_duplicadas], "2")
 
 ## juntando data frames
-
-dfreg <- df1 %>%
+dfmodelo <- df1 %>%
   left_join(df3, by = "iniciais") %>%
   left_join(df4, by = "iniciais")
 
-dfreg %>% head()
-
 ## data frame só com as variáveis que eu vou precisar
-
-dfreg<- cbind(dfreg$iniciais, dfreg$pressao_sis, dfreg$pressao_dias, dfreg$grupo.x, dfreg$idade, dfreg$tabagista, dfreg$imc, dfreg$gordura, dfreg$cintura, dfreg$quadril, dfreg$cintura_quadril, dfreg$colesterol_total, dfreg$hdl, dfreg$ldl_dosado, dfreg$triglicerides, dfreg$hba1c, dfreg$pai1, dfreg$aaat1, dfreg$dimero)
+dfmodelo<- cbind(dfmodelo$iniciais, dfmodelo$pressao_sis, dfmodelo$pressao_dias, dfmodelo$grupo.x, dfmodelo$idade, dfmodelo$tabagista, dfmodelo$imc, dfmodelo$gordura, dfmodelo$cintura, dfmodelo$quadril, dfmodelo$cintura_quadril, dfmodelo$colesterol_total, dfmodelo$hdl, dfmodelo$ldl_dosado, dfmodelo$triglicerides, dfmodelo$hba1c, dfmodelo$pai1, dfmodelo$aaat1, dfmodelo$dimero) %>% as.data.frame() 
 
 # nome pras colunas do df regressao
+colnames(dfmodelo) <- c("iniciais", "pressao_sis", "pressao_dias", "grupo", "idade", "tabagista", "imc", "gordura", "cintura", "quadril", "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides", "hba1c", "pai1", "aaat1", "dimero")
 
-colnames(dfreg) <- c("iniciais", "pressao_sis", "pressao_dias", "grupo", "idade", "tabagista", "imc", "gordura", "cintura", "quadril", "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides", "hba1c", "pai1", "aaat1", "dimero")
-
-## colocando em ordem crescente a quantidade de na presentes em cada coluna
-
-sort(colMeans(is.na(dfreg)))
-```
-
-```{r}
-# novo df que será usado para a regressão
-
-dfmodelo <- dfreg[, c("iniciais","pressao_sis", "pressao_dias","grupo", "idade", "tabagista", "imc", "gordura", "cintura", "quadril","cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")] %>% na.omit %>% as_tibble()
-
-
+# variaveis para numerico
 var_cat <- c("iniciais", "grupo")
-
 dfmodelo <- dfmodelo %>% mutate_at(vars(-var_cat), as.numeric)
 
+# criando coluna para a variavel resposta: pressao alta
 dfmodelo$alta_pressao <- ifelse(dfmodelo$pressao_sis > 140 | dfmodelo$pressao_dias > 90, 1, 0)
 
-realizar_teste2 <- function(dataframe, variavel) {
+## colocando em ordem crescente a quantidade de na presentes em cada coluna
+comna<- sort(colMeans(is.na(dfmodelo)))
+
+# não utilizaremos tirar dimero, pai1, aaat1, hba1c, que tem mais de de 20% de NA cada um
+colunas_para_descartar <- c("dimero", "pai1", "hba1c", "aaat1")
+
+# Use a função select() do dplyr para manter todas as colunas, exceto as listadas
+dfmodelo <- dfmodelo %>%
+  dplyr::select(-any_of(colunas_para_descartar)) %>%
+  na.omit()
+```
+
+```{r include=FALSE}
+permutacoes <- function(grupo_MN, grupo_MP, n = 10000){
+  difobs <- mean(grupo_MN, na.rm = T) - mean(grupo_MP, na.rm = T)
+  dif <-numeric(n)
+  todos <- c(grupo_MN, grupo_MP)
+  todos <- todos[! is.na(todos)]
+  set.seed(2023)
+  N <- length(todos)
+
+  for (i in 1:n) {
+    # permutar dados
+    sorteio <- sample(todos, replace = F)
   
+    g1_perm <- sorteio[1:(N/2)]
+    g2_perm <- sorteio[((N/2)+1):N]
+    dif[i] <- mean(g1_perm)-mean(g2_perm)
+  }
+  valorp<- 2 * length(dif[dif > abs(difobs) ])/n # cauda superior
+  alpha <- 0.05
+  
+  tipo_teste <- "Teste permutação"
+  
+  #cat(paste("Teste permutação\n",
+  #          "Hipotese Alternativa: Medias diferentes para os grupos\n",
+  #          paste0("Nivel de significancia de ", alpha),
+  #          "pvalor =", valorp), 
+  #    "\n", if_else(valorp >= alpha, "Não rejeita-se H0", "Rejeita-se H0"))
+  
+  return(list(method = tipo_teste, p.value = valorp))
+  } 
+
+resumo_testes <- function(teste, variavel){
+    pvalor <- teste$p.value
+    metodo <- teste$method  
+    alpha <- 0.05
+    conclusao <- if_else(pvalor >= alpha, "Não rejeita-se H0", "Rejeita-se H0")
+    
+    lista <- list(
+      Nome = variavel,
+      `Método` = metodo,
+      Pvalor = pvalor %>% round(4),
+      `Conclusão` = conclusao)
+    
+    return(lista %>% as_tibble() )
+}
+
+realizar_teste2 <- function(dataframe, variavel) {
+
   grupo_1<- dataframe %>%
     filter(alta_pressao == "0") %>%
     pull(variavel)
@@ -1418,10 +1759,10 @@ realizar_teste2 <- function(dataframe, variavel) {
   grupo_2<- dataframe %>%
     filter(alta_pressao == "1") %>%
     pull(variavel)
-  
+
   shapiro1 <- shapiro.test(grupo_1)
   shapiro2 <- shapiro.test(grupo_2)
-  
+
   if (shapiro1$p.value <= 0.05 || shapiro2$p.value <= 0.05) {
     permutacoes(grupo_1, grupo_2)
   } else {
@@ -1430,71 +1771,37 @@ realizar_teste2 <- function(dataframe, variavel) {
   }
 }
 
+
 col_teste_num <- c("pressao_sis", "pressao_dias","idade", "imc", "gordura", "cintura", "quadril",
-                   "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")
+               "cintura_quadril", "colesterol_total", "hdl", "ldl_dosado", "triglicerides")
 
-tabela_resumo <-  resumo_testes( realizar_teste2(dfmodelo, "idade"),"idade")
 
-for (col in col_teste_num[-c(1,2,3)]) {
-  teste_hiper <- realizar_teste2(dfmodelo, col)
-  resultado <- resumo_testes(teste_hiper, col)
-  tabela_resumo <- rbind(tabela_resumo, resultado)
+tabela_resumo <-  resumo_testes( realizar_teste2(dfmodelo, "pressao_sis"),"pressao_sis")
+
+for (col in col_teste_num[-1]) {
+    teste_hiper <- realizar_teste2(dfmodelo, col)
+    resultado <- resumo_testes(teste_hiper, col)
+    tabela_resumo <- rbind(tabela_resumo, resultado)
 }
 
+tabela_grupo <- table(dfmodelo$alta_pressao, dfmodelo$grupo)
+teste_grupo <- chisq.test(tabela_grupo)
+
+tabela_tabagista <- table(dfmodelo$alta_pressao, dfmodelo$tabagista)
+teste_tabagista <- chisq.test(tabela_tabagista)
+
+# Crie tabelas de resumo para os resultados dos testes Qui-Quadrado
+resumo_grupo <- resumo_testes(teste_grupo, "grupo")
+resumo_tabagista <- resumo_testes(teste_tabagista, "tabagista")
+
+# Junte as tabelas de resumo dos testes Qui-Quadrado com a tabela de resumo existente
+tabela_resumo <- bind_rows(tabela_resumo, resumo_grupo, resumo_tabagista)
+
+# Exiba a tabela completa
 tabela_resumo %>% arrange(Pvalor)
 
-
-library(lmtest)
-library(DescTools)
-library(nnet)
-library(psych)
-pairs.panels(dfmodelo[4:12])
-
-# aqui entraram só as variáveis com p-valor < 0.3
-modelo<- glm(alta_pressao ~ grupo + imc + cintura + cintura_quadril + idade + quadril + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo)
-vif(modelo)
-
-# aqui fica apenas grupo, idade e ldl
-# no gráfico da pra ver que ia dar problema de multicolinearidade
-modelo1<- glm(alta_pressao ~ grupo + idade + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo1)
-vif(modelo1) #vif ta top
-
-# colocando cada uma das seguintes variáveis: imc, gordura, cintura, quadril e cintura_quadril
-
-modelo2<- glm(alta_pressao ~ grupo + idade + imc + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo2)
-
-modelo3<- glm(alta_pressao ~ grupo + idade + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo3)
-
-modelo4<- glm(alta_pressao ~ grupo + idade + cintura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo4)
-
-modelo5<- glm(alta_pressao ~ grupo + idade + quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo5)
-
-modelo6<- glm(alta_pressao ~ grupo + idade + cintura_quadril + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
-summary(modelo6)
-
-
-# Stepwise para definir variaveis
-modelostepwise <- step(modelo, direction = "both", trace = 1, k = log(nrow(dfmodelo)))
-summary(modelostepwise)
-
-
-coeftest(modelo)
-#razao de chances
-exp(coef(modelo))
-
-#hnp(modelo) #verifecar pressuposto
-# Descrição
-# Gera gráficos (semi) normais com envelopes de simulação para diagnósticos comuns a partir de modelos ajustados
-# para uma variedade de classes de modelo. A função hnp() é escrita de forma que seja relativamente fácil estendê-la
-# a novas classes de modelos e diferentes diagnósticos que ainda não estão implementados. Alguns exemplos
-# conjuntos de dados estão incluídos.
 ```
+
 
 ```{r}
 library(hnp)
@@ -1507,53 +1814,116 @@ library(gtsummary)
 pairs.panels(dfmodelo[4:12])
 ```
 
-A análise da matriz de dispersão e da correlação entre as vaiáveis pode ajudar a identificar a multicolinearidade, que ocorre quando duas ou mais variáveis independentes estão altamente correlacionadas entre si. Isso pode ser observado em gráficos de dispersão onde as variáveis estão fortemente alinhadas. É possível identificar uma relação linear positiva entre as seguintes variáveis: imc, gordura, cintura e quadril.
+Na matriz de dispersão e correlação é possível identificar uma relação linear positiva entre as seguintes variáveis: IMC, gordura, cintura e quadril.
 
 ```{r include=FALSE}
-# aqui entraram só as variáveis com p-valor < 0.25
 modelo<- glm(alta_pressao ~ grupo + imc + cintura + cintura_quadril + idade + quadril + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
 summary(modelo)
 vif(modelo)
 
-modelo2<- glm(alta_pressao ~ grupo + imc, data = dfmodelo, family = "binomial"(link = 'logit'))
+modelo1<- glm(alta_pressao ~ grupo + imc, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo1)
+vif(modelo1)
+exp(coef(modelo1))
+exp(confint(modelo1))
+
+modelo2<- glm(alta_pressao ~ grupo + imc + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
 summary(modelo2)
 vif(modelo2)
 exp(coef(modelo2))
 exp(confint(modelo2))
-tbl_regression(modelo2, exponentiate = TRUE)
 
-modelo4<- glm(alta_pressao ~ grupo + imc + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+modelo3<- glm(alta_pressao ~ grupo + gordura, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo3)
+vif(modelo3)
+exp(coef(modelo3))
+exp(confint(modelo3))
+
+modelo4<- glm(alta_pressao ~ grupo + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
 summary(modelo4)
 vif(modelo4)
 exp(coef(modelo4))
 exp(confint(modelo4))
-tbl_regression(modelo4, exponentiate = TRUE)
 
+vif(modelo1)
+exp(coef(modelo1))
+exp(confint(modelo1))
 
-AIC(modelo2, modelo4)
-BIC(modelo2, modelo4)
+AIC(modelo1, modelo2, modelo3, modelo4)
+
+modelo5<- glm(alta_pressao ~ ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+summary(modelo5)
+# modelo independente com apenas a variável LDL, obtendo um coeficiente estimado de 0,012527 e um valor-p de 0,005265. No entanto, optamos por manter LDL no modelo final devido à sua importância clínica.
+
 anova(modelo2, modelo4, test = "Chisq")
 
-#modelo4 será nosso modelo final
+step(modelo4, direction = "both")
 
-#verificação
-hnp(modelo4)
-# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+#modelo4 será nosso modelo final
 ```
+
+```{r}
+tbl_regression(modelo1, exponentiate = TRUE)
+```
+
+**Razão de chances - modelo 1**
+
+As duas variáveis são significativas para o modelo, e o valor 1 não pertence a nenhum dos intervalos.
+Os hífens na linha do grupo 1 indicam que vamos comparar nosso grupo 2 (mulheres que tiveram pré-eclâmpsia) em relação a ele. A variável grupo é binária, então, nesse modelo, a mulher que está no grupo 2 tem um aumento de 151% nas chances de ser hipertensa, em relação a mulher que está no grupo 1 (mulheres que não tiveram pré-eclâmpsia). 
+Podemos dizer que, para o aumento de uma unidade no IMC, esperamos ver um aumento de cerca de 10% nas chances da mulher ter hipertensão.
+
+```{r}
+tbl_regression(modelo2, exponentiate = TRUE)
+```
+
+**Razão de chances - modelo 2**
+
+As variáveis grupo e IMC são significativas para o modelo. O valor 1 não pertence aos intervalos dessas variáveis.
+Os hífens na linha do grupo 1 indicam que vamos comparar nosso grupo 2 (mulheres que tiveram pré-eclâmpsia) em relação a ele. A variável grupo é binária, então, nesse modelo, a mulher que está no grupo 2 tem um aumento de 114% nas chances de ser hipertensa, em relação a mulher que está no grupo 1 (mulheres que não tiveram pré-eclâmpsia). 
+Podemos dizer que, para o aumento de uma unidade no IMC, esperamos ver um aumento de cerca de 10% nas chances da mulher ter hipertensão. Essas chances não mudaram em relação ao modelo anterior.
+A variável LDL não é considerada significativa para o modelo. O valor 1 é o limite inferior do intervalo. Para o aumento de uma unidade no LDL, existe um aumento de apenas 1% nas chances da mulher ter hipertensão.
+
+```{r}
+tbl_regression(modelo3, exponentiate = TRUE)
+```
+
+**Razão de chances - modelo 3**
+
+As duas variáveis são significativas para o modelo. O valor 1 não pertence aos intervalos dessas variáveis.
+Os hífens na linha do grupo 1 indicam que vamos comparar nosso grupo 2 (mulheres que tiveram pré-eclâmpsia) em relação a ele. A variável grupo é binária, então, nesse modelo, a mulher que está no grupo 2 tem um aumento de 157% nas chances de ser hipertensa, em relação a mulher que está no grupo 1 (mulheres que não tiveram pré-eclâmpsia). 
+Podemos dizer que, para o aumento de uma unidade na gordura, esperamos ver um aumento de cerca de 5% nas chances da mulher ter hipertensão.
 
 ```{r}
 tbl_regression(modelo4, exponentiate = TRUE)
 ```
 
+**Razão de chances - modelo 4**
+
+Apenas a variável grupo é significativa para o modelo. O valor 1 não pertence ao intervalo do grupo, e é o limite inferior na variável LDL.
+Os hífens na linha do grupo 1 indicam que vamos comparar nosso grupo 2 (mulheres que tiveram pré-eclâmpsia) em relação a ele. A variável grupo é binária, então, nesse modelo, a mulher que está no grupo 2 tem um aumento de 141% nas chances de ser hipertensa, em relação a mulher que está no grupo 1 (mulheres que não tiveram pré-eclâmpsia). 
+A variável LDL não é considerada significativa para o modelo. Para o aumento de uma unidade no LDL, existe um aumento de apenas 1% nas chances da mulher ter hipertensão.
+
+Na tabela a seguir, temos as probabilidades preditas da mulher ter hipertensão, para os grupos 1 e 2, com os seguintes IMCs: 25, 30, 35, 40 e 45.
 
 ```{r}
-allmean = data.frame(grupo=c(rep("2",4)),
-                     imc=rep(c(25,30,35,40),1)
-                     )
-allmean
-allmean$pred.prob = predict(modelo2, newdata=allmean, type="response")
-allmean
+valores_imc <- c(25, 30, 35, 40, 45)
+
+grupos <- c("1", "2")
+
+dados <- expand.grid(grupo = grupos, imc = valores_imc) %>%
+  mutate(probabilidade = predict(modelo1, newdata = ., type = "response")) %>%
+  arrange(grupo)
+
+tabelinha <- dados %>%
+  kable("html") %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(2, bold = TRUE) %>%
+  column_spec(3, width = "100px")
+tabelinha
 ```
+
+É evidente que há um considerável aumento nas probabilidades de hipertensão ao fazer a transição do "grupo 1" para o "grupo 2". Essa tendência é firmemente corroborada pelos resultados apresentados em nossa tabela de Razão de Chances. Além disso, à medida que o Índice de Massa Corporal (IMC) cresce, observamos um progressivo aumento nas probabilidades de uma mulher ser diagnosticada com hipertensão. Isso destaca a marcante influência do IMC na previsão da probabilidade de hipertensão, enfatizando a importância de considerar cuidadosamente o peso corporal na avaliação do risco dessa condição de saúde.
 
 # Apêndice
 
@@ -1563,6 +1933,43 @@ allmean
 grafico_residuos
 ```
 
+## Resíduos modelos de regressão
+
+A função hnp (Half-Normal Plots with Simulation Envelopes/ Gráficos meio normais com envelopes de simulação), do pacote hnp, do Rstudio, tem como função produzir um gráfico (meio) normal de um objeto de modelo ajustado para uma variedade de modelos diferentes. O hpn serve como guia do que se esperar de um modelo bem ajustado.
+
+Resíduos modelo 1
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo1)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Resíduos modelo 2
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo2)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Resíduos modelo 3
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo3)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Resíduos modelo 4
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo4)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Com base nos gráficos acima, observamos que a modelagem binomial se ajustou bem para modelar nossos dados, e apresentou um bom ajuste, englobando todos os pontos dentro do envelope.
 
 ## Idade:
 
@@ -2056,6 +2463,13 @@ tab <- df_tab1 %>%
 
 funcao_tabela(tab, "Grupo", "tabagista")
 ```
+
+# Conclusão
+
+Na análise, avaliamos uma amostra razoável e identificamos que o erro com delta menor que 10 é aceitável, fornecendo confiança em nossos resultados. Além disso, através da estimação da concentração por imputação do limite inferior, obtivemos uma curva logística de quatro parâmetros, permitindo assim a obtenção de valores de sFlt, resultados anteriormente inacessíveis por serem muito baixos.
+
+Nossos resultados destacam a importância das variáveis "grupo" e "IMC" na predição da hipertensão em mulheres. O "grupo", que indicava se a mulher teve ou não pré-eclampsia mostrou-se como um fator significativo que aumenta substancialmente a probabilidade de ocorrência dessa condição. Além disso, o aumento do Índice de Massa Corporal (IMC) também se correlacionou com um maior risco de pré-eclâmpsia, enfatizando a relevância do controle do peso como parte da estratégia de prevenção.
+Essas conclusões reforçam a necessidade de considerar atentamente esses fatores ao avaliar o risco de hipertensão.
 
 # Referências
 
