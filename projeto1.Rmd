@@ -105,9 +105,17 @@ As variâncias para a **pressão sistólica** são:
 
 -   Grupo MP: 514,95
 
-Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que os resultados encontrados estão na *Tabela 1*.
+Além disso, as médias para a **pressão sistólica**, também do estudo piloto, são:
+
+-   Grupo MN: 122.02
+
+-   Grupo MP: 132.05
 
 O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$.
+
+Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo esse valor será fixado como diferença entre as médias.
+
+Então, escolhendo um nível de significância de $\alpha = 0,05$ e variandos-se o poder de teste de ($1 - \beta$), tem-se que os resultados encontrados estão na *Tabela 1*.
 
 
 ## Curva de concentração do Sflt1
@@ -187,21 +195,15 @@ Para as variáveis qualitativas, o *Teste Exato de Fisher* para tabelas de conti
 
 A *Tabela 1* consta os resultados. 
 
-Além disso, dados as médias para a **pressão sistólica** também do estudo piloto, são elas:
-
--   Grupo MN: 122.02
-
--   Grupo MP: 132.05
-
-
-Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo nota-se que a tabela contempla esse valor.
+Optou-se por variar o $\beta$ no estudo (1 - $\beta$ indica o poder do teste). Testes mais poderosos implicam em maior rigor do tamanho amostral, espera-se aumento do tamanho da amostra quando avaliar-se isso.
 
 ```{r calc_amostral}
 var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
-beta <- 0.1
-delta <- c(0.5, 1, 2, 5, 10) # erro
+beta <- c(0.01,0.05,0.1)
+#delta <- c(1, 2, 5, 10) # erro
+delta = 10
 
 z2 <- qnorm(1 - alpha/2)
 zbeta <- qnorm(1 - beta)
@@ -209,12 +211,14 @@ zbeta <- qnorm(1 - beta)
 #se o erro aumenta, o n diminui. peq erros maior n
 n = ((var1 + var2) * (z2 + zbeta)^2) / (delta^2) 
 
-tibble(
-  "Delta" = delta,
-  "Tamanho Amostral" = n %>% round()
-) %>% 
+tab_amostra <- tibble(
+  "Poder" = paste0( (1-beta)*100,"%"),
+  "Tamanho por grupo" = n %>% round()
+) %>% mutate("Tamanho Amostral" = 2*n) 
+
+tab_amostra %>% 
   kable(
-    caption = "Cálculo do tamanho amostral para diferentes erros",
+    caption = "Cálculo do tamanho amostral para diferentes betas",
     format.args = list(big.mark = "."))
 ```
 
@@ -1538,6 +1542,16 @@ hnp(modelo4)
 
 ```{r}
 tbl_regression(modelo4, exponentiate = TRUE)
+```
+
+
+```{r}
+allmean = data.frame(grupo=c(rep("2",4)),
+                     imc=rep(c(25,30,35,40),1)
+                     )
+allmean
+allmean$pred.prob = predict(modelo2, newdata=allmean, type="response")
+allmean
 ```
 
 # Apêndice
