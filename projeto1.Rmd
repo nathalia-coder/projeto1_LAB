@@ -1,11 +1,6 @@
 ---
-#title: "Projeto I"
-#author:
-#- Bárbara Oliveira Ribeiro
-#- Nathalia Gabriella Ferreira dos Santos
-#date: "`r Sys.Date()`"
 output:
-  bookdown::html_document2:
+bookdown::html_document2:
     new_session: true
     number_sections: false
     fig_caption: true
@@ -366,10 +361,17 @@ As variâncias para a **pressão sistólica** são:
 
 -   Grupo MP: 514,95
 
-Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de teste de $\beta = 0,10$, tem-se que os resultados encontrados estão na *Tabela 1*.
+Além disso, as médias para a **pressão sistólica**, também do estudo piloto, são:
+
+-   Grupo MN: 122.02
+
+-   Grupo MP: 132.05
 
 O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$.
 
+Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo esse valor será fixado como diferença entre as médias.
+
+Então, escolhendo um nível de significância de $\alpha = 0,05$ e variandos-se o poder de teste de ($1 - \beta$), tem-se que os resultados encontrados estão na *Tabela 1*.
 
 ## 3.3 Curva de concentração do Sflt1
 
@@ -479,21 +481,15 @@ As probabilidades de uma mulher ter hipertensão em relação a esses IMCs, bem 
 
 A *Tabela 1* consta os resultados. 
 
-Além disso, dados as médias para a **pressão sistólica** também do estudo piloto, são elas:
-
--   Grupo MN: 122.02
-
--   Grupo MP: 132.05
-
-
-Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo nota-se que a tabela contempla esse valor.
+Optou-se por variar o $\beta$ no estudo (1 - $\beta$ indica o poder do teste). Testes mais poderosos implicam em maior rigor do tamanho amostral, espera-se aumento do tamanho da amostra quando avaliar-se isso. Vale lembrar que usualmente usa-se o poder de 90%.
 
 ```{r}
 var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
-beta <- 0.1
-delta <- c(0.5, 1, 2, 5, 10) # erro
+beta <- c(0.01,0.05,0.1)
+#delta <- c(1, 2, 5, 10) # erro
+delta = 10
 
 z2 <- qnorm(1 - alpha/2)
 zbeta <- qnorm(1 - beta)
@@ -501,13 +497,16 @@ zbeta <- qnorm(1 - beta)
 #se o erro aumenta, o n diminui. peq erros maior n
 n = ((var1 + var2) * (z2 + zbeta)^2) / (delta^2) 
 
-tibble(
-  "Delta" = delta,
-  "Tamanho Amostral" = n %>% round()
-) %>% 
+tab_amostra <- tibble(
+  "Poder" = paste0( (1-beta)*100,"%"),
+  "Tamanho por grupo" = n %>% round(),
+  "Tamanho Amostral Total" = 2*n %>% round()
+  ) 
+
+tab_amostra %>% 
   kable(
-    caption = "Cálculo do tamanho amostral para diferentes erros",
-    format.args = list(big.mark = "."))%>% 
+    caption = "Cálculo do tamanho amostral para diferentes betas",
+    format.args = list(big.mark = ".")) %>%
   kable_styling("striped", full_width = F)
 ```
 
@@ -1180,8 +1179,9 @@ funcao_tabela <- function(dados, grupo, variavel){
     tabyl( !!sym(grupo), !!sym(variavel), show_na = F) %>% 
     adorn_percentages() %>% 
     adorn_rounding(4) %>%  adorn_pct_formatting(digits = 2) %>% 
-      kable(caption = "Tabela da proporção da variavel por grupo")%>% 
-  kable_styling("striped", full_width = F)
+      kable(caption = "Tabela da proporção da variavel por grupo") %>% 
+      footnote(paste0("Variável de referência: ", variavel)) %>%
+      kable_styling("striped", full_width = F)
   )
 }
 ```
@@ -2469,7 +2469,7 @@ funcao_tabela(tab, "Grupo", "tabagista")
 
 # 6 Conclusão
 
-Na análise, avaliamos uma amostra razoável e identificamos que o erro com delta menor que 10 é aceitável, fornecendo confiança em nossos resultados. Além disso, através da estimação da concentração por imputação do limite inferior, obtivemos uma curva logística de quatro parâmetros, permitindo assim a obtenção de valores de sFlt, resultados anteriormente inacessíveis por serem muito baixos.
+Na análise, avaliamos uma amostra razoável e identificamos que o erro com $\delta$ menor que 10 é aceitável, fornecendo confiança em nossos resultados. Além disso, através da estimação dos parâmetros da curva logística de quatro parâmetros, e por imputação do limite inferior, foi possível a obtenção de valores da concentração de sFlt, resultados anteriormente inacessíveis por serem muito baixos.
 
 Nossos resultados destacam a importância das variáveis "grupo" e "IMC" na predição da hipertensão em mulheres. O "grupo", que indicava se a mulher teve ou não pré-eclampsia mostrou-se como um fator significativo que aumenta substancialmente a probabilidade de ocorrência dessa condição. Além disso, o aumento do Índice de Massa Corporal (IMC) também se correlacionou com um maior risco de pré-eclâmpsia, enfatizando a relevância do controle do peso como parte da estratégia de prevenção.
 Essas conclusões reforçam a necessidade de considerar atentamente esses fatores ao avaliar o risco de hipertensão.
