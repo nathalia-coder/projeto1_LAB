@@ -5,7 +5,7 @@
 #- Nathalia Gabriella Ferreira dos Santos
 #date: "`r Sys.Date()`"
 output:
-  pdf_document:
+  html_document:
     number_sections: yes
     fig_caption: yes
 #header-includes: \usepackage[brazil]{babel}
@@ -245,7 +245,8 @@ tibble(
 ) %>% 
   kable(
     caption = "Cálculo do tamanho amostral para diferentes erros",
-    format.args = list(big.mark = "."))
+    format.args = list(big.mark = "."))%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 ## Curva de concentração do Sflt1
@@ -278,14 +279,16 @@ drc.fit <- drm(abs ~ conc,
   drc.fit$coefficients %>% round(4),
   c("Slope", "Amin", "Amax", "log2ED50")
 )
-cbind(`Coeficientes Estimados`) %>% kable(caption = "Valores estimados dos parâmetros")
+cbind(`Coeficientes Estimados`) %>% kable(caption = "Valores estimados dos parâmetros")%>% 
+  kable_styling("striped", full_width = F)
 
 resumo <- summary(drc.fit)
 ```
 
 ```{r ic_ajuste}
 confint(drc.fit) %>% round(3) %>% 
-  kable(caption = "Intervalo de confiança para os parâmetros")
+  kable(caption = "Intervalo de confiança para os parâmetros")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Por meio da *Figura 2* é possível notar o comportamento da curva para os dados teóricos. Na *Figura 3*, tem-se as previsões para os dados abaixo da curva juntamente com os dados teóricos. A *tabela 5* consta todos resultados encontrados e foi deixado a referência repassada pela pesquisadora.
@@ -314,7 +317,8 @@ De mesmo modo, sobre a *Tabela 4*, sobre a hipótese nula de que os resíduos po
 residuos <- drc.fit$predres[,2] 
 teste <- residuos %>% shapiro.test()
 resumo_testes(teste, "Resíduos") %>% 
-  kable(caption = "Resumo teste de normalidade dos resíduos")
+  kable(caption = "Resumo teste de normalidade dos resíduos")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Logo conclui-se que a estimação parece se adequar bem aos dados e pode-se seguir para a estimação da concentração por meio desses parâmetros.
@@ -354,7 +358,8 @@ left_join(results, resultado_luiza) %>%
   rename("Absorbância" = abs, "Concentração Estimada" = concentration.est) %>% 
   kable(
     caption = "Comparativo das estimações para concentração de Sflt1 abaixo da curva"
-    )
+    )%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Nota-se que os valores preditos parecem estar próximos do esperado para o comportamento dos dados teóricos.
@@ -901,7 +906,8 @@ descritiva_extremos <- function(dados_originais, dados_filtro , coluna){
   return(
     tabela %>% kable(caption = "Resumo da retirada") %>% 
       footnote(paste0("Variável de referência: ", coluna))
-    )
+    )%>% 
+  kable_styling("striped", full_width = F)
 }
 
 
@@ -912,7 +918,8 @@ funcao_tabela <- function(dados, grupo, variavel){
     tabyl( !!sym(grupo), !!sym(variavel), show_na = F) %>% 
     adorn_percentages() %>% 
     adorn_rounding(4) %>%  adorn_pct_formatting(digits = 2) %>% 
-      kable(caption = "Tabela da proporção da variavel por grupo")
+      kable(caption = "Tabela da proporção da variavel por grupo")%>% 
+  kable_styling("striped", full_width = F)
   )
 }
 ```
@@ -1356,7 +1363,8 @@ df1 %>%
   summarise(
     Nulos = sum(is.na(ck)),
     `Nao nulos` = sum(!is.na(ck))
-    ) %>% kable(caption = "Quantidade de nulos e não nulos por grupo de CK")
+    ) %>% kable(caption = "Quantidade de nulos e não nulos por grupo de CK")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Em seguida,na *Tabela 7*, será apresentado o resumo de todos testes de hipóteses aplicados as variáveis.
@@ -1365,7 +1373,8 @@ Em seguida,na *Tabela 7*, será apresentado o resumo de todos testes de hipótes
 tabela_resumo_ordenada <- tabela_resumo %>% arrange(Pvalor) 
 
 tabela_resumo_ordenada %>% 
-  kable(caption = "Resumo de todos os resultados dos testes")
+  kable(caption = "Resumo de todos os resultados dos testes")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na média ou frequência dentro do grupo *Grupo MN* e *Grupo MP* para um nível de significância de $\alpha = 0,05$ está contido na *Tabela 8*.
@@ -1373,7 +1382,8 @@ Resumo Descritivas favoráveis para o estudo sobre as variáveis que impactam na
 ```{r}
 tabela_resumo_ordenada %>% 
   filter(Pvalor <= 0.05) %>% 
-  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.05 de significância")
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.05 de significância")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 A *Tabela 9* indica as as seguintes variáveis seriam candidatas a impactar no grupo, caso fosse assumido um nível de significância de $\alpha = 0,10$.
@@ -1382,7 +1392,8 @@ A *Tabela 9* indica as as seguintes variáveis seriam candidatas a impactar no g
 tabela_resumo_ordenada %>% 
   filter(Pvalor <= 0.1) %>% 
   mutate("Conclusão" = "Significativo") %>% 
-  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.1 de significância")
+  kable(caption = "Resumo de todos os resultados favoráveis dos testes para 0.1 de significância")%>% 
+  kable_styling("striped", full_width = F)
 ```
 
 ## Regressão Logística
