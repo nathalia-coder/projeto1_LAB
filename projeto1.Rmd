@@ -95,6 +95,266 @@ Conduzir uma investigação abrangente sobre a pré-eclâmpsia, incluindo planej
 
 # Metodologia
 
+## Variáveis utilizadas
+
+As variáveis analisadas foram:
+
+**Idade**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Anos
+
+**Escolaridade**
+
+ - Tipo de Variável: Categórica (Nível de Educação)
+
+ - Unidades de Medida: N/A
+
+ - Níveis:
+
+   - 0 – Educação infantil
+
+   - 1 - Fundamental
+
+   - 2 - Médio
+
+   - 3 - Superior
+
+   - 4 - Pós-graduação
+
+   - 5 - Técnico
+
+**Número de Gestações**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Anos Desde a Última Gestação**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Anos
+
+**Peso da Mulher**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Kilogramas
+
+**Índice de Massa Corporal (IMC)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Percentual de Gordura**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Porcentagem
+
+**Pressão Sistólica**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mmHg (milímetros de mercúrio)
+
+**Pressão Diastólica**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mmHg (milímetros de mercúrio)
+
+**Pressão Arterial Média**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mmHg (milímetros de mercúrio)
+
+**Circunferência de Cintura**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Centímetros
+
+**Circunferência de Abdômen**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Centímetros
+
+**Circunferência de Quadril**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Centímetros
+
+**Relação Cintura/Quadril**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Neutrófilos**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Contagem Absoluta
+
+**Linfócitos**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Contagem Absoluta
+
+**Razão Neutrófilo/Linfócito (NLR)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A
+
+**Colesterol Total**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**HDL (High-Density Lipoprotein/ Lipoproteína de Alta Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**LDL Dosado (Low-Density Lipoprotein/ Lipoproteína de Baixa Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**VLDL (Very Low-Density Lipoprotein/ Lipoproteína de Muito Baixa Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Não-HDL (Non-High-Density Lipoprotein/ Lipoproteína de Não Alta Densidade)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Triglicérides**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Hemoglobina Glicada (HbA1c)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Porcentagem
+
+**Creatinina**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**Ritmo de Filtração Glomerular**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mL/min (mililitros por minuto)
+
+**TGP/ALT (Transaminase Glutâmica Pirúvica / Alanina Transaminase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**TGO/AST (Transaminase Glutâmica Oxalacética / Aspartato Transaminase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**Ácido Úrico**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: mg/dL (miligramas por decilitro)
+
+**CK (Creatina Quinase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**Gama GT (Gama Glutamiltransferase)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: U/L (unidades por litro)
+
+**Peso do Bebê**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: Kilogramas
+
+**PAI-1 (Inibidor-1 do Ativador de Plasminogênio)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**Trombomodulina**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**ADMA (Asymmetric Dimethylarginine/ Dimetilarginina assimétrica)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**sFlt1 (Soluble Fms-Like Tyrosine Kinase-1)**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: N/A (cálculos necessários)
+
+**Dímero-D**
+
+ - Tipo de Variável: Numérica
+
+ - Unidades de Medida: ng/mL (nanogramas por mililitro)
+
+**Tabagismo**
+
+ - Tipo de Variável: Categórica Nominal
+
+ - Níveis:
+
+   - 0 – Não fumante
+
+   - 1 - Fumante  
+   
+**Grupo (em relação à pré-eclâmpsia)**
+
+ - Tipo de Variável: Categórica Nominal
+
+ - Níveis:
+
+   - 1 – Não teve pre-eclâmpsia
+
+   - 2 - Teve pré-eclâmpsia  
+
 ## Tamanho Amostral
 
 Para o cálculo do tamanho da amostra onde o objetivo do estudo era comparar dois grupos: grupo tratamento com um controle, no contexto do trabalho o grupo controle seriam as mulheres que tiveram gestações saudáveis *(MN)* e o grupo tratamento seriam mulheres que tiveram pré-eclâmpsia *(MP)*. Optou-se por usar a variância da pressão sistólica porque, segundo a Sociedade Brasileira de Cardiologia, ela é primerio indício para causa de doença cardiovascular, ou seja, está sendo usado como desfecho para o aumento da pressão. As variâncias para os grupos serão denotados por $\sigma^2_{MN}$ e $\sigma^2_{MP}$, respectivamente, e foram obtidas por meio de estudo piloto e repassado pela cliente para o estudo.
