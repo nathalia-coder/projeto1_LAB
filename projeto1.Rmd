@@ -183,33 +183,34 @@ Para as variáveis qualitativas, o *Teste Exato de Fisher* para tabelas de conti
 
 ## Regressão Logística
 
-A regressão logística é uma técnica de análise de dados que usa matemática para encontrar as relações entre dois ou mais fatores de dados. Em seguida, essa relação é usada para prever o valor de um desses fatores com base no(s) outro(s). A previsão geralmente tem um número finito de resultados, como sim ou não.
+A regressão logística é uma técnica estatística que explora as relações entre variáveis em estudos com múltiplas categorias. No nosso contexto, a regressão logística é usada para prever a probabilidade de hipertensão em mulheres, considerando diversas variáveis explicativas.
 
-A regressão logística binária funciona bem para problemas de classificação binária que tenham apenas dois resultados possíveis. A variável dependente pode ter apenas dois valores, como sim e não ou 0 e 1. Nessa análise, nosso valor 0 corresponde a não ter hipertensão e o valor corresponde a ter.
+A regressão logística binária é particularmente útil para problemas de classificação com duas categorias de resultados, como "sim" ou "não". No nosso caso, a variável dependente é a presença ou ausência de hipertensão, representada como "0" (ausência) e "1" (presença).
 
-No caso, múltiplas variáveis explicativas serão estudadas, para a correta avaliação de quais preveem a variável dependente, que é a hipertensão.
+Para fins deste estudo, definimos **hipertensão** como pressão sistólica e diastólica acima de 140mmHg e 90 mmHg, respectivamente, independentemente das respostas ao questionário.
 
-Os passos para selecionar as variáveis apropriadas para o modelo de regressão logística foram os seguintes: primeiramente, excluímos aquelas com alta proporção de valores faltantes. Em seguida, eliminamos as linhas com valores ausentes para as outras variáveis. 
-Realizamos os testes avaliar diferença entre médias e associação das variáveis com hipertensão. Aquelas que apresentaram um p-valor menor ou igual a 0,25 entraram no nosso modelo inicial. O valor alto foi escolhido para uma pré seleção das variáveis, uma vez que seria muito difícil uma variável que apresentar um p-valor maior do que esse ter significância no modelo.
+Para a construção do modelo de regressão logística, começamos excluindo variáveis com um alto número de valores faltantes.
+Nossa seleção de variáveis para o modelo inicial baseou-se em testes de associação e diferença entre médias. Variáveis com p-valores menores ou iguais a 0,25 foram incluídas no modelo. Este valor de corte mais elevado foi escolhido para a pré-seleção das variáveis, considerando que variáveis com p-valores maiores seriam improváveis de contribuir significativamente para o modelo.
 
-Uma observação importante é que criamos uma variável **hipertensão**, considerando pressões sistólica e diastólica acima de 140 e/ou 90, respectivamente, para classificar mulheres com hipertensão, independentemente das respostas do questionário.
+A multicolinearidade, que ocorre quando as variáveis independentes possuem relações lineares aproximadas, foi avaliada usando uma matriz de dispersão e correlação, bem como o cálculo do Fator de Inflação da Variância (VIF). Detectamos multicolinearidade significativa entre IMC, gordura, cintura e quadril, o que poderia afetar a significância dos coeficientes de regressão. Portanto, optamos por não incluir simultaneamente essas variáveis no modelo final.
 
-Uma matriz de correlação exibe o grau de correlação entre várias interseções de medidas como uma matriz de células retangulares. Na matriz de dispersão, a ideia é a mesma, mas no lugar de um número, teremos um gráfico de correlação entre as variáveis em cada célula.
+Nosso **modelo final** inclui as variáveis **"grupo"** e **"IMC"**. A inclusão de "LDL" foi realizada em um modelo separado, devido à sua relevância teórica para a variável resposta. Devido à multicolinearidade, não foi possível incluir as variáveis "IMC" e "gordura" no mesmo modelo. No entanto, considerando a importância da variável "gordura", fornecemos outras opções de modelo:
 
-A multicolinearidade que consiste em um problema comum em regressões, no qual as variáveis independentes possuem relações lineares exatas ou aproximadamente exatas. Para avaliá-la, utilizamos uma matriz de dispersão e correlação e calculamos o VIF (fator de inflação da variância). Detectamos multicolinearidade significativa entre IMC, gordura, cintura e quadril. Isso pode afetar a significância dos coeficientes de regressão e, portanto, essas variáveis foram consideradas problemáticas. 
-Também usamos o critério AIC (critério de informação de Akaike), que é uma métrica que mensura a qualidade de um modelo estatístico visando também a sua simplicidade. Após diversas iterações de modelos, confirmamos que a inclusão simultânea das variáveis problemáticas inflacionava o VIF. 
+- Modelo 1: "grupo" e "IMC"
+- Modelo 2: "grupo", "IMC" e "LDL"
+- Modelo 3: "grupo" e "gordura"
+- Modelo 4: "grupo" e "LDL"
 
-Nosso **modelo final** incluiu **grupo** e **IMC**. A inclusão de LDL foi feita em outro modelo, por ser teoricamente relevante na variável resposta. 
-Por razão da multicolinearidade, não foi possível conciliar as variáveis IMC e gordura no mesmo modelo, mas como a segunda variável também é importante para a cliente, deixamos também, como pedido, outras opções de modelo. 
+As tabelas geradas apresentam os resultados da análise, incluindo a Razão de Chances (OD), Intervalo de Confiança de 95% (IC 95%) e p-valor. A presença do valor "1" no intervalo de confiança sugere que a variável não é estatisticamente significativa.
 
-Variáveis por modelo:
+Algumas classificações para o Índice de Massa Corporal (IMC) são:
 
-  - Modelo 1: grupo e IMC
-  - Modelo 2: grupo, IMC e LDL
-  - Modelo 3: grupo e gordura
-  - Modelo 4: grupo e LDL
-  
-As colunas das tabelas geradas tabelas apresentam: Characteristic, que é nossa variável que está sendo avaliada, o OD (razão de chances), o 95% IC (intervalo de confiança de 95% para  a razão de chances) e p-value (p-valor). O valor 1 estar presente no intervalo de confiança corrobora para a afirmação de que a variável não é significativa.
+- IMC de 25 a menor que 30: Sobrepeso
+- IMC de 30 a menor que 35: Obesidade Grau I
+- IMC de 35 a menor que 40: Obesidade Grau II (considerada severa)
+- IMC maior que 40: Obesidade Grau III (considerada mórbida)
+
+As probabilidades de uma mulher ter hipertensão em relação a esses IMCs, bem como a associação com os grupos, foram calculadas.
 
 # Resultados
 
@@ -1578,7 +1579,7 @@ vif(modelo3)
 exp(coef(modelo3))
 exp(confint(modelo3))
 
-modelo4<- glm(alta_pressao ~ grupo + gordura + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
+modelo4<- glm(alta_pressao ~ grupo + ldl_dosado, data = dfmodelo, family = "binomial"(link = 'logit'))
 summary(modelo4)
 vif(modelo4)
 exp(coef(modelo4))
@@ -1638,10 +1639,31 @@ tbl_regression(modelo4, exponentiate = TRUE)
 
 **Razão de chances - modelo 4**
 
-As variáveis grupo e gordura são significativas para o modelo. O valor 1 não pertence ao intervalo do grupo, e é o limite inferior nas variáveis gordura e LDL).
-Os hífens na linha do grupo 1 indicam que vamos comparar nosso grupo 2 (mulheres que tiveram pré-eclâmpsia) em relação a ele. A variável grupo é binária, então, nesse modelo, a mulher que está no grupo 2 tem um aumento de 116% nas chances de ser hipertensa, em relação a mulher que está no grupo 1 (mulheres que não tiveram pré-eclâmpsia). 
-Podemos dizer que, para o aumento de uma unidade na gordura, esperamos ver um aumento de cerca de 4% nas chances da mulher ter hipertensão.
+Apenas a variável grupo é significativa para o modelo. O valor 1 não pertence ao intervalo do grupo, e é o limite inferior na variável LDL.
+Os hífens na linha do grupo 1 indicam que vamos comparar nosso grupo 2 (mulheres que tiveram pré-eclâmpsia) em relação a ele. A variável grupo é binária, então, nesse modelo, a mulher que está no grupo 2 tem um aumento de 141% nas chances de ser hipertensa, em relação a mulher que está no grupo 1 (mulheres que não tiveram pré-eclâmpsia). 
 A variável LDL não é considerada significativa para o modelo. Para o aumento de uma unidade no LDL, existe um aumento de apenas 1% nas chances da mulher ter hipertensão.
+
+Na tabela a seguir, temos as probabilidades preditas da mulher ter hipertensão, para os grupos 1 e 2, com os seguintes IMCs: 25, 30, 35, 40 e 45.
+
+```{r}
+valores_imc <- c(25, 30, 35, 40, 45)
+
+grupos <- c("1", "2")
+
+dados <- expand.grid(grupo = grupos, imc = valores_imc) %>%
+  mutate(probabilidade = predict(modelo1, newdata = ., type = "response")) %>%
+  arrange(grupo)
+
+tabelinha <- dados %>%
+  kable("html") %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(2, bold = TRUE) %>%
+  column_spec(3, width = "100px")
+tabelinha
+```
+
+É evidente que há um considerável aumento nas probabilidades de hipertensão ao fazer a transição do "grupo 1" para o "grupo 2". Essa tendência é firmemente corroborada pelos resultados apresentados em nossa tabela de Razão de Chances. Além disso, à medida que o Índice de Massa Corporal (IMC) cresce, observamos um progressivo aumento nas probabilidades de uma mulher ser diagnosticada com hipertensão. Isso destaca a marcante influência do IMC na previsão da probabilidade de hipertensão, enfatizando a importância de considerar cuidadosamente o peso corporal na avaliação do risco dessa condição de saúde.
 
 # Apêndice
 
@@ -1651,6 +1673,43 @@ A variável LDL não é considerada significativa para o modelo. Para o aumento 
 grafico_residuos
 ```
 
+## Resíduos modelos de regressão
+
+A função hnp (Half-Normal Plots with Simulation Envelopes/ Gráficos meio normais com envelopes de simulação), do pacote hnp, do Rstudio, tem como função produzir um gráfico (meio) normal de um objeto de modelo ajustado para uma variedade de modelos diferentes. O hpn serve como guia do que se esperar de um modelo bem ajustado.
+
+Resíduos modelo 1
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo1)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Resíduos modelo 2
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo2)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Resíduos modelo 3
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo3)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Resíduos modelo 4
+
+```{r warning=FALSE, message=FALSE}
+#verificação
+hnp(modelo4)
+# Gráfico (semi) normal com envelope de simulação para diagnósticos comuns a partir de modelos ajustados
+```
+
+Com base nos gráficos acima, observamos que a modelagem binomial se ajustou bem para modelar nossos dados, e apresentou um bom ajuste, englobando todos os pontos dentro do envelope.
 
 ## Idade:
 
