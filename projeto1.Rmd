@@ -5,9 +5,10 @@
 #- Nathalia Gabriella Ferreira dos Santos
 #date: "`r Sys.Date()`"
 output:
-  html_document:
-    number_sections: yes
-    fig_caption: yes
+  bookdown::html_document2:
+    new_session: true
+    number_sections: false
+    fig_caption: true
 #header-includes: \usepackage[brazil]{babel}
 editor_options:
   chunk_output_type: console
@@ -70,7 +71,7 @@ resumo_testes <- function(teste, variavel){
 }
 ```
 
-# Introdução
+# 1 Introdução
 
 A pré-eclâmpsia, caracterizada por hipertensão arterial e danos a órgãos, é uma complicação gestacional que geralmente se manifesta após a 20ª semana de gravidez. Ela é frequentemente acompanhada de sintomas como aumento da pressão arterial, presença de proteína na urina, edema e, em casos mais graves, eclâmpsia, que pode resultar em convulsões. Esta condição não apenas representa uma ameaça direta à saúde da mãe, mas também pode ter sérias consequências para o feto, incluindo restrição de crescimento intrauterino e parto prematuro. A magnitude do problema da pré-eclâmpsia é evidente nas estatísticas globais de saúde materna. A pré-eclâmpsia é um fator de risco para complicações de saúde a longo prazo para a mãe, como doença cardíaca e hipertensão.
 
@@ -80,22 +81,22 @@ Através deste estudo multidisciplinar, esperamos fornecer insights valiosos par
 
 Este trabalho tem como objetivo explorar uma ampla gama de dados relacionados às mulheres que tiveram ou não pré-eclâmpsia, incluindo características físicas, resultados de exames laboratoriais, histórico de doenças e hábitos. A pré-eclâmpsia, uma condição médica complexa que afeta mulheres grávidas, é de grande interesse para a comunidade médica devido às suas implicações para a saúde materna e neonatal.
 
-# Objetivo
+# 2 Objetivo
 
-## Objetivo Geral
+## 2.1 Objetivo Geral
 
 Conduzir uma investigação abrangente sobre a pré-eclâmpsia, incluindo planejamento amostral, análise das diferenças entre mulheres saudáveis (MN) e aquelas com pré-eclâmpsia (MP), previsão de resultados relevantes não alcançados pelos equipamentos atuais e estudo da relação entre pré-eclâmpsia e hipertensão, um dos principais fatores de risco.
 
-## Objetivos Específicos
+## 2.2 Objetivos Específicos
 
  - Realizar o dimensionamento amostral, em que será calculado o tamanho da amostra de acordo com o erro esperado.
  - Estimar as concentração de sFlt-1 que não puderam ser determinadas pelo equipamento de medição.
  - Determinar quais fatores predizem a hipertensão, bem como realizar essa predição.
  - Realizar testes para compreender como e comportam os grupos de mulheres com e sem pré-eclâmpsia.
 
-# Metodologia
+# 3 Metodologia
 
-## Variáveis utilizadas
+## 3.1 Variáveis utilizadas
 
 As variáveis analisadas foram:
 
@@ -355,7 +356,7 @@ As variáveis analisadas foram:
 
    - 2 - Teve pré-eclâmpsia  
 
-## Tamanho Amostral
+## 3.2 Tamanho Amostral
 
 Para o cálculo do tamanho da amostra onde o objetivo do estudo era comparar dois grupos: grupo tratamento com um controle, no contexto do trabalho o grupo controle seriam as mulheres que tiveram gestações saudáveis *(MN)* e o grupo tratamento seriam mulheres que tiveram pré-eclâmpsia *(MP)*. Optou-se por usar a variância da pressão sistólica porque, segundo a Sociedade Brasileira de Cardiologia, ela é primerio indício para causa de doença cardiovascular, ou seja, está sendo usado como desfecho para o aumento da pressão. As variâncias para os grupos serão denotados por $\sigma^2_{MN}$ e $\sigma^2_{MP}$, respectivamente, e foram obtidas por meio de estudo piloto e repassado pela cliente para o estudo.
 
@@ -370,7 +371,7 @@ Então, escolhendo um nível de significância de $\alpha = 0,05$ e um poder de 
 O *delta* ($\delta$) denota a diferença das médias do grupo MN e MP, $|\mu_{MN} - \mu_{MP}| < \delta$.
 
 
-## Curva de concentração do Sflt1
+## 3.3 Curva de concentração do Sflt1
 
 Devido ao não registro de valores de *concentração* de Sflt1 (provavelmente devido a baixa acurácia do equipamento na medição para valores pequenos de concentração), e tendo o resultado da *absorbância* observada, foi solicitado a estimação teórica dessas concentrações.
 
@@ -398,13 +399,13 @@ Para testar a significância dos parâmetros, um intervalo de confiança foi obt
 
 Por meio da *Figura 1* é possível notar o quão bem a curva se ajustou aos dados teóricos.
 
-### Estimação da concentração por imputação do limite inferior
+### 3.3.1 Estimação da concentração por imputação do limite inferior
 
 Para estimação da concentração, como foi feita uma parametrização, a *Log2-concentração* será obstida e então convertida para escala padrão. Buscando-se na literatura referências, foi encontrado que além dos valores estimados, como deseja-se estimar concentrações abaixo do limite inferior, um novo candidato a mínimo deveria ser estipulado. Nesse caso, optou-se pelo mínimo ser o menor valor de concentração observado na amostra (0.048). Esse valor está contido no Intervalo de Confiança para o mínimo. Os demais coeficientes serão os mesmos estimados.
 
 As concentrações encontradas podem ser vistas na *Tabela 5*.
 
-## Análises descritivas
+## 3.4 Análises descritivas
 
 Em seguida foi levantado algumas medidas de resumo para as variáveis de interesse contidas no banco de dados. Essas descritivas foram levantadas com o objetivo de avaliar principalmente o efeito da variável em cada grupo, *Grupo MN* e *Grupo MP*.
 
@@ -422,7 +423,7 @@ Para os dados categóricos, a medida descritiva escolhida foi um gráfico de bar
 
 Essas análises descritivas estão contidas na seção de **Apêndice** desse relatório.
 
-## Resumo testes de hipóteses
+## 3.5 Resumo testes de hipóteses
 
 Para os dados numéricos, os testes tiveram por hipótese geral:
 
@@ -441,7 +442,7 @@ Caso os dados atendessem a suposição de normalidade para os grupos, foi aplica
 
 Para as variáveis qualitativas, o *Teste Exato de Fisher* para tabelas de contingência $2~\cdot~m$ foi aplicado sobre a hipótese nula de que a proporção das categorias fossem iguais para ambos grupos (*MN* e *MP*).
 
-## Regressão Logística
+## 3.6 Regressão Logística
 
 A regressão logística é uma técnica estatística que explora as relações entre variáveis em estudos com múltiplas categorias. No nosso contexto, a regressão logística é usada para prever a probabilidade de hipertensão em mulheres, considerando diversas variáveis explicativas.
 
@@ -472,9 +473,9 @@ Algumas classificações para o Índice de Massa Corporal (IMC) são:
 
 As probabilidades de uma mulher ter hipertensão em relação a esses IMCs, bem como a associação com os grupos, foram calculadas.
 
-# Resultados
+# 4 Resultados
 
-## Tamanho Amostral
+## 4.1 Tamanho Amostral
 
 A *Tabela 1* consta os resultados. 
 
@@ -487,7 +488,7 @@ Além disso, dados as médias para a **pressão sistólica** também do estudo p
 
 Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo nota-se que a tabela contempla esse valor.
 
-```{r calc_amostral}
+```{r}
 var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
@@ -510,7 +511,7 @@ tibble(
   kable_styling("striped", full_width = F)
 ```
 
-## Curva de concentração do Sflt1
+## 4.2 Curva de concentração do Sflt1
 
 ```{r dados_curva}
 resultado <- read_xlsx("curva.xlsx", sheet = "prev") # valores a serem preditos
@@ -518,7 +519,7 @@ resultado_luiza <- read_xlsx("curva.xlsx", sheet = "ajust") %>%
   rename("Ajuste Luiza" = ajust)
 ```
 
-```{r ajuste_curva}
+```{r}
 library(drc)
 
 data <- read_xlsx("dados_teoricos.xlsx")
@@ -546,22 +547,22 @@ cbind(`Coeficientes Estimados`) %>% kable(caption = "Valores estimados dos parâ
 resumo <- summary(drc.fit)
 ```
 
-```{r ic_ajuste}
+```{r}
 confint(drc.fit) %>% round(3) %>% 
   kable(caption = "Intervalo de confiança para os parâmetros")%>% 
   kable_styling("striped", full_width = F)
 ```
 
-Por meio da *Figura 2* é possível notar o comportamento da curva para os dados teóricos. Na *Figura 3*, tem-se as previsões para os dados abaixo da curva juntamente com os dados teóricos. A *tabela 5* consta todos resultados encontrados e foi deixado a referência repassada pela pesquisadora.
+Por meio da *Figura 1* é possível notar o comportamento da curva para os dados teóricos. Na *Figura 2*, tem-se as previsões para os dados abaixo da curva juntamente com os dados teóricos. A *tabela 5* consta todos resultados encontrados e foi deixado a referência repassada pela pesquisadora.
 
 ```{r fig.cap="Gráfico da curva com os dados teóricos",out.width = "70%", fig.align='center'}
 plot(drc.fit, broken=F, xlab="Concentração", ylab="Absorbância", lwd=1.2, 
      cex=1.2, cex.axis=1.2, cex.lab=1.2)
 ```
 
-### Análise de resíduos
+### 4.2.1 Análise de resíduos
 
-A fim de validar alguns pressupostos da regressão e a partir da *Figura 4* (contida no *apêndice*), sobre os resíduos, nota-se que a homocedasticidade é válida.
+A fim de validar alguns pressupostos da regressão e a partir da *Figura 3* (contida no *apêndice*), sobre os resíduos, nota-se que a homocedasticidade é válida.
 
 ```{r fig.cap="Gráfico dos valores ajustados pelos resíduos do modelo",out.width = "70%", fig.align='center'}
 grafico_residuos <- ggplot(as_tibble(drc.fit$predres)) +
@@ -574,7 +575,7 @@ grafico_residuos <- ggplot(as_tibble(drc.fit$predres)) +
 
 De mesmo modo, sobre a *Tabela 4*, sobre a hipótese nula de que os resíduos possuem distribuição normal, para o mesmo $\alpha = 0,05$, dado o $p-valor$ observado, não rejeita-se a hipótese nula. Não foi encontrado pressuposto de normalidade dos resíduos na literatura, entretanto, optou-se por reportar.
 
-```{r analise_residuos}
+```{r}
 residuos <- drc.fit$predres[,2] 
 teste <- residuos %>% shapiro.test()
 resumo_testes(teste, "Resíduos") %>% 
@@ -595,7 +596,7 @@ novo_df <- rbind(data, novo_data)
 plot(log2(new$conc), new$abs, type = "line")
 ```
 
-### Estimação da concentração por imputação do limite inferior
+### 4.2.2 Estimação da concentração por imputação do limite inferior
 
 ```{r}
 prev.conc = resultado$abs
@@ -1594,7 +1595,7 @@ resultado <- resumo_testes(teste, variavel)
 tabela_resumo <- rbind(tabela_resumo, resultado)
 ```
 
-## Resumo testes de hipóteses
+## 4.3 Resumo testes de hipóteses
 
 Para os dados numéricos, os testes tiveram por hipótese geral:
 
@@ -1657,7 +1658,7 @@ tabela_resumo_ordenada %>%
   kable_styling("striped", full_width = F)
 ```
 
-## Regressão Logística
+## 4.4 Regressão Logística
 
 ```{r include=FALSE}
 library(tidyverse)
@@ -1915,7 +1916,9 @@ dados <- expand.grid(grupo = grupos, imc = valores_imc) %>%
   arrange(grupo)
 
 tabelinha <- dados %>%
-  kable("html") %>%
+  kable(
+    caption = "Probabilidade de desenvolver hipertensão",
+    format.args = list(big.mark = ".")) %>%
   kable_styling("striped", full_width = F) %>%
   column_spec(1, bold = TRUE) %>%
   column_spec(2, bold = TRUE) %>%
@@ -1925,7 +1928,7 @@ tabelinha
 
 É evidente que há um considerável aumento nas probabilidades de hipertensão ao fazer a transição do "grupo 1" para o "grupo 2". Essa tendência é firmemente corroborada pelos resultados apresentados em nossa tabela de Razão de Chances. Além disso, à medida que o Índice de Massa Corporal (IMC) cresce, observamos um progressivo aumento nas probabilidades de uma mulher ser diagnosticada com hipertensão. Isso destaca a marcante influência do IMC na previsão da probabilidade de hipertensão, enfatizando a importância de considerar cuidadosamente o peso corporal na avaliação do risco dessa condição de saúde.
 
-# Apêndice
+# 5 Apêndice
 
 ## Resíduos curva
 
@@ -2464,14 +2467,14 @@ tab <- df_tab1 %>%
 funcao_tabela(tab, "Grupo", "tabagista")
 ```
 
-# Conclusão
+# 6 Conclusão
 
 Na análise, avaliamos uma amostra razoável e identificamos que o erro com delta menor que 10 é aceitável, fornecendo confiança em nossos resultados. Além disso, através da estimação da concentração por imputação do limite inferior, obtivemos uma curva logística de quatro parâmetros, permitindo assim a obtenção de valores de sFlt, resultados anteriormente inacessíveis por serem muito baixos.
 
 Nossos resultados destacam a importância das variáveis "grupo" e "IMC" na predição da hipertensão em mulheres. O "grupo", que indicava se a mulher teve ou não pré-eclampsia mostrou-se como um fator significativo que aumenta substancialmente a probabilidade de ocorrência dessa condição. Além disso, o aumento do Índice de Massa Corporal (IMC) também se correlacionou com um maior risco de pré-eclâmpsia, enfatizando a relevância do controle do peso como parte da estratégia de prevenção.
 Essas conclusões reforçam a necessidade de considerar atentamente esses fatores ao avaliar o risco de hipertensão.
 
-# Referências
+# 7 Referências
 
 <https://dl.acm.org/doi/pdf/10.1145/503506.503509>
 
