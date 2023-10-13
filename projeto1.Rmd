@@ -1,9 +1,9 @@
 ---
 output:
-  pdf_document: default
   html_document:
     number_sections: yes
     fig_caption: yes
+  pdf_document: default
 editor_options:
   chunk_output_type: console
 ---
@@ -480,21 +480,15 @@ As probabilidades de uma mulher ter hipertensão em relação a esses IMCs, bem 
 
 A *Tabela 1* consta os resultados. 
 
-Além disso, dados as médias para a **pressão sistólica** também do estudo piloto, são elas:
-
--   Grupo MN: 122.02
-
--   Grupo MP: 132.05
-
-
-Averiguou-se qual seria a escolha do $\delta$ para o estudo, no caso: $\delta \approx 10$, logo nota-se que a tabela contempla esse valor.
+Optou-se por variar o $\beta$ no estudo (1 - $\beta$ indica o poder do teste). Testes mais poderosos implicam em maior rigor do tamanho amostral, espera-se aumento do tamanho da amostra quando avaliar-se isso. Vale lembrar que usualmente usa-se o poder de 90%.
 
 ```{r calc_amostral}
 var1 <- 196.9
 var2 <- 514.95
 alpha <- 0.05
-beta <- 0.1
-delta <- c(0.5, 1, 2, 5, 10) # erro
+beta <- c(0.01,0.05,0.1)
+#delta <- c(1, 2, 5, 10) # erro
+delta = 10
 
 z2 <- qnorm(1 - alpha/2)
 zbeta <- qnorm(1 - beta)
@@ -502,13 +496,16 @@ zbeta <- qnorm(1 - beta)
 #se o erro aumenta, o n diminui. peq erros maior n
 n = ((var1 + var2) * (z2 + zbeta)^2) / (delta^2) 
 
-tibble(
-  "Delta" = delta,
-  "Tamanho Amostral" = n %>% round()
-) %>% 
+tab_amostra <- tibble(
+  "Poder" = paste0( (1-beta)*100,"%"),
+  "Tamanho por grupo" = n %>% round(),
+  "Tamanho Amostral Total" = 2*n %>% round()
+  ) 
+
+tab_amostra %>% 
   kable(
-    caption = "Cálculo do tamanho amostral para diferentes erros",
-    format.args = list(big.mark = "."))%>% 
+    caption = "Cálculo do tamanho amostral para diferentes betas",
+    format.args = list(big.mark = ".")) %>%
   kable_styling("striped", full_width = F)
 ```
 
